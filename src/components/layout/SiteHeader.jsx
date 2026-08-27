@@ -34,7 +34,7 @@ export function SiteHeader({ slotRef, wordSlotRef }) {
       <a href="#top" className="flex items-center gap-3" aria-label={`${EVENT_CONFIG.brandLine}, home`}>
         <span ref={slotRef} className="emblem-slot block" aria-hidden />
         <span ref={wordSlotRef} className="label invisible whitespace-nowrap" aria-hidden>
-          DEVI GARBA
+          DIVI GARBA
         </span>
       </a>
 

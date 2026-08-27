@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
 
 /**
- * The "DEVI GARBA" wordmark — the text counterpart to FlyingEmblem's
+ * The "DIVI GARBA" wordmark — the text counterpart to FlyingEmblem's
  * ring, and reciprocal to it: TempleGate scales `wordRef` up from the
  * center in lockstep with the ring as the doors open. Once open, this
  * component takes over and flies it into the header's word slot as
@@ -104,7 +104,7 @@ export function FlyingWordmark({ wordRef, slotRef, gateSelector = "#gate" }) {
         ref={titleRef}
         className="display-type block whitespace-nowrap text-[clamp(2.2rem,7vw,5.5rem)] leading-[0.9] tracking-[0.06em] gilt"
       >
-        DEVI GARBA
+        DIVI GARBA
       </span>
       <span ref={subRef} className="label mt-3 block text-antique/70">
         Navratri · Ahmedabad

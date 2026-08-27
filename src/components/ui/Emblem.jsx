@@ -67,7 +67,7 @@ export const Emblem = forwardRef(function Emblem({ className, showWord = true },
       {showWord && (
         <span data-em-word className="mt-4 block whitespace-nowrap text-center">
           <span className="display-type block text-[clamp(2.2rem,7vw,5.5rem)] leading-[0.9] tracking-[0.06em] gilt">
-            DEVI GARBA
+            DIVI GARBA
           </span>
           <span className="label mt-3 block text-antique/70">Navratri · Ahmedabad</span>
         </span>

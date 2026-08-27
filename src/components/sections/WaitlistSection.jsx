@@ -175,7 +175,7 @@ export function WaitlistSection() {
             <button
               type="button"
               onClick={() =>
-                navigator.share?.({ title: "Devi Garba", url: window.location.href })
+                navigator.share?.({ title: "Divi Garba", url: window.location.href })
               }
               className="label text-ivory/50 underline underline-offset-4 transition-colors hover:text-ivory"
             >
