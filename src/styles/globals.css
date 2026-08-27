@@ -237,6 +237,13 @@
   100% { transform: scaleY(0); transform-origin: bottom; }
 }
 
+/* Transform-only rotation for Mandala — stays on the compositor,
+   never triggers layout or paint. The reduced-motion block above
+   already zeroes every animation-duration site-wide, this included. */
+@keyframes mandala-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ============================================================
    ANCIENT SURFACE — brass leaf over aged pigment.
    Two woven gradients + a hairline weave read as beaten metal

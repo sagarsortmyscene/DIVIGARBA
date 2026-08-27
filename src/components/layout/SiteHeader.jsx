@@ -39,7 +39,7 @@ export function SiteHeader({ slotRef, wordSlotRef }) {
       </a>
 
       <a
-        href="#waitlist"
+        href="#book"
         data-cursor="cta"
         className="label rounded-full border border-antique/40 px-5 py-2.5 text-mukut transition-colors duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian"
       >

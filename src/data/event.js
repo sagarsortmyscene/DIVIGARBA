@@ -1,6 +1,6 @@
 /* Change the event here. No component holds a hard-coded date. */
 export const EVENT_CONFIG = {
-  name: "Shakti",
+  name: "Devi Garba",
   dates: "10 — 19 October 2026",
   location: "Ahmedabad",
   gateEntry: "12:00 AM (00:00)",
@@ -12,7 +12,7 @@ export const EVENT_CONFIG = {
   openNights: [10, 11, 12, 13, 14, 15, 16, 17, 18, 19],
 
   phone: "+91 99744 48244",
-  email: "shunya0chakra@gmail.com",
+  email: "devi@gmail.com",
   instagram: "https://www.instagram.com/shunyachakra/",
   instagramHandle: "@shunyachakra",
   maps: "https://maps.app.goo.gl/BTfX64dfCBcKsEip9",
@@ -24,4 +24,5 @@ export const EVENT_CONFIG = {
   organiserName: "INCEPT EVENTS",
   organiserUrl: "https://www.inceptevents.in/",
   brandLine: "Devi Garba",
+  venue: "Devi Garba — VAYANA",
 };

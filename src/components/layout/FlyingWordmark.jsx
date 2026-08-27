@@ -63,19 +63,29 @@ export function FlyingWordmark({ wordRef, slotRef, gateSelector = "#gate" }) {
             scrollTrigger: { trigger: gateSelector, start: "bottom 92%", end: "bottom 62%", scrub: true },
           });
 
-          gsap.to(wrapRef.current, {
-            ease: "none",
-            scrollTrigger: {
-              trigger: gateSelector,
-              start: "bottom 92%",
-              end: "bottom 22%",
-              scrub: 1,
-              invalidateOnRefresh: true,
-            },
-            x: () => target().x,
-            y: () => target().y,
-            scale: () => target().scale,
-          });
+          // fromTo, not to: `scale` on this same element was already
+          // driven from 0.12 → 1 by TempleGate's grow tween, and GSAP
+          // caches a plain .to()'s start value once at creation (back
+          // when it was still 0.12) — so docking would snap to that
+          // stale start and visibly jump instead of shrinking smoothly
+          // from the size it actually grew to.
+          gsap.fromTo(
+            wrapRef.current,
+            { scale: 1 },
+            {
+              ease: "none",
+              scrollTrigger: {
+                trigger: gateSelector,
+                start: "bottom 92%",
+                end: "bottom 22%",
+                scrub: 1,
+                invalidateOnRefresh: true,
+              },
+              x: () => target().x,
+              y: () => target().y,
+              scale: () => target().scale,
+            }
+          );
         })
       );
       return () => cancelAnimationFrame(raf);

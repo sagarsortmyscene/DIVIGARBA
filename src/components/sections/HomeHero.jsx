@@ -1,94 +1,52 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { unsplash, unsplashSrcSet, IMAGES, GALLERY } from "../../data/images";
+import { Mandala } from "../ui/Mandala";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
-
-/* The garba floor at rest; the Devi behind the circle. */
-const HERO_IMAGE = GALLERY[0]; // dancer twirling
-const DIVINE_IMAGE = IMAGES.devi;
 
 /**
  * HOME — the page proper, arriving right after the gate has opened
- * and the mark has docked in the header. A second reveal, quieter
- * than the gate's: the word "divine" is a window the Devi opens
- * through as you scroll.
+ * and the mark has docked in the header. No photograph here — just
+ * the same warm gradient ground the rest of the site rests on, a
+ * field of mathematically-drawn mandalas turning behind the copy,
+ * and the line rising into place.
  */
 export function HomeHero() {
   const ref = useRef(null);
-  const wordRef = useRef(null);
   const reduced = useReducedMotion();
 
   useGSAP(
     () => {
       const q = gsap.utils.selector(ref);
 
-      /* The circle opens FROM the word "divine", so it has to know where
-         that word actually is. Measured live, re-measured on refresh —
-         a hardcoded percentage drifts at every viewport width. */
-      const origin = () => {
-        const w = wordRef.current?.getBoundingClientRect();
-        const s = ref.current?.getBoundingClientRect();
-        if (!w || !s) return { x: 50, y: 62 };
-        return {
-          x: ((w.left + w.width / 2 - s.left) / s.width) * 100,
-          y: ((w.top + w.height / 2 - s.top) / s.height) * 100,
-        };
-      };
-
-      const setCircle = (r) => {
-        const { x, y } = origin();
-        gsap.set(q("[data-divine-layer]"), { clipPath: `circle(${r}% at ${x}% ${y}%)` });
-      };
-
       if (reduced) {
         gsap.set(q("[data-fade]"), { opacity: 1, y: 0 });
         gsap.set(q("[data-line] > span"), { yPercent: 0 });
-        setCircle(0);
         return;
       }
 
       /* --- on arrival --- */
       gsap
         .timeline({ defaults: { ease: "power3.out" }, scrollTrigger: { trigger: ref.current, start: "top 70%" } })
-        .fromTo(
-          q("[data-hero-img]"),
-          { scale: 1.08, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 1.8, ease: "power2.out" }
-        )
-        .from(q("[data-eyebrow]"), { opacity: 0, y: 18, duration: 1 }, "-=1.1")
+        .from(q("[data-eyebrow]"), { opacity: 0, y: 18, duration: 1 })
         .from(q("[data-line] > span"), { yPercent: 108, duration: 1.35, stagger: 0.11, ease: "power4.out" }, "-=0.75")
         .from(q("[data-lede]"), { opacity: 0, y: 20, duration: 1 }, "-=0.8")
         .from(q("[data-cta]"), { opacity: 0, y: 20, duration: 1 }, "-=0.75");
 
-      /* --- scroll: image pushes in, copy lifts, the circle opens --- */
-      gsap.to(q("[data-hero-img]"), {
-        scale: 1.1,
+      /* --- scroll: the mandala field turns slowly under the copy --- */
+      gsap.to(q("[data-mandala]"), {
+        rotate: 26,
+        scale: 1.08,
         ease: "none",
-        scrollTrigger: { trigger: ref.current, start: "top top", end: "bottom top", scrub: true },
+        scrollTrigger: { trigger: ref.current, start: "top top", end: "bottom top", scrub: 1.4 },
       });
 
+      /* --- scroll: the copy simply lifts and fades as you leave --- */
       gsap.to(q("[data-copy]"), {
         y: -70,
         opacity: 0,
         ease: "none",
         scrollTrigger: { trigger: ref.current, start: "18% top", end: "bottom top", scrub: true },
-      });
-
-      const state = { r: 0 };
-      setCircle(0);
-      gsap.to(state, {
-        r: 150,
-        ease: "none",
-        scrollTrigger: {
-          trigger: ref.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: 1,
-          invalidateOnRefresh: true,
-          onRefresh: () => setCircle(state.r),
-        },
-        onUpdate: () => setCircle(state.r),
       });
     },
     { scope: ref, dependencies: [reduced] }
@@ -100,45 +58,25 @@ export function HomeHero() {
       className="relative grid min-h-[100svh] place-items-center overflow-hidden bg-obsidian px-5 sm:px-10"
       aria-label="Where garba meets the divine"
     >
-      {/* the garba floor */}
-      <img
-        data-hero-img
-        src={unsplash(HERO_IMAGE.file, { w: 2000 })}
-        srcSet={unsplashSrcSet(HERO_IMAGE.file)}
-        sizes="100vw"
-        alt={HERO_IMAGE.alt}
-        className="absolute inset-0 h-full w-full object-cover object-[center_38%]"
-        style={{ zIndex: "var(--z-background)" }}
-      />
+      {/* no photograph here — the same warm ground the rest of the site sits on */}
       <div
         aria-hidden
         className="absolute inset-0"
         style={{
-          zIndex: "var(--z-atmosphere)",
+          zIndex: "var(--z-background)",
           background:
-            "linear-gradient(180deg, rgba(7,5,4,0.72) 0%, rgba(7,5,4,0.38) 34%, rgba(7,5,4,0.88) 100%)",
+            "radial-gradient(120% 70% at 50% 0%, rgba(240,193,75,0.14), transparent 60%), radial-gradient(90% 60% at 15% 100%, rgba(143,23,18,0.20), transparent 62%), radial-gradient(90% 60% at 85% 100%, rgba(168,121,44,0.16), transparent 62%), linear-gradient(180deg, #120a04 0%, #0b0706 50%, #070504 100%)",
         }}
       />
 
-      {/* THE SIGNATURE — the divine, revealed through the circle */}
+      {/* One mandala, dead centre behind the copy, at a visible strength. */}
       <div
-        data-divine-layer
         aria-hidden
-        className="absolute inset-0"
-        style={{ zIndex: "var(--z-geometry)", clipPath: "circle(0% at 50% 62%)" }}
+        data-mandala
+        className="pointer-events-none absolute inset-0 overflow-hidden text-gold"
+        style={{ zIndex: "var(--z-atmosphere)" }}
       >
-        <img
-          src={unsplash(DIVINE_IMAGE.file, { w: 2000 })}
-          alt=""
-          className="h-full w-full object-cover object-[center_28%]"
-        />
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(60% 60% at 50% 45%, rgba(216,100,30,0.28), transparent 70%), linear-gradient(180deg, rgba(7,5,4,0.55), rgba(7,5,4,0.85))",
-          }}
-        />
+        <Mandala className="absolute top-1/2 left-1/2 h-[110vmin] w-[110vmin] -translate-x-1/2 -translate-y-1/2 opacity-[0.32]" />
       </div>
 
       {/* copy */}
@@ -158,9 +96,7 @@ export function HomeHero() {
             </span>
           ))}
           <span data-line className="block overflow-hidden">
-            <span ref={wordRef} className="gilt block italic">
-              divine
-            </span>
+            <span className="gilt block italic">divine</span>
           </span>
         </h1>
 

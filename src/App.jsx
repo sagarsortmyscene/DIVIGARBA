@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { useHashRoute } from "./hooks/useHashRoute";
 import { LenisProvider } from "./components/providers/LenisProvider";
 import { Atmosphere } from "./components/layout/Atmosphere";
 import { SiteHeader } from "./components/layout/SiteHeader";
@@ -12,6 +13,7 @@ import { HomeHero } from "./components/sections/HomeHero";
 import { Gallery } from "./components/sections/Gallery";
 import { DetailsSection } from "./components/sections/DetailsSection";
 import { WaitlistSection } from "./components/sections/WaitlistSection";
+import { BookingPage } from "./components/booking/BookingPage";
 
 export default function App() {
   /* The emblem and wordmark are each shared: the gate scales them up
@@ -21,6 +23,11 @@ export default function App() {
   const wordRef = useRef(null);
   const headerSlotRef = useRef(null);
   const headerWordSlotRef = useRef(null);
+  const route = useHashRoute();
+
+  /* Booking is its own view: no gate animation, no flying emblem,
+     no Lenis smoothing fighting a form. */
+  if (route === "book") return <BookingPage />;
 
   return (
     <LenisProvider>
