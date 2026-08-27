@@ -14,6 +14,18 @@ import { Gallery } from "./components/sections/Gallery";
 import { DetailsSection } from "./components/sections/DetailsSection";
 import { WaitlistSection } from "./components/sections/WaitlistSection";
 import { BookingPage } from "./components/booking/BookingPage";
+import { TermsPage } from "./components/legal/TermsPage";
+import { PrivacyPage } from "./components/legal/PrivacyPage";
+import { DataDeletionPage } from "./components/legal/DataDeletionPage";
+import { PrivacyChoicesPage } from "./components/legal/PrivacyChoicesPage";
+
+const ROUTES = {
+  book: BookingPage,
+  terms: TermsPage,
+  privacy: PrivacyPage,
+  "data-deletion": DataDeletionPage,
+  "privacy-choices": PrivacyChoicesPage,
+};
 
 export default function App() {
   /* The emblem and wordmark are each shared: the gate scales them up
@@ -25,9 +37,10 @@ export default function App() {
   const headerWordSlotRef = useRef(null);
   const route = useHashRoute();
 
-  /* Booking is its own view: no gate animation, no flying emblem,
-     no Lenis smoothing fighting a form. */
-  if (route === "book") return <BookingPage />;
+  /* Booking and the legal pages are each their own view: no gate
+     animation, no flying emblem, no Lenis smoothing fighting a form. */
+  const RouteView = ROUTES[route];
+  if (RouteView) return <RouteView />;
 
   return (
     <LenisProvider>

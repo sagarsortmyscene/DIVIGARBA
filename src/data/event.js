@@ -17,9 +17,9 @@ export const EVENT_CONFIG = {
   instagramHandle: "@shunyachakra",
   maps: "https://maps.app.goo.gl/BTfX64dfCBcKsEip9",
 
-  terms: "https://shunyachakra.com/terms-and-conditions",
-  privacy: "https://shunyachakra.com/privacy-policy",
-  dataDeletion: "https://shunyachakra.com/data-deletion",
+  terms: "#terms",
+  privacy: "#privacy",
+  dataDeletion: "#data-deletion",
 
   organiserName: "INCEPT EVENTS",
   organiserUrl: "https://www.inceptevents.in/",

@@ -20,7 +20,7 @@ export function SiteFooter() {
     ["T&Cs", terms],
     ["Privacy", privacy],
     ["Data Deletion", dataDeletion],
-    ["Privacy choices", "#"],
+    ["Privacy choices", "#privacy-choices"],
   ];
 
   return (
