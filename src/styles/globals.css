@@ -1,0 +1,334 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TAILWIND V4 — CSS-FIRST CONFIG
+   Everything below becomes a utility: bg-obsidian, text-gold,
+   font-display, text-hero, z-nav …
+   ============================================================ */
+@theme {
+  /* --- COLOR. Ratio discipline: 80% dark / 12% red / 6% ivory / 2% gold --- */
+  --color-obsidian: #070504;
+  --color-void: #0b0706;
+  --color-maroon: #180807;
+  --color-temple: #350a08;
+  --color-sindoor: #8f1712;
+  --color-crimson: #b32618;
+  --color-ember: #d8641e;
+  --color-mukut: #f0c14b;   /* mukut gold — the crown yellow */
+  --color-brass: #a8792c;
+  --color-antique: #c9a24a;
+  --color-gold: #edc766;
+  --color-ivory: #f4e8d0;
+
+  /* --- TYPE --- */
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  --font-deva: "Tiro Devanagari Hindi", serif;
+  --font-ui: "Manrope", system-ui, sans-serif;
+
+  --text-hero: clamp(4rem, 11vw, 12rem);
+  --text-display: clamp(3rem, 7vw, 8rem);
+  --text-heading: clamp(2.25rem, 5vw, 6rem);
+  --text-subheading: clamp(1.35rem, 2.5vw, 3rem);
+  --text-body: clamp(1rem, 1.15vw, 1.2rem);
+  --text-label: 0.68rem;
+
+  /* Devanagari carries matras above and below the baseline, so it needs
+     its own steps rather than borrowing the Latin display sizes. */
+  --text-deva-hero: clamp(3rem, 9vw, 7rem);
+  --text-deva-chapter: clamp(2.2rem, 5.2vw, 4.2rem);
+  --text-deva-verse: clamp(1rem, 2.2vw, 1.5rem);
+  --text-deva-caption: clamp(1.1rem, 2.6vw, 1.9rem);
+  --text-deva-blessing: clamp(1.4rem, 4vw, 2.6rem);
+
+  /* --- LAYERS. One scale — components read these, never raw values. --- */
+  --z-background: 0;
+  --z-atmosphere: 10;
+  --z-geometry: 20;
+  --z-image: 30;
+  --z-grade: 40;
+  --z-content: 50;
+  --z-foreground: 60;
+  --z-nav: 70;
+  --z-cursor: 90;
+  --z-loader: 100;
+
+  /* --- MOTION --- */
+  --ease-sacred: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-veil: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-obsidian);
+    color: var(--color-ivory);
+    font-family: var(--font-ui);
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Lenis owns scrolling. Native smooth would fight it. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-gold);
+    outline-offset: 4px;
+  }
+
+  ::selection {
+    background: var(--color-sindoor);
+    color: var(--color-ivory);
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+}
+
+/* ============================================================
+   REUSABLE UTILITIES
+   Composed here rather than repeated as long class strings.
+   ============================================================ */
+@utility label {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 400;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+}
+
+@utility display-type {
+  font-family: var(--font-display);
+  font-weight: 300;
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+}
+
+/* Gold is jewelry — used on type only at these two moments */
+@utility gilt {
+  background: linear-gradient(
+    100deg,
+    var(--color-ivory) 0%,
+    var(--color-gold) 45%,
+    var(--color-antique) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* A reveal mask: child slides up out of a clipped line box */
+@utility line-clip {
+  display: block;
+  overflow: hidden;
+}
+
+/* ---------- HOME — the editorial hero that follows the gate ---------- */
+@utility home-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(3.6rem, 10vw, 10.5rem);
+  line-height: 0.88;
+  letter-spacing: -0.03em;
+}
+
+@utility home-eyebrow {
+  font-family: var(--font-ui);
+  font-size: clamp(0.68rem, 1vw, 0.8rem);
+  font-weight: 400;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+@utility home-body {
+  font-family: var(--font-ui);
+  font-weight: 300;
+  font-size: clamp(1rem, 1.25vw, 1.15rem);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   ATMOSPHERE — the textures the design leans on
+   ============================================================ */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-foreground);
+  pointer-events: none;
+  opacity: 0.26;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    62% 62% at 50% 48%,
+    transparent 28%,
+    rgba(7, 5, 4, 0.62) 74%,
+    var(--color-obsidian) 100%
+  );
+}
+
+/* The one place heavy blur is allowed: light scattering off the artwork */
+.scatter {
+  filter: blur(80px) saturate(1.45) brightness(0.78);
+}
+
+@media (max-width: 768px) {
+  /* Large blur radii are the main mobile GPU cost — halve it */
+  .scatter {
+    filter: blur(42px) saturate(1.4) brightness(0.8);
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION — the story still reads, it just doesn't move
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes cue {
+  0% { transform: scaleY(0); transform-origin: top; }
+  45% { transform: scaleY(1); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: bottom; }
+  100% { transform: scaleY(0); transform-origin: bottom; }
+}
+
+/* ============================================================
+   ANCIENT SURFACE — brass leaf over aged pigment.
+   Two woven gradients + a hairline weave read as beaten metal
+   without shipping a texture file.
+   ============================================================ */
+.brass-leaf {
+  background-color: var(--color-maroon);
+  background-image:
+    radial-gradient(60% 40% at 20% 12%, rgba(240, 193, 75, 0.18), transparent 62%),
+    radial-gradient(50% 40% at 82% 78%, rgba(216, 100, 30, 0.16), transparent 60%),
+    repeating-linear-gradient(102deg, rgba(240, 193, 75, 0.05) 0 2px, transparent 2px 7px),
+    repeating-linear-gradient(14deg, rgba(7, 5, 4, 0.30) 0 3px, transparent 3px 9px);
+}
+
+/* Hairline brass rule used between blocks */
+.rule-brass {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-antique), transparent);
+  opacity: 0.4;
+}
+
+/* The emblem docks into the header; this reserves its slot */
+.emblem-slot {
+  width: clamp(34px, 4vw, 44px);
+  aspect-ratio: 1;
+}
+
+/* ============================================================
+   ANCIENT FRAME — a double brass rule with cut corners, the way
+   a temple panel or an old invitation card is bordered.
+   ============================================================ */
+.frame-ancient {
+  position: relative;
+  border: 1px solid rgba(201, 162, 74, 0.42);
+  /* clipped corners read as beaten metal, not a CSS box */
+  clip-path: polygon(
+    14px 0, calc(100% - 14px) 0, 100% 14px,
+    100% calc(100% - 14px), calc(100% - 14px) 100%,
+    14px 100%, 0 calc(100% - 14px), 0 14px
+  );
+}
+.frame-ancient::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid rgba(201, 162, 74, 0.22);
+  pointer-events: none;
+  z-index: 2;
+  clip-path: inherit;
+}
+
+/* Corner pips — the small brass studs at each corner of a panel */
+.frame-pips::after {
+  content: "";
+  position: absolute;
+  inset: 11px;
+  pointer-events: none;
+  z-index: 2;
+  background-image:
+    radial-gradient(circle, var(--color-mukut) 45%, transparent 46%),
+    radial-gradient(circle, var(--color-mukut) 45%, transparent 46%),
+    radial-gradient(circle, var(--color-mukut) 45%, transparent 46%),
+    radial-gradient(circle, var(--color-mukut) 45%, transparent 46%);
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+  background-position: top left, top right, bottom left, bottom right;
+  opacity: 0.65;
+}
+
+/* A carved divider: hairline, lozenge, hairline */
+.divider-carved {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+.divider-carved::before,
+.divider-carved::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(201, 162, 74, 0.5), transparent);
+}
+
+/* The Devi, aged into the background of a section */
+.devi-ground {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-position: center 26%;
+  background-size: cover;
+  opacity: 0.16;
+  filter: sepia(0.55) saturate(0.75) contrast(1.05) brightness(0.62);
+  mask-image: radial-gradient(72% 62% at 50% 42%, #000 18%, transparent 78%);
+}
