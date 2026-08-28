@@ -9,7 +9,7 @@ import { FlyingWordmark } from "./components/layout/FlyingWordmark";
 import { CustomCursor } from "./components/ui/CustomCursor";
 import { NoiseOverlay } from "./components/ui/NoiseOverlay";
 import { TempleGate } from "./components/sections/TempleGate";
-import { HomeHero } from "./components/sections/HomeHero";
+import { CinematicHero } from "./components/sections/CinematicHero";
 import { Gallery } from "./components/sections/Gallery";
 import { DetailsSection } from "./components/sections/DetailsSection";
 import { WaitlistSection } from "./components/sections/WaitlistSection";
@@ -63,7 +63,7 @@ export default function App() {
 
       <main id="top" className="relative" style={{ zIndex: "var(--z-content)" }}>
         <TempleGate emblemRef={emblemRef} wordRef={wordRef} />
-        <HomeHero />
+        <CinematicHero />
         <Gallery />
         <DetailsSection />
         <WaitlistSection />

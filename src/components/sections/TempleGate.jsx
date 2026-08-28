@@ -1,8 +1,6 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { Media } from "../ui/Media";
-import { Emblem } from "../ui/Emblem";
 import { IMAGES } from "../../data/images";
 import { createScene } from "../../lib/animations";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
@@ -58,8 +56,6 @@ export function TempleGate({ emblemRef, wordRef }) {
           HALF_OPEN
         )
         .to(q("[data-em-ring]"), { rotate: 90, duration: 2.4, ease: "none" }, HALF_OPEN)
-        // 4. she is revealed behind
-        .to(q("[data-devi]"), { opacity: 0.62, scale: 1, duration: 2.6, ease: "power2.out" }, 1.4)
         .from(q("[data-tagline]"), { opacity: 0, y: 20, duration: 1.1 }, 3.4);
     },
     { scope: ref, dependencies: [reduced] }
@@ -106,12 +102,6 @@ export function TempleGate({ emblemRef, wordRef }) {
       className="relative grid min-h-[100svh] place-items-center overflow-hidden"
       aria-label="The gate opens"
     >
-      {/* what waits behind: her, held far back and dim */}
-      <div data-devi className="absolute inset-0 scale-110 opacity-0" style={{ zIndex: "var(--z-background)" }}>
-        <Media image={IMAGES.devi} />
-        <div aria-hidden className="absolute inset-0 bg-obsidian/70" />
-      </div>
-
       <div
         data-glow
         aria-hidden
