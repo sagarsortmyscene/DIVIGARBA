@@ -24,7 +24,7 @@ function Section({ heading, paragraphs = [], bullets = [] }) {
   );
 }
 
-/** Shared shell for every legal page — same slim header/footer as BookingPage. */
+/** Shared shell for every legal page — a slim header/footer of its own. */
 export function LegalPage({ title, effective, intro, sections = [], footnote, children }) {
   return (
     <div className="min-h-svh">

@@ -8,7 +8,7 @@ import { EVENT_CONFIG } from "../../data/event";
  * The left slot is EMPTY on purpose — FlyingEmblem docks into it,
  * and `slotRef` is how that component finds where to land.
  */
-export function SiteHeader({ slotRef, ctaVisible }) {
+export function SiteHeader({ slotRef }) {
   const ref = useRef(null);
 
   useGSAP(
@@ -32,12 +32,8 @@ export function SiteHeader({ slotRef, ctaVisible }) {
 
       <a
         href="#book"
-        data-cursor={ctaVisible ? "cta" : undefined}
-        aria-hidden={!ctaVisible}
-        tabIndex={ctaVisible ? undefined : -1}
-        className={`label rounded-full border border-antique/40 bg-obsidian/45 px-5 py-2.5 text-mukut transition-[opacity,transform,color,background-color,border-color] duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian ${
-          ctaVisible ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
-        }`}
+        data-cursor="cta"
+        className="label rounded-full border border-antique/40 bg-obsidian/45 px-5 py-2.5 text-mukut transition-colors duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian"
       >
         Book ticket
       </a>

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useHashRoute } from "./hooks/useHashRoute";
 import { LenisProvider } from "./components/providers/LenisProvider";
 import { Atmosphere } from "./components/layout/Atmosphere";
@@ -11,14 +11,12 @@ import { TempleGate } from "./components/sections/TempleGate";
 import { CinematicHero } from "./components/sections/CinematicHero";
 import { Gallery } from "./components/sections/Gallery";
 import { DetailsSection } from "./components/sections/DetailsSection";
-import { BookingPage } from "./components/booking/BookingPage";
 import { TermsPage } from "./components/legal/TermsPage";
 import { PrivacyPage } from "./components/legal/PrivacyPage";
 import { DataDeletionPage } from "./components/legal/DataDeletionPage";
 import { PrivacyChoicesPage } from "./components/legal/PrivacyChoicesPage";
 
 const ROUTES = {
-  book: BookingPage,
   terms: TermsPage,
   privacy: PrivacyPage,
   "data-deletion": DataDeletionPage,
@@ -31,13 +29,9 @@ export default function App() {
   const emblemRef = useRef(null);
   const headerSlotRef = useRef(null);
   const route = useHashRoute();
-  /* The header's "Book ticket" CTA stays hidden until the gate has
-     fully opened — TempleGate reports that directly, since it's the
-     one place that already owns the correctly pin-accounted trigger. */
-  const [gateOpen, setGateOpen] = useState(false);
 
-  /* Booking and the legal pages are each their own view: no gate
-     animation, no flying emblem, no Lenis smoothing fighting a form. */
+  /* The legal pages are each their own view: no gate animation, no
+     flying emblem, no Lenis smoothing fighting a form. */
   const RouteView = ROUTES[route];
   if (RouteView) return <RouteView />;
 
@@ -47,7 +41,7 @@ export default function App() {
       <CustomCursor />
       <NoiseOverlay />
 
-      <SiteHeader slotRef={headerSlotRef} ctaVisible={gateOpen} />
+      <SiteHeader slotRef={headerSlotRef} />
 
       {/* FlyingEmblem must mount before TempleGate so its ref (emblemRef,
           attached inside it) exists by the time TempleGate's own effect
@@ -60,11 +54,7 @@ export default function App() {
       <FlyingEmblem emblemRef={emblemRef} slotRef={headerSlotRef} gateSelector="#gate" />
 
       <main id="top" className="relative" style={{ zIndex: "var(--z-content)" }}>
-        <TempleGate
-          emblemRef={emblemRef}
-          onGateOpen={() => setGateOpen(true)}
-          onGateClose={() => setGateOpen(false)}
-        />
+        <TempleGate emblemRef={emblemRef} />
         <CinematicHero />
         <Gallery />
         <DetailsSection />
