@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+/* The site's one custom typeface — a single Heavy-weight face, so the
+   range covers every weight the site asks for rather than letting the
+   browser synthesize (fake-bold) a mismatch.
+
+   This is the "Free" trial build of the font: its digit glyphs (0–9)
+   are replaced with the word "Sregs" as a watermark forcing a
+   licence purchase for real numerals. `unicode-range` tells the
+   browser this face doesn't cover the digit codepoints at all, so it
+   skips straight to the next font in the stack for any number —
+   everything else still renders in Sregs Serif. */
+@font-face {
+  font-family: "Sregs Serif";
+  src: url("/fonts/SregsSerif-Heavy.otf") format("opentype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-002F, U+003A-007E, U+00A0-00FF, U+2010-2027;
+}
+
 /* ============================================================
    TAILWIND V4 — CSS-FIRST CONFIG
    Everything below becomes a utility: bg-obsidian, text-gold,
@@ -21,9 +40,13 @@
   --color-ivory: #f4e8d0;
 
   /* --- TYPE --- */
-  --font-display: "Cormorant Garamond", Georgia, serif;
+  /* "Poppins" sits right after Sregs Serif: the trial font's
+     unicode-range above excludes digits, so numbers cascade straight
+     to Poppins (which has real numerals) instead of the older
+     fallbacks — everything else still renders in Sregs Serif. */
+  --font-display: "Sregs Serif", "Poppins", "Cormorant Garamond", Georgia, serif;
   --font-deva: "Tiro Devanagari Hindi", serif;
-  --font-ui: "Manrope", system-ui, sans-serif;
+  --font-ui: "Sregs Serif", "Poppins", "Manrope", system-ui, sans-serif;
 
   --text-hero: clamp(4rem, 11vw, 12rem);
   --text-display: clamp(3rem, 7vw, 8rem);
@@ -122,6 +145,15 @@
    REUSABLE UTILITIES
    Composed here rather than repeated as long class strings.
    ============================================================ */
+
+/* The gallery's marquee row — renders its shots twice back to back
+   and slides exactly one set-width, so the loop point is invisible. */
+@keyframes marquee-left {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 @utility label {
   font-family: var(--font-ui);
   font-size: var(--text-label);
@@ -267,7 +299,7 @@
 
 /* The emblem docks into the header; this reserves its slot */
 .emblem-slot {
-  width: clamp(34px, 4vw, 44px);
+  width: clamp(72px, 8vw, 100px);
   aspect-ratio: 1;
 }
 

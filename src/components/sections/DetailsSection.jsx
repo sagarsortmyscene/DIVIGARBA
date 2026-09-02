@@ -16,11 +16,7 @@ export function DetailsSection() {
         className="frame-ancient frame-pips relative mx-auto max-w-3xl bg-maroon/25 px-6 py-12 text-center sm:px-14 sm:py-14"
         style={{ zIndex: "var(--z-content)" }}
       >
-        <span className="label text-antique">
-          <span className="text-mukut/70">01</span> &nbsp;·&nbsp; The details
-        </span>
-
-        <ScrollReveal className="mt-6">
+        <ScrollReveal className="mt-0">
           <p className="display-type gilt text-[clamp(1.9rem,5vw,3.6rem)] leading-none">{dates}</p>
           <p className="label mt-3 text-antique">{location}</p>
         </ScrollReveal>

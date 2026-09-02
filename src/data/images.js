@@ -44,13 +44,14 @@ export const SIZES = {
 
 /* ---------- The gate ---------- */
 export const IMAGES = {
-  /* A real carved door from Rajasthan — the ancient note the whole
-     site hangs on. Photographed flat, so it splits cleanly in two. */
+  /* The gate's backdrop — Maa Durga's gaze, split across the two
+     door panels so the image stays continuous as they part. */
   door: {
-    file: "1677206213866-65b5f73bb95b",
-    alt: "An ancient carved wooden temple door from Rajasthan",
+    file: "/assets/gate-background.jpg",
+    fileMobile: "/assets/gate-mobile-background.jpg",
+    alt: "Maa Durga",
     focal: "center center",
-    credit: "Darshan Patel",
+    credit: null,
   },
   /* What waits behind the doors. */
   devi: {
@@ -61,14 +62,16 @@ export const IMAGES = {
   },
 };
 
-/* ---------- Gallery: six plates, fanned like a hand of cards ---------- */
+/* ---------- Gallery: real nights from the ground, not stock ---------- */
 export const GALLERY = [
-  { n: "01", file: "1754244575428-8123e0d27ef3", title: "The turn",   line: "Three steps, a clap, and the ghagra does the rest.", alt: "A dancer twirling in traditional Gujarati attire", focal: "center 38%", credit: "Raas Usa" },
-  { n: "02", file: "1774377767315-cb846a51725b", title: "The dhol",   line: "It enters at midnight and stays until the sun does.",   alt: "A drummer playing dhol",                          focal: "center 38%", credit: "Tanmay Abhay Mahajan" },
-  { n: "03", file: "1716655359683-791d415c3f4c", title: "The sticks", line: "Dandiya. Two pieces of wood, and a conversation.",     alt: "A dancer holding dandiya sticks",                 focal: "center 32%", credit: "Joydeep Sensarma" },
-  { n: "04", file: "1774437897284-b2f7c4638c55", title: "The circle", line: "Nobody leads. The floor becomes one body.",            alt: "Women in colourful saris dancing",                focal: "center 40%", credit: "Tanmay Abhay Mahajan" },
-  { n: "05", file: "1626094305935-94534682b1d9", title: "The Devi",   line: "Installed at dusk. Everything turns around her.",      alt: "Durga idol in gold ornaments and garlands",       focal: "center 30%", credit: "Sonika Agarwal" },
-  { n: "06", file: "1734120113511-3fc3daa90633", title: "The ground", line: "Ten thousand people, one direction of travel.",        alt: "A vast crowd on the garba ground at night",       focal: "center 44%", credit: "Tirth Jivani" },
+  { n: "01", file: "/assets/gallery/DSC00508.JPG", title: "The turn",    line: "Three steps, a clap, and the ghagra does the rest.",   alt: "A couple dancing together in the crowd", focal: "center 30%", credit: null },
+  { n: "02", file: "/assets/gallery/DSC00688.JPG", title: "The lift",    line: "Arms up, dupatta out — the beat finds everyone.",       alt: "A dancer twirling with her arms raised", focal: "center 35%", credit: null },
+  { n: "03", file: "/assets/gallery/DSC01683.JPG", title: "The ground",  line: "Ten thousand people, one direction of travel.",         alt: "A vast crowd dancing under a lit canopy at night", focal: "center 55%", credit: null },
+  { n: "04", file: "/assets/gallery/DSC02502.JPG", title: "The circle",  line: "Nobody leads. The floor becomes one body.",             alt: "A woman laughing mid-spin in a red dupatta", focal: "center 30%", credit: null },
+  { n: "05", file: "/assets/gallery/DSC08073.JPG", title: "The aarti",   line: "Before the dancing, the flame goes around first.",      alt: "Guests performing aarti with diya plates", focal: "center 35%", credit: null },
+  { n: "06", file: "/assets/gallery/DSC07975.JPG", title: "The Devi",    line: "Installed at dusk. Everything turns around her.",       alt: "The flower-ringed altar under a canopy of fabric petals", focal: "center 45%", credit: null },
+  { n: "07", file: "/assets/gallery/DSC08780.JPG", title: "The night",   line: "Nine nights. Every one of them like this.",             alt: "A woman in white dancing joyfully at night", focal: "center 30%", credit: null },
+  { n: "08", file: "/assets/gallery/DSC01173.JPG", title: "The gathering", line: "Before the crowd arrives, the ground waits, lit.",    alt: "The decorated ground and canopy before the crowd arrives", focal: "center 60%", credit: null },
 ];
 
 /* ---------- Attribution ----------
@@ -87,5 +90,5 @@ export const PHOTOGRAPHERS = {
 
 /** De-duplicated {credit, link} for every photo actually on the page. */
 export const CREDITS = [
-  ...new Set([...Object.values(IMAGES), ...GALLERY].map((i) => i.credit)),
+  ...new Set([...Object.values(IMAGES), ...GALLERY].map((i) => i.credit).filter(Boolean)),
 ].map((credit) => ({ credit, link: PHOTOGRAPHERS[credit] }));

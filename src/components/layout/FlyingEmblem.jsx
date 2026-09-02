@@ -1,7 +1,6 @@
 import { useRef, useLayoutEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Emblem } from "../ui/Emblem";
 import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
 
@@ -76,11 +75,11 @@ export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
   return (
     <div
       ref={wrapRef}
-      className="pointer-events-none fixed h-[min(46vmin,340px)] w-[min(46vmin,340px)] origin-center"
+      className="pointer-events-none fixed h-[min(68vmin,520px)] w-[min(68vmin,520px)] origin-center"
       style={{ zIndex: "var(--z-nav)" }}
     >
       {/* hidden at gate-open scale from first paint — no flash before GSAP attaches */}
-      <Emblem ref={emblemRef} className="h-full w-full scale-[0.12] opacity-0" showWord={false} />
+      <Emblem ref={emblemRef} className="h-full w-full scale-[0.12] opacity-0" />
     </div>
   );
 }

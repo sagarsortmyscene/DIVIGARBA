@@ -9,7 +9,7 @@ import { EVENT_CONFIG } from "../../data/event";
  * The left slot is EMPTY on purpose — FlyingEmblem docks into it,
  * and `slotRef` is how that component finds where to land.
  */
-export function SiteHeader({ slotRef, wordSlotRef }) {
+export function SiteHeader({ slotRef, ctaVisible }) {
   const ref = useRef(null);
 
   useGSAP(
@@ -26,22 +26,23 @@ export function SiteHeader({ slotRef, wordSlotRef }) {
   return (
     <header
       ref={ref}
-      className="fixed top-0 left-0 flex w-full items-center justify-between px-5 py-4 transition-colors duration-500 sm:px-9 [&.is-stuck]:bg-gradient-to-b [&.is-stuck]:from-obsidian/95 [&.is-stuck]:to-transparent [&.is-stuck]:backdrop-blur-sm"
+      className="fixed top-0 left-0 flex w-full items-center justify-between px-5 py-4 transition-colors duration-500 sm:px-9 [&.is-stuck]:bg-gradient-to-b [&.is-stuck]:from-obsidian/95 [&.is-stuck]:to-transparent"
       style={{ zIndex: "var(--z-nav)" }}
     >
-      {/* the emblem and wordmark land here — FlyingEmblem docks the ring,
-          FlyingWordmark docks the text; this span just reserves its slot */}
+      {/* the emblem lands here — FlyingEmblem docks it; this span just
+          reserves its slot */}
       <a href="#top" className="flex items-center gap-3" aria-label={`${EVENT_CONFIG.brandLine}, home`}>
         <span ref={slotRef} className="emblem-slot block" aria-hidden />
-        <span ref={wordSlotRef} className="label invisible whitespace-nowrap" aria-hidden>
-          DIVI GARBA
-        </span>
       </a>
 
       <a
         href="#book"
-        data-cursor="cta"
-        className="label rounded-full border border-antique/40 px-5 py-2.5 text-mukut transition-colors duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian"
+        data-cursor={ctaVisible ? "cta" : undefined}
+        aria-hidden={!ctaVisible}
+        tabIndex={ctaVisible ? undefined : -1}
+        className={`label rounded-full border border-antique/40 bg-obsidian/45 px-5 py-2.5 text-mukut transition-[opacity,transform,color,background-color,border-color] duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian ${
+          ctaVisible ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none -translate-y-2 opacity-0"
+        }`}
       >
         Book ticket
       </a>

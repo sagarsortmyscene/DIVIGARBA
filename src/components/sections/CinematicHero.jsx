@@ -2,19 +2,11 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { SCENES } from "../../data/scenes";
-import { useScrollVideo } from "../../hooks/useScrollVideo";
 import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
 import { cx } from "../../lib/utils";
 
-/* >>> DROP YOUR FILE HERE: public/assets/video/devi-garba-ritual.mp4
-   No still-image fallback by design — if this fails to load, the section
-   just shows the plain grade/gradient rather than any photo. Any free
-   stock clip works; re-encode it scrubbable with something like:
-   ffmpeg -i in.mp4 -an -vf "scale=1600:-2" -g 1 -crf 22 devi-garba-ritual.mp4 */
-const VIDEO_SRC = "/assets/video/devi-garba-ritual.mp4";
-
 /** How tall the scroll film runs. Longer = slower, more cinematic. */
-const HERO_VH = 700;
+const HERO_VH = 520;
 
 const SIDE = {
   left: "left-[6vw] sm:left-[8vw] items-start text-left",
@@ -24,33 +16,32 @@ const ALIGN = { start: "top-[22%]", center: "top-1/2 -translate-y-1/2", end: "bo
 
 /**
  * HOME — the page proper, arriving right after the gate has opened and
- * the mark has docked in the header. A pinned scroll-scrubbed film with
- * captions sliding through it, replacing the old static hero.
+ * the mark has docked in the header. A pinned scroll-scrubbed sequence
+ * of real event photos, one per scene, crossfading as captions slide
+ * through them.
  */
 export function CinematicHero() {
   const sectionRef = useRef(null);
-  const videoRef = useRef(null);
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
-
-  /* Mobile scrubbing is unreliable — iOS throttles seeks hard and the
-     decode cost on a mid-range Android drops frames badly. There we let
-     the video loop normally and keep the text scenes scroll-driven. */
-  const scrub = !reduced && !mobile;
-  const { ready, failed } = useScrollVideo(videoRef, sectionRef, { enabled: scrub });
 
   useGSAP(
     () => {
       const q = gsap.utils.selector(sectionRef);
 
-      /* Each scene owns a slice of the hero. Separate scrubbed timelines
-         mean reversing the scroll reverses the text for free. */
+      /* Each scene owns a slice of the hero: its photo crossfades in a
+         touch ahead of its caption and holds a touch after, so the
+         image is never left waiting on bare grade before the text. */
       SCENES.forEach((scene) => {
-        const el = q(`[data-scene="${scene.id}"]`);
+        const text = q(`[data-scene="${scene.id}"]`);
+        const photo = q(`[data-photo="${scene.id}"]`);
+
         if (reduced) {
-          gsap.set(el, { opacity: 1, y: 0 });
+          gsap.set(text, { opacity: 1, y: 0 });
+          gsap.set(photo, { opacity: 1 });
           return;
         }
+
         gsap
           .timeline({
             scrollTrigger: {
@@ -60,9 +51,22 @@ export function CinematicHero() {
               scrub: 1,
             },
           })
-          .fromTo(el, { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" })
-          .to(el, { duration: 1.4 })                                   // hold
-          .to(el, { opacity: 0, y: -34, duration: 1, ease: "power2.in" });
+          .fromTo(text, { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" })
+          .to(text, { duration: 1.4 }) // hold
+          .to(text, { opacity: 0, y: -34, duration: 1, ease: "power2.in" });
+
+        gsap
+          .timeline({
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: `${Math.max(0, scene.from - 0.05) * 100}% top`,
+              end: `${Math.min(1, scene.to + 0.05) * 100}% top`,
+              scrub: 1,
+            },
+          })
+          .fromTo(photo, { opacity: 0, scale: 1.06 }, { opacity: 1, duration: 1, ease: "power2.out" })
+          .to(photo, { scale: 1, duration: 3.4, ease: "none" }, 0) // slow drift, whole slice
+          .to(photo, { opacity: 0, duration: 1, ease: "power2.in" });
       });
 
       if (reduced) return;
@@ -77,7 +81,6 @@ export function CinematicHero() {
           scrollTrigger: { trigger: sectionRef.current, start: "88% top", end: "bottom bottom", scrub: true },
         }
       );
-
     },
     { scope: sectionRef, dependencies: [reduced] }
   );
@@ -92,22 +95,18 @@ export function CinematicHero() {
     >
       {/* the frame stays put while the scroll drives what is inside it */}
       <div className="sticky top-0 h-svh w-full overflow-hidden bg-obsidian">
-        {!failed && (
-          <video
-            ref={videoRef}
-            src={VIDEO_SRC}
-            muted
-            playsInline
-            preload="auto"
-            loop={!scrub}
-            autoPlay={!scrub}
-            aria-hidden
-            className="absolute inset-0 h-full w-full object-cover"
-            style={{ zIndex: "var(--z-background)" }}
+        {SCENES.map((scene) => (
+          <img
+            key={scene.id}
+            data-photo={scene.id}
+            src={mobile ? scene.image.fileMobile : scene.image.file}
+            alt={scene.image.alt}
+            className="absolute inset-0 h-full w-full object-cover opacity-0"
+            style={{ objectPosition: scene.image.focal, zIndex: "var(--z-background)" }}
           />
-        )}
+        ))}
 
-        {/* grade: pulls stock footage into the site's palette */}
+        {/* grade: pulls the photos into the site's palette */}
         <div
           aria-hidden
           className="absolute inset-0"
@@ -150,16 +149,6 @@ export function CinematicHero() {
             background: "linear-gradient(180deg, rgba(26,11,13,0.6), var(--color-obsidian) 78%)",
           }}
         />
-
-        {/* loading note only while the video is genuinely still fetching */}
-        {scrub && !ready && !failed && (
-          <p
-            className="label absolute bottom-8 left-1/2 -translate-x-1/2 text-ivory/30"
-            style={{ zIndex: "var(--z-content)" }}
-          >
-            Loading the ritual…
-          </p>
-        )}
       </div>
     </section>
   );

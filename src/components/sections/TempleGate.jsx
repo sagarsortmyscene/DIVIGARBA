@@ -3,7 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { IMAGES } from "../../data/images";
 import { createScene } from "../../lib/animations";
-import { useReducedMotion } from "../../hooks/useMediaQuery";
+import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
 
 /**
  * THE GATE — the whole opening of the site, on one pinned timeline.
@@ -11,23 +11,34 @@ import { useReducedMotion } from "../../hooks/useMediaQuery";
  *   doors closed  →  they part  →  the emblem grows out of the light
  *   →  full open   →  the emblem lifts away and docks in the header
  *
- * The doors are two halves of ONE photograph of a real Rajasthani
- * carved door: each panel holds the full image and shifts its
- * background-position, so the carving lines up across the seam.
+ * The doors are two halves of ONE photograph, each panel holding the
+ * full image and shifting its background-position so it lines up
+ * across the seam. They translate fully off-screen well before the
+ * emblem starts its flight up to the header, so that photo is gone
+ * by the time the logo starts moving.
  */
-export function TempleGate({ emblemRef, wordRef }) {
+export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
   const ref = useRef(null);
   const reduced = useReducedMotion();
+  const mobile = useIsMobile();
+  const doorFile = mobile ? IMAGES.door.fileMobile : IMAGES.door.file;
 
   useGSAP(
     () => {
       const q = gsap.utils.selector(ref);
 
       if (reduced) {
-        gsap.set(q("[data-door-l]"), { xPercent: -100 });
-        gsap.set(q("[data-door-r]"), { xPercent: 100 });
+        if (mobile) {
+          gsap.set(q("[data-door-t]"), { yPercent: -100 });
+          gsap.set(q("[data-door-b]"), { yPercent: 100 });
+        } else {
+          gsap.set(q("[data-door-l]"), { xPercent: -100 });
+          gsap.set(q("[data-door-r]"), { xPercent: 100 });
+        }
         gsap.set(emblemRef.current, { scale: 1, opacity: 1 });
-        gsap.set(wordRef.current, { scale: 1, opacity: 1 });
+        gsap.set(q("[data-glow]"), { opacity: 1 });
+        gsap.set(q("[data-doors]"), { opacity: 0 });
+        onGateOpen?.();
         return;
       }
 
@@ -35,65 +46,89 @@ export function TempleGate({ emblemRef, wordRef }) {
       // for the emblem and wordmark to start growing, not the door's own start
       const HALF_OPEN = 2.1;
 
-      createScene(ref.current, "300%")
-        // 1. a low warm bloom in the seam — not a spotlight
-        .to(q("[data-glow]"), { opacity: 0.55, scale: 1.15, duration: 2.2, ease: "power2.in" }, 0)
-        // 2. the doors part
-        .to(q("[data-door-l]"), { xPercent: -100, duration: 3.2, ease: "power2.inOut" }, 0.5)
-        .to(q("[data-door-r]"), { xPercent: 100, duration: 3.2, ease: "power2.inOut" }, 0.5)
-        // 3. once the door is half open, the emblem grows out of it, small → full —
-        // the wordmark scales up in lockstep, reciprocal, same beat
+      createScene(ref.current, "300%", {
+        // fires exactly when this same pin releases — i.e. right as the
+        // emblem starts flying up into the header slot — and reverses if
+        // the user scrolls back up into the gate. The doors are long
+        // since off-screen by now, but hide them outright too, so there
+        // is no chance of that photo showing again while the logo flies —
+        // only the plain shine shows from here until the hero arrives.
+        onLeave: () => {
+          gsap.set(q("[data-doors]"), { opacity: 0 });
+          onGateOpen?.();
+        },
+        onEnterBack: () => {
+          gsap.set(q("[data-doors]"), { opacity: 1 });
+          onGateClose?.();
+        },
+      })
+        // 1. the backdrop rises behind the doors as they part
+        .to(q("[data-glow]"), { opacity: 1, duration: 2.2, ease: "power2.in" }, 0)
+        // 2. the doors part — sideways on desktop, top/bottom on mobile
+        .to(
+          q(mobile ? "[data-door-t]" : "[data-door-l]"),
+          mobile
+            ? { yPercent: -100, duration: 3.2, ease: "power2.inOut" }
+            : { xPercent: -100, duration: 3.2, ease: "power2.inOut" },
+          0.5
+        )
+        .to(
+          q(mobile ? "[data-door-b]" : "[data-door-r]"),
+          mobile
+            ? { yPercent: 100, duration: 3.2, ease: "power2.inOut" }
+            : { xPercent: 100, duration: 3.2, ease: "power2.inOut" },
+          0.5
+        )
+        // 3. once the door is half open, the emblem grows out of it, small → full
         .fromTo(
           emblemRef.current,
           { scale: 0.12, opacity: 0 },
           { scale: 1, opacity: 1, duration: 2.0, ease: "power2.out" },
           HALF_OPEN
         )
-        .fromTo(
-          wordRef.current,
-          { scale: 0.12, opacity: 0 },
-          { scale: 1, opacity: 1, duration: 2.0, ease: "power2.out" },
-          HALF_OPEN
-        )
-        .to(q("[data-em-ring]"), { rotate: 90, duration: 2.4, ease: "none" }, HALF_OPEN)
         .from(q("[data-tagline]"), { opacity: 0, y: 20, duration: 1.1 }, 3.4);
     },
-    { scope: ref, dependencies: [reduced] }
+    { scope: ref, dependencies: [reduced, mobile] }
   );
 
-  /** One photo, two halves — background-position keeps the carving continuous. */
-  const Door = ({ side }) => (
-    <div
-      {...{ [`data-door-${side}`]: true }}
-      className="relative h-full w-1/2 overflow-hidden will-change-transform"
-    >
+  /* One photo, two halves. Desktop splits left/right (each panel holds
+     the full image, shifted sideways, so the carving lines up across
+     the seam); mobile splits top/bottom the same way, rotated 90°, so
+     the top half lifts up and the bottom half drops away. */
+  const Door = ({ edge }) => {
+    const isTB = edge === "t" || edge === "b";
+    return (
       <div
-        className="absolute inset-0 bg-cover"
-        style={{
-          backgroundImage: `url(${
-            "https://images.unsplash.com/photo-" + IMAGES.door.file + "?auto=format&fit=crop&q=80&w=1600"
-          })`,
-          backgroundPosition: side === "l" ? "left center" : "right center",
-          backgroundSize: "200% 100%",
-        }}
-      />
-      {/* aged brass grade so the wood sits in the palette */}
-      <div
-        aria-hidden
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(53,10,8,0.55), rgba(7,5,4,0.72)), radial-gradient(80% 60% at 50% 40%, rgba(240,193,75,0.14), transparent 70%)",
-          mixBlendMode: "multiply",
-        }}
-      />
-      {/* the inner edge catches the light from the opening */}
-      <div
-        aria-hidden
-        className={`absolute top-0 bottom-0 w-px bg-gold/50 ${side === "l" ? "right-0" : "left-0"}`}
-      />
-    </div>
-  );
+        {...{ [`data-door-${edge}`]: true }}
+        className={`relative overflow-hidden will-change-transform ${isTB ? "h-1/2 w-full" : "h-full w-1/2"}`}
+      >
+        <div
+          className="absolute inset-0 bg-cover"
+          style={{
+            backgroundImage: `url(${doorFile})`,
+            backgroundPosition: isTB
+              ? edge === "t"
+                ? "center top"
+                : "center bottom"
+              : edge === "l"
+                ? "left center"
+                : "right center",
+            backgroundSize: isTB ? "100% 200%" : "200% 100%",
+          }}
+        />
+        {/* a faint warm grade so the photo sits in the palette */}
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(53,10,8,0.12), rgba(7,5,4,0.16)), radial-gradient(80% 60% at 50% 40%, rgba(240,193,75,0.08), transparent 70%)",
+            mixBlendMode: "multiply",
+          }}
+        />
+      </div>
+    );
+  };
 
   return (
     <section
@@ -105,18 +140,44 @@ export function TempleGate({ emblemRef, wordRef }) {
       <div
         data-glow
         aria-hidden
-        className="absolute h-[62vmin] w-[62vmin] scale-50 rounded-full opacity-0"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(240,193,75,0.34) 0%, rgba(216,100,30,0.18) 38%, transparent 72%)",
-          zIndex: "var(--z-atmosphere)",
-        }}
-      />
+        className="absolute inset-0 opacity-0"
+        style={{ zIndex: "var(--z-atmosphere)" }}
+      >
+        {/* a plain burnt-orange field with a diagonal sheen, rather than a photo */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(135deg, #5c2205 0%, #8e3606 28%, #c9752c 50%, #8e3606 72%, #5c2205 100%)",
+          }}
+        />
+        {/* warm glow on top, so it still reads as light */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(240,193,75,0.28) 0%, rgba(216,100,30,0.14) 38%, transparent 72%)",
+          }}
+        />
+      </div>
 
-      {/* the doors themselves */}
-      <div className="absolute inset-0 flex" style={{ zIndex: "var(--z-image)" }}>
-        <Door side="l" />
-        <Door side="r" />
+      {/* the doors themselves — side-by-side on desktop, stacked on mobile */}
+      <div
+        data-doors
+        className={`absolute inset-0 flex ${mobile ? "flex-col" : ""}`}
+        style={{ zIndex: "var(--z-image)" }}
+      >
+        {mobile ? (
+          <>
+            <Door edge="t" />
+            <Door edge="b" />
+          </>
+        ) : (
+          <>
+            <Door edge="l" />
+            <Door edge="r" />
+          </>
+        )}
       </div>
 
       <p

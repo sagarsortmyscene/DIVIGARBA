@@ -4,38 +4,29 @@ import gsap from "gsap";
 import { Media } from "../ui/Media";
 import { Lightbox } from "../ui/Lightbox";
 import { GALLERY, IMAGES, SIZES, unsplash } from "../../data/images";
-import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
-import { cx } from "../../lib/utils";
+import { useReducedMotion } from "../../hooks/useMediaQuery";
 
 /**
- * An accordion of panels: hover (or focus) one and it opens while the
- * rest give way. Slow and weighted — 1.05s on a long-tail ease, so it
- * feels like a heavy door rather than a UI toggle.
- *
- * The open/close is a CSS transition on flex-grow, not GSAP. Accordion
- * motion is a LAYOUT animation, and the browser's own transition path
- * handles that far better than a JS ticker writing flex values to six
- * elements every frame. GSAP is kept for the entrance, which animates
- * transform/opacity and belongs on the compositor.
- *
- * Column on mobile — flex-grow drives height there instead of width,
- * so the same accordion works with no second implementation.
+ * One row of plates, drifting left on a continuous loop — no hover,
+ * no click-to-open-a-row, it just runs. The row renders its shots
+ * twice back to back and the CSS animation slides it exactly one
+ * set-width, so the seam where it repeats is never visible. Click a
+ * plate to view it full screen.
  */
+const ROW = { shots: GALLERY, direction: "marquee-left", duration: 46 };
+
 export function Gallery() {
   const ref = useRef(null);
-  const [active, setActive] = useState(0);
   const [open, setOpen] = useState(null);
   const reduced = useReducedMotion();
-  const mobile = useIsMobile();
 
   useGSAP(
     () => {
       if (reduced) return;
-      gsap.from(ref.current.querySelectorAll("[data-panel]"), {
+      gsap.from(ref.current.querySelector("[data-row]"), {
         opacity: 0,
         y: 40,
         duration: 1.1,
-        stagger: 0.09,
         ease: "power3.out",
         scrollTrigger: { trigger: ref.current, start: "top 74%" },
       });
@@ -86,48 +77,31 @@ export function Gallery() {
           </div>
         </div>
 
-        <div
-          className="flex h-[74svh] flex-col gap-2 md:h-[68svh] md:flex-row md:gap-3"
-          onMouseLeave={() => !mobile && setActive(0)}
-        >
-          {GALLERY.map((shot, i) => {
-            const isOpen = active === i;
-
-            return (
+        <div data-row className="overflow-hidden">
+          <div
+            className="flex w-max gap-4 sm:gap-6"
+            style={
+              reduced ? undefined : { animation: `${ROW.direction} ${ROW.duration}s linear infinite` }
+            }
+          >
+            {[...ROW.shots, ...ROW.shots].map((shot, i) => (
               <button
-                key={shot.file}
-                data-panel
+                key={`${shot.file}-${i}`}
                 type="button"
-                aria-expanded={isOpen}
                 aria-label={`${shot.title} — ${shot.line}`}
-                onMouseEnter={() => !mobile && setActive(i)}
-                onFocus={() => setActive(i)}
-                onClick={() => (mobile && !isOpen ? setActive(i) : setOpen(shot))}
-                style={{ flexGrow: isOpen ? (mobile ? 4.2 : 4.6) : 1 }}
-                className={cx(
-                  "frame-ancient frame-pips group relative min-h-0 basis-0 overflow-hidden",
-                  "bg-maroon text-left will-change-[flex-grow]",
-                  "transition-[flex-grow] duration-[1050ms] ease-[cubic-bezier(.22,1,.36,1)]",
-                  "focus-visible:outline-2 focus-visible:outline-mukut"
-                )}
+                tabIndex={i < ROW.shots.length ? undefined : -1}
+                onClick={() => setOpen(shot)}
+                className="frame-ancient frame-pips group relative h-[46svh] w-[70vw] shrink-0 overflow-hidden bg-maroon text-left sm:h-[58svh] sm:w-[30vw] md:w-[24vw]"
               >
-                {/* the crop pans as the panel opens, so a collapsed strip
-                    still shows something worth looking at */}
-                <div
-                  className={cx(
-                    "absolute inset-0 transition-transform duration-[1400ms] ease-[cubic-bezier(.22,1,.36,1)]",
-                    isOpen ? "scale-100" : "scale-[1.35]"
-                  )}
-                >
-                  <Media image={shot} sizes={SIZES.card} />
-                </div>
+                <Media
+                  image={shot}
+                  sizes={SIZES.card}
+                  className="scale-[1.08] transition-transform duration-700 ease-out group-hover:scale-100"
+                />
 
                 <div
                   aria-hidden
-                  className={cx(
-                    "pointer-events-none absolute inset-0 transition-opacity duration-1000",
-                    isOpen ? "opacity-70" : "opacity-100"
-                  )}
+                  className="pointer-events-none absolute inset-0"
                   style={{
                     background:
                       "linear-gradient(180deg, rgba(53,10,8,0.30), transparent 34%, rgba(7,5,4,0.90))",
@@ -138,46 +112,21 @@ export function Gallery() {
                   {shot.n}
                 </span>
 
-                {/* Collapsed: the title runs up the panel. Opened: it
-                    lies down and the line joins it. */}
                 <div className="absolute inset-x-4 bottom-4">
-                  <h3
-                    className={cx(
-                      "display-type whitespace-nowrap text-ivory transition-all duration-[900ms] ease-[cubic-bezier(.22,1,.36,1)]",
-                      isOpen
-                        ? "text-2xl [writing-mode:horizontal-tb] md:rotate-0"
-                        : "text-lg md:rotate-180 md:[writing-mode:vertical-rl]"
-                    )}
-                  >
-                    {shot.title}
-                  </h3>
-
+                  <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
                   <p
-                    className={cx(
-                      "max-w-[34ch] text-xs leading-snug text-ivory/60 transition-all duration-700",
-                      isOpen ? "mt-1.5 opacity-100" : "pointer-events-none h-0 opacity-0"
-                    )}
+                    className="mt-1.5 max-w-[34ch] text-xs leading-snug text-ivory/60"
+                    style={{ fontFamily: "Poppins, sans-serif" }}
                   >
                     {shot.line}
                   </p>
-
-                  <span
-                    className={cx(
-                      "label mt-3 inline-block text-mukut/80 transition-opacity duration-700",
-                      isOpen ? "opacity-100 delay-200" : "opacity-0"
-                    )}
-                  >
-                    View →
-                  </span>
                 </div>
               </button>
-            );
-          })}
+            ))}
+          </div>
         </div>
 
-        <p className="mt-4 text-center text-xs text-ivory/30">
-          {mobile ? "Tap to open a night, tap again to view it full screen." : "Hover to open a night. Click to view it full screen."}
-        </p>
+        <p className="mt-4 text-center text-xs text-ivory/30">Click a night to view it full screen.</p>
       </div>
 
       {open && <Lightbox shot={open} onClose={() => setOpen(null)} />}

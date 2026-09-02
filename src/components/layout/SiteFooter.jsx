@@ -1,6 +1,5 @@
 import { Phone, Mail, AtSign, MapPin } from "lucide-react";
 import { EVENT_CONFIG } from "../../data/event";
-import { CREDITS } from "../../data/images";
 
 export function SiteFooter() {
   const {
@@ -28,7 +27,11 @@ export function SiteFooter() {
       <div className="divider-carved mb-10"><span className="h-1.5 w-1.5 rotate-45 bg-mukut/70" /></div>
 
       <div className="mx-auto max-w-5xl">
-        <p className="display-type text-center text-3xl text-ivory">{brandLine}</p>
+        <img
+          src="/assets/logo-divi.png"
+          alt={brandLine}
+          className="mx-auto h-24 w-auto object-contain sm:h-32"
+        />
 
         <ul className="mt-7 grid gap-px border border-antique/15 bg-antique/15 sm:grid-cols-2 lg:grid-cols-4">
           {contacts.map(({ Icon, label, href }) => (
@@ -73,15 +76,7 @@ export function SiteFooter() {
         </p>
 
         <p className="mt-3 text-center text-xs text-ivory/20">
-          Photography via Unsplash —{" "}
-          {CREDITS.map((c, i) => (
-            <span key={c.credit}>
-              <a href={c.link} target="_blank" rel="noreferrer noopener" className="hover:text-ivory/50">
-                {c.credit}
-              </a>
-              {i < CREDITS.length - 1 ? ", " : ""}
-            </span>
-          ))}
+          This photography is from live events only. © 2026 {brandLine}.
         </p>
       </div>
     </footer>
