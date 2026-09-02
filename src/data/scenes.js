@@ -16,8 +16,8 @@ export const SCENES = [
     heading: "She is installed at dusk.",
     body: "Marigold, flame and cloth, laid out before the first beat of the dhol.",
     image: {
-      file: "/assets/img-1.JPG",
-      fileMobile: "/assets/img1-mobile.JPG",
+      file: "/assets/img-1.jpg",
+      fileMobile: "/assets/img1-mobile.jpg",
       alt: "A flower-ringed altar beneath a canopy of fabric petals, lit at dusk",
       focal: "center 40%",
     },
@@ -32,8 +32,8 @@ export const SCENES = [
     heading: "The dhol calls first.",
     body: "Before the feet move, the drum does. It reaches you before you reach the ground.",
     image: {
-      file: "/assets/img-2.JPG",
-      fileMobile: "/assets/img2-mobile.JPG",
+      file: "/assets/img-2.jpg",
+      fileMobile: "/assets/img2-mobile.jpg",
       alt: "Dhol and shehnai players performing as the crowd dances behind them",
       focal: "center 46%",
     },
@@ -48,8 +48,10 @@ export const SCENES = [
     heading: "Everyone you know is here.",
     body: "Old friends, new outfits, the same nine nights.",
     image: {
-      file: "/assets/img-3.JPG",
-      fileMobile: "/assets/img3-mobile.JPG",
+      file: "/assets/img-3.jpg",
+      // no mobile crop was uploaded for this one — falls back to the
+      // desktop photo until img3-mobile.jpg is added to public/assets
+      fileMobile: "/assets/img-3.jpg",
       alt: "A group of friends in festive attire smiling together at the ground",
       focal: "center 30%",
     },
@@ -64,8 +66,8 @@ export const SCENES = [
     heading: "Ten thousand people.",
     body: "One direction of travel, the whole night through.",
     image: {
-      file: "/assets/img-4.JPG",
-      fileMobile: "/assets/img4-mobile.JPG",
+      file: "/assets/img-4.jpg",
+      fileMobile: "/assets/img4-mobile.jpg",
       alt: "Young dhol players leading a procession through a packed night crowd",
       focal: "center 48%",
     },
