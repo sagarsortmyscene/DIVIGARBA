@@ -1,9 +1,23 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { IMAGES } from "../../data/images";
+import { IMAGES, GALLERY } from "../../data/images";
 import { createScene } from "../../lib/animations";
 import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
+
+/* Six gallery shots, scattered around the emblem like snapshots
+   stuck on a wall — each its own position and tilt. The tilt is
+   applied by the GSAP tween below (as `rotation`), not a Tailwind
+   class: GSAP writes `transform` directly, which would otherwise
+   clobber a class-based rotate on the same element. */
+const SCATTER = [
+  { shot: GALLERY[0], style: "top-[10%] left-[5%] sm:left-[9%]", rotate: -8 },
+  { shot: GALLERY[2], style: "top-[9%] right-[5%] sm:right-[9%]", rotate: 6 },
+  { shot: GALLERY[4], style: "bottom-[13%] left-[7%] sm:left-[11%]", rotate: 5 },
+  { shot: GALLERY[6], style: "bottom-[9%] right-[6%] sm:right-[10%]", rotate: -7 },
+  { shot: GALLERY[1], style: "top-[40%] left-[1%] sm:left-[3%]", rotate: 4 },
+  { shot: GALLERY[3], style: "top-[42%] right-[1%] sm:right-[3%]", rotate: -5 },
+];
 
 /**
  * THE GATE — the whole opening of the site, on one pinned timeline.
@@ -38,6 +52,7 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         gsap.set(emblemRef.current, { scale: 1, opacity: 1 });
         gsap.set(q("[data-glow]"), { opacity: 1 });
         gsap.set(q("[data-doors]"), { opacity: 0 });
+        gsap.set(q("[data-scatter]"), { opacity: 0 });
         onGateOpen?.();
         return;
       }
@@ -54,11 +69,12 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         // is no chance of that photo showing again while the logo flies —
         // only the plain shine shows from here until the hero arrives.
         onLeave: () => {
-          gsap.set(q("[data-doors]"), { opacity: 0 });
+          gsap.set(q("[data-doors], [data-scatter]"), { opacity: 0 });
           onGateOpen?.();
         },
         onEnterBack: () => {
           gsap.set(q("[data-doors]"), { opacity: 1 });
+          gsap.set(q("[data-scatter]"), { opacity: 1 });
           onGateClose?.();
         },
       })
@@ -85,6 +101,21 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
           { scale: 0.12, opacity: 0 },
           { scale: 1, opacity: 1, duration: 2.0, ease: "power2.out" },
           HALF_OPEN
+        )
+        // 4. the scattered snapshots land around it, one after another
+        .fromTo(
+          q("[data-scatter]"),
+          { opacity: 0, scale: 0.7, y: 24, rotation: 0 },
+          {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            rotation: (i) => SCATTER[i].rotate,
+            duration: 1.1,
+            stagger: 0.15,
+            ease: "back.out(1.6)",
+          },
+          HALF_OPEN + 0.6
         )
         .from(q("[data-tagline]"), { opacity: 0, y: 20, duration: 1.1 }, 3.4);
     },
@@ -116,16 +147,6 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
             backgroundSize: isTB ? "100% 200%" : "200% 100%",
           }}
         />
-        {/* a faint warm grade so the photo sits in the palette */}
-        <div
-          aria-hidden
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(180deg, rgba(53,10,8,0.12), rgba(7,5,4,0.16)), radial-gradient(80% 60% at 50% 40%, rgba(240,193,75,0.08), transparent 70%)",
-            mixBlendMode: "multiply",
-          }}
-        />
       </div>
     );
   };
@@ -140,26 +161,9 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
       <div
         data-glow
         aria-hidden
-        className="absolute inset-0 opacity-0"
+        className="absolute inset-0 bg-white opacity-0"
         style={{ zIndex: "var(--z-atmosphere)" }}
-      >
-        {/* a plain burnt-orange field with a diagonal sheen, rather than a photo */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(135deg, #5c2205 0%, #8e3606 28%, #c9752c 50%, #8e3606 72%, #5c2205 100%)",
-          }}
-        />
-        {/* warm glow on top, so it still reads as light */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "radial-gradient(circle, rgba(240,193,75,0.28) 0%, rgba(216,100,30,0.14) 38%, transparent 72%)",
-          }}
-        />
-      </div>
+      />
 
       {/* the doors themselves — side-by-side on desktop, stacked on mobile */}
       <div
@@ -180,6 +184,24 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         )}
       </div>
 
+      {/* snapshots stuck around the emblem, at their own angles */}
+      {SCATTER.map(({ shot, style }) => (
+        <div
+          key={shot.file}
+          data-scatter
+          aria-hidden
+          className={`absolute h-32 w-28 bg-ivory p-1.5 shadow-[0_10px_28px_rgba(0,0,0,0.35)] opacity-0 sm:h-44 sm:w-36 md:h-56 md:w-44 ${style}`}
+          style={{ zIndex: "var(--z-content)" }}
+        >
+          <img
+            src={shot.file}
+            alt=""
+            className="h-full w-full object-cover"
+            style={{ objectPosition: shot.focal || "center" }}
+          />
+        </div>
+      ))}
+
       <p
         data-tagline
         className="display-type absolute bottom-10 px-6 text-center text-xl text-ivory/70 sm:text-2xl"
@@ -188,7 +210,6 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         Nine nights. One circle.
       </p>
 
-      <div className="vignette" style={{ zIndex: "var(--z-grade)" }} />
     </section>
   );
 }

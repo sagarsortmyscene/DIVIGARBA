@@ -1,7 +1,6 @@
 import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { EVENT_CONFIG } from "../../data/event";
 
 /**
@@ -14,10 +13,6 @@ export function SiteHeader({ slotRef, ctaVisible }) {
 
   useGSAP(
     () => {
-      ScrollTrigger.create({
-        start: "top -80",
-        onUpdate: (s) => ref.current?.classList.toggle("is-stuck", s.scroll() > 80),
-      });
       gsap.from(ref.current, { opacity: 0, y: -14, duration: 1, delay: 0.6, ease: "power3.out" });
     },
     { scope: ref }
@@ -26,7 +21,7 @@ export function SiteHeader({ slotRef, ctaVisible }) {
   return (
     <header
       ref={ref}
-      className="fixed top-0 left-0 flex w-full items-center justify-between px-5 py-4 transition-colors duration-500 sm:px-9 [&.is-stuck]:bg-gradient-to-b [&.is-stuck]:from-obsidian/95 [&.is-stuck]:to-transparent"
+      className="fixed top-0 left-0 flex w-full items-center justify-between px-5 py-4 transition-colors duration-500 sm:px-9"
       style={{ zIndex: "var(--z-nav)" }}
     >
       {/* the emblem lands here — FlyingEmblem docks it; this span just
