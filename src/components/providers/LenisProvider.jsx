@@ -7,6 +7,14 @@ import { LenisContext } from "./LenisContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* On a real phone, scrolling collapses/expands the browser's address
+   bar, which fires a native `resize` — Chrome DevTools' mobile
+   emulator never triggers this, which is why pinned scenes (the gate)
+   can look fine there but jump straight to a later state on an actual
+   device. This tells ScrollTrigger to ignore resizes caused by just
+   the address bar, instead of re-measuring every pin mid-scroll. */
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 /**
  * The single smooth-scroll instance for the whole app.
  * GSAP's ticker is the only RAF loop — Lenis is driven from it rather
