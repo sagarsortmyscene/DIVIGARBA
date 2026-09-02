@@ -2,38 +2,32 @@ import { useRef, useLayoutEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Emblem } from "../ui/Emblem";
-import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
+import { useReducedMotion } from "../../hooks/useMediaQuery";
 
 /**
- * The emblem lives in ONE fixed layer for the whole page. The gate
- * scales it up; this component then flies it into the header slot as
- * you scroll past.
+ * The emblem lives in ONE fixed layer for the whole page. It sits
+ * large and centred (behind the splash) until `ready` flips true —
+ * the moment the splash finishes — then flies up into the header
+ * slot once. After that it just stays docked, re-snapping on resize.
  *
  * It measures the real header slot rather than using magic offsets,
- * so it lands correctly at any viewport and re-measures on resize.
+ * so it lands correctly at any viewport.
  */
-export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
+export function FlyingEmblem({ emblemRef, slotRef, ready }) {
   const wrapRef = useRef(null);
   const reduced = useReducedMotion();
-  const mobile = useIsMobile();
 
   useLayoutEffect(() => {
-    // start centred, at the size the gate animation expects
     gsap.set(wrapRef.current, { xPercent: -50, yPercent: -50, top: "50%", left: "50%" });
   }, []);
 
-  const { contextSafe } = useGSAP(
-    () => {
-      if (reduced) {
-        gsap.set(emblemRef.current, { scale: 1, opacity: 1 });
-      }
-    },
-    { dependencies: [reduced, mobile] }
-  );
+  useGSAP(() => {
+    gsap.set(emblemRef.current, { scale: 1, opacity: 1 });
+  }, []);
 
   useGSAP(
     () => {
-      if (reduced) return;
+      if (!ready) return;
 
       /** Where the header slot is, measured live. */
       const target = () => {
@@ -47,29 +41,19 @@ export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
         };
       };
 
-      // deferred a frame: TempleGate's pin (created in a sibling mounted
-      // after this one, so its ref is populated in time) must exist
-      // before this trigger is created — see the note in App.jsx
-      const raf = requestAnimationFrame(
-        contextSafe(() => {
-          gsap.to(wrapRef.current, {
-            ease: "none",
-            scrollTrigger: {
-              trigger: gateSelector,
-              start: "bottom 92%",
-              end: "bottom 22%",
-              scrub: 1,
-              invalidateOnRefresh: true,
-            },
-            x: () => target().x,
-            y: () => target().y,
-            scale: () => target().scale,
-          });
-        })
-      );
-      return () => cancelAnimationFrame(raf);
+      const dock = () => gsap.set(wrapRef.current, target());
+
+      if (reduced) {
+        dock();
+      } else {
+        gsap.to(wrapRef.current, { ...target(), duration: 1.3, ease: "power3.inOut" });
+      }
+
+      // stay aligned with the header slot if the viewport resizes afterward
+      window.addEventListener("resize", dock);
+      return () => window.removeEventListener("resize", dock);
     },
-    { dependencies: [reduced, mobile] }
+    { dependencies: [ready, reduced] }
   );
 
   return (
@@ -78,8 +62,7 @@ export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
       className="pointer-events-none fixed h-[min(68vmin,520px)] w-[min(68vmin,520px)] origin-center"
       style={{ zIndex: "var(--z-nav)" }}
     >
-      {/* hidden at gate-open scale from first paint — no flash before GSAP attaches */}
-      <Emblem ref={emblemRef} className="h-full w-full scale-[0.12] opacity-0" />
+      <Emblem ref={emblemRef} className="h-full w-full opacity-0" />
     </div>
   );
 }

@@ -42,6 +42,11 @@ export const SIZES = {
   card: "(max-width: 768px) 80vw, 32vw",
 };
 
+/* ---------- Brand ---------- */
+export const BRAND = {
+  logo: "/assets/logo-divi.png",
+};
+
 /* ---------- The gate ---------- */
 export const IMAGES = {
   /* The gate's backdrop — Maa Durga's gaze, split across the two
