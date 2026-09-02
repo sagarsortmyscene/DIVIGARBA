@@ -122,10 +122,14 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
     { scope: ref, dependencies: [reduced, mobile] }
   );
 
-  /* One photo, two halves. Desktop splits left/right (each panel holds
-     the full image, shifted sideways, so the carving lines up across
-     the seam); mobile splits top/bottom the same way, rotated 90°, so
-     the top half lifts up and the bottom half drops away. */
+  /* One photo, two halves. Each panel's inner layer is sized to the
+     TRUE full canvas (100vw × 100svh — the whole un-split image),
+     offset by exactly half so the two panels align at the seam, and
+     background-size:cover is computed against that real canvas size.
+     That's what makes it responsive: a fixed "200%/100%" split (the
+     old approach) stretches the photo to whatever the panel's own
+     box ratio happens to be at a given viewport, distorting it
+     differently on every screen size instead of just cropping it. */
   const Door = ({ edge }) => {
     const isTB = edge === "t" || edge === "b";
     return (
@@ -134,18 +138,24 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         className={`relative overflow-hidden will-change-transform ${isTB ? "h-1/2 w-full" : "h-full w-1/2"}`}
       >
         <div
-          className="absolute inset-0 bg-cover"
-          style={{
-            backgroundImage: `url(${doorFile})`,
-            backgroundPosition: isTB
-              ? edge === "t"
-                ? "center top"
-                : "center bottom"
-              : edge === "l"
-                ? "left center"
-                : "right center",
-            backgroundSize: isTB ? "100% 200%" : "200% 100%",
-          }}
+          className="absolute bg-cover bg-center"
+          style={
+            isTB
+              ? {
+                  backgroundImage: `url(${doorFile})`,
+                  left: 0,
+                  top: edge === "t" ? 0 : "-50svh",
+                  width: "100%",
+                  height: "100svh",
+                }
+              : {
+                  backgroundImage: `url(${doorFile})`,
+                  top: 0,
+                  left: edge === "l" ? 0 : "-50vw",
+                  width: "100vw",
+                  height: "100%",
+                }
+          }
         />
       </div>
     );
