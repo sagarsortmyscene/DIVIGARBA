@@ -145,6 +145,27 @@
    Composed here rather than repeated as long class strings.
    ============================================================ */
 
+/* The gate's pinned section needs a reliable height no matter what —
+   everything inside it is absolutely positioned, so if `min-height`
+   ever resolves to nothing, the section collapses toward 0px and the
+   pinned scroll distance (a % of its own height) collapses with it,
+   completing the whole gate animation in a single tiny scroll tick.
+   `@supports` gates the svh upgrade so a minifier can't collapse the
+   two declarations into one and silently drop the fallback the way it
+   would with two plain `min-height` lines in the same rule (tried
+   first — the build's CSS minifier deduped them, keeping only the
+   later one). A Tailwind `min-h-screen min-h-[100svh]` pairing was
+   tried before that; Tailwind v4 emits the arbitrary value first,
+   so the cascade order wasn't guaranteed either. */
+.gate-min-h {
+  min-height: 100vh;
+}
+@supports (min-height: 100svh) {
+  .gate-min-h {
+    min-height: 100svh;
+  }
+}
+
 /* The gallery's marquee row — renders its shots twice back to back
    and slides exactly one set-width, so the loop point is invisible. */
 @keyframes marquee-left {

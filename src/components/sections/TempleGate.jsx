@@ -154,7 +154,7 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
     <section
       ref={ref}
       id="gate"
-      className="relative grid min-h-[100svh] place-items-center overflow-hidden"
+      className="gate-min-h relative grid place-items-center overflow-hidden"
       aria-label="The gate opens"
     >
       <div
