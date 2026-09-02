@@ -1,8 +1,6 @@
 /* Change the event here. No component holds a hard-coded date. */
 export const EVENT_CONFIG = {
   name: "Divi Garba",
-  nameGu: "દિવી ગરબા",
-  tagline: "Nine nights. One circle.",
   dates: "11 — 20 October 2026",
   location: "Ahmedabad",
   gateEntry: "12:00 AM (00:00)",

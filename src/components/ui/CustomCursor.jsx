@@ -20,12 +20,19 @@ export function CustomCursor() {
     if (touch || reduced) return;
     const el = ref.current;
     const set = { x: gsap.quickTo(el, "x", { duration: 0.35, ease: "power3" }), y: gsap.quickTo(el, "y", { duration: 0.35, ease: "power3" }) };
+    // only the position needs to update every single move — the size/
+    // opacity tween is expensive to recreate, so it only reruns when the
+    // hovered element's cursor state actually changes (was firing on
+    // every pointermove regardless, which is most of them on a 120Hz mouse)
+    let lastKey = null;
 
     const onMove = (e) => {
       set.x(e.clientX);
       set.y(e.clientY);
       const hit = e.target.closest("[data-cursor], a, button");
       const key = hit?.dataset?.cursor || (hit ? "link" : "default");
+      if (key === lastKey) return;
+      lastKey = key;
       gsap.to(el, { ...(STATES[key] || STATES.default), duration: 0.4, ease: "power3.out" });
     };
 

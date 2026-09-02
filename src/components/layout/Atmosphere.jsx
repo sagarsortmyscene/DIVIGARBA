@@ -27,6 +27,11 @@ export function Atmosphere() {
         scrollTrigger: { trigger: document.documentElement, start: "top top", end: "bottom bottom", scrub: true },
       });
 
+      // On mobile these are a permanent, always-running cost (~20 infinite
+      // tweens ticking forever on every page) for an effect that's barely
+      // visible at that size — leave them as static specks there instead.
+      if (mobile) return;
+
       gsap.utils.toArray(ref.current.querySelectorAll("[data-ember]")).forEach((e, i) => {
         gsap.to(e, {
           y: `random(-${140 + i * 10}, -${60 + i * 10})`,
@@ -40,10 +45,10 @@ export function Atmosphere() {
         });
       });
     },
-    { scope: ref, dependencies: [reduced] }
+    { scope: ref, dependencies: [reduced, mobile] }
   );
 
-  const embers = Array.from({ length: mobile ? 10 : 22 });
+  const embers = Array.from({ length: mobile ? 8 : 22 });
 
   return (
     <div
