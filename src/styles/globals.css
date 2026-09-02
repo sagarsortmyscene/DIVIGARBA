@@ -39,14 +39,13 @@
   --color-gold: #edc766;
   --color-ivory: #f4e8d0;
 
-  /* --- TYPE --- */
-  /* "Poppins" sits right after Sregs Serif: the trial font's
+  /* --- TYPE --- Two fonts on this site, full stop: Sregs Serif and
+     Poppins. "Poppins" sits right after Sregs Serif: the trial font's
      unicode-range above excludes digits, so numbers cascade straight
-     to Poppins (which has real numerals) instead of the older
-     fallbacks — everything else still renders in Sregs Serif. */
-  --font-display: "Sregs Serif", "Poppins", "Cormorant Garamond", Georgia, serif;
-  --font-deva: "Tiro Devanagari Hindi", serif;
-  --font-ui: "Sregs Serif", "Poppins", "Manrope", system-ui, sans-serif;
+     to Poppins (which has real numerals) instead of rendering as its
+     "Sregs" watermark — everything else still renders in Sregs Serif. */
+  --font-display: "Sregs Serif", "Poppins", sans-serif;
+  --font-ui: "Poppins", "Sregs Serif", sans-serif;
 
   --text-hero: clamp(4rem, 11vw, 12rem);
   --text-display: clamp(3rem, 7vw, 8rem);
