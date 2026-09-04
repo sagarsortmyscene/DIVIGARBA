@@ -24,3 +24,16 @@ export function useMediaQuery(query) {
 export const useIsMobile = () => useMediaQuery("(max-width: 768px)");
 export const useIsTouch = () => useMediaQuery("(hover: none), (pointer: coarse)");
 export const useReducedMotion = () => useMediaQuery("(prefers-reduced-motion: reduce)");
+
+/** The live viewport width — for picking between a handful of
+ *  exact-width creatives, where a boolean breakpoint isn't enough. */
+export function useViewportWidth() {
+  const subscribe = useCallback((onChange) => {
+    window.addEventListener("resize", onChange);
+    return () => window.removeEventListener("resize", onChange);
+  }, []);
+
+  const getSnapshot = useCallback(() => window.innerWidth, []);
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => 0);
+}

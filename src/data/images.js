@@ -53,7 +53,10 @@ export const BACKGROUNDS = {
 
 /* ---------- The gate + the canvas behind it ---------- */
 export const IMAGES = {
-  /* The gate. Two crops: left/right on desktop, top/bottom on a phone. */
+  /* The gate. Left/right on desktop; on a phone, one of four crops
+     purpose-made for the exact device widths in `DOOR_MOBILE_CROPS`
+     below, picked by TempleGate at render time. `fileMobile` is the
+     fallback for any mobile width none of those four crops covers. */
   door: {
     file:       "/assets/gate-background.jpg",
     fileMobile: "/assets/gate-mobile-background.jpg",
@@ -81,6 +84,19 @@ export const IMAGES = {
     focal: "center 45%",
   },
 };
+
+/* ---------- Gate: exact-width mobile crops ----------
+   Four creatives, each composed for one specific device width rather
+   than one crop stretched/squeezed to fit all of them. Sorted by
+   width so TempleGate can pick the first one the viewport is at
+   least as wide as, falling back to IMAGES.door.fileMobile below
+   360px or above 414px (still under the sm breakpoint). */
+export const DOOR_MOBILE_CROPS = [
+  { minWidth: 414, file: "/assets/gate-mobile-414x896.jpg" },
+  { minWidth: 412, file: "/assets/gate-mobile-412x915.jpg" },
+  { minWidth: 390, file: "/assets/gate-mobile-390x844.jpg" },
+  { minWidth: 360, file: "/assets/gate-mobile-360x800.jpg" },
+];
 
 /* ---------- Gallery: your own photographs ---------- */
 export const GALLERY = [

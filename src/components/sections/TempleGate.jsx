@@ -2,9 +2,16 @@ import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { IMAGES, GALLERY } from "../../data/images";
+import { IMAGES, GALLERY, DOOR_MOBILE_CROPS } from "../../data/images";
 import { createScene } from "../../lib/animations";
-import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
+import { useReducedMotion, useIsMobile, useViewportWidth } from "../../hooks/useMediaQuery";
+
+/** The exact-width crop for this viewport, or the generic mobile
+ *  background if none of the four purpose-made crops fit. */
+function pickDoorMobileFile(width) {
+  const match = DOOR_MOBILE_CROPS.find((c) => width >= c.minWidth);
+  return match ? match.file : IMAGES.door.fileMobile;
+}
 
 /* Snapshots scattered around the emblem.
    `at` carries responsive position classes; `rotate` is applied by GSAP
@@ -42,7 +49,8 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
   const ref = useRef(null);
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
-  const doorSrc  = mobile ? IMAGES.door.fileMobile : IMAGES.door.file;
+  const viewportWidth = useViewportWidth();
+  const doorSrc  = mobile ? pickDoorMobileFile(viewportWidth) : IMAGES.door.file;
   const doorFocal = mobile ? IMAGES.door.focalMobile : IMAGES.door.focal;
 
   useGSAP(
