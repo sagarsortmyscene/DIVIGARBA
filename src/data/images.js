@@ -3,36 +3,51 @@
    Every path below points at a file that exists in public/assets.
    ============================================================ */
 
-/** Local assets need no transform — this keeps the <Media> API unchanged. */
-export const unsplash = (file) => file;
-export const unsplashSrcSet = () => undefined;
-
-export const SIZES = {
-  full:     "100vw",
-  half:     "(max-width: 1024px) 100vw, 50vw",
-  chapter:  "(max-width: 1024px) 100vw, 58vw",
-  portrait: "(max-width: 768px) 90vw, 46vw",
-  card:     "(max-width: 640px) 92vw, (max-width: 1024px) 46vw, 30vw",
-};
-
 /* ---------- Brand ---------- */
 export const BRAND = {
-  /* the gold logotype on transparent — header, gate and legal pages */
+  /* the gold logotype on transparent — legal pages and the footer */
   logo: "/assets/logo-divi.png",
 };
 
-/* ---------- The gate + the canvas behind it ---------- */
+/* ---------- Images, by the job each one does ---------- */
 export const IMAGES = {
-  /* The gate. Left/right on desktop; on a phone, one of four crops
-     purpose-made for the exact device widths in `DOOR_MOBILE_CROPS`
-     below, picked by TempleGate at render time. `fileMobile` is the
-     fallback for any mobile width none of those four crops covers. */
-  door: {
-    file:       "/assets/gate-background.jpg",      // 1600x900, ratio 1.778
-    fileMobile: "/assets/gate-mobile-background.jpg",
-    alt: "Maa Durga — the gate",
-    focal: "center center",
-    focalMobile: "center center",
+  /* The book's cover — the first page of the hero flipbook.
+     1875x2500, so ratio 0.750, which is exactly the 900x1200 page it
+     sits on. That is why it is shown with object-contain and still
+     fills the page corner to corner: there is no letterbox to leave,
+     because the shapes match. Change the page ratio in GalleryFlip
+     and this stops being true. */
+  cover: {
+    file: "/assets/divibg-mobile.jpg",
+    alt: "Divi Garba — Navratri 2026",
+  },
+
+  /* The book's second page — the first thing on show once the cover
+     opens. 414x896, so ratio 0.462 against a 0.75 page: it is a
+     phone-shaped crop left over from the temple gate, and it cannot
+     fill this page without either bars or a heavy crop. GalleryFlip
+     covers it and pins it to the top, losing 38% of its height. A
+     900x1200 export of this artwork would drop that compromise. */
+  opening: {
+    file: "/assets/gate-mobile-414x896.jpg",
+    alt: "Divi Garba — the gate",
+  },
+
+  /* The temple bells hung at the top of the hero, once each side.
+     640x640 and a genuine RGBA cut-out — 85.6% of it is fully
+     transparent — so it drops onto the gradient with no mask and no
+     matte behind it, unlike the couple photo that used to sit there. */
+  bell: {
+    file: "/assets/bell.png",
+    alt: "",
+  },
+
+  /* The ornament that drifts behind the home hero, twice — low-left
+     and high-right. A genuine 626x626 RGBA PNG, so it needs no mask: the transparency does the work and it
+     sits over the gradient cleanly at low opacity. */
+  vector: {
+    file: "/assets/vector.png",
+    alt: "",
   },
 
   /* The aged-canvas texture behind the gallery panels. */
@@ -42,40 +57,6 @@ export const IMAGES = {
     focal: "center 34%",
   },
 };
-
-/* ---------- Gate: desktop ----------
-   One supplied creative, 1600x900 (16:9), shown with object-cover.
-
-   Worth knowing: a real desktop viewport is rarely 16:9, because
-   browser chrome takes ~110px of height — most end up WIDER
-   (1920x1080 -> 1.98, 1366x768 -> 2.08) and some TALLER (1024x768 ->
-   1.56). Cover therefore crops whichever axis is in surplus, and the
-   "Event by panchatva" mark sits only 2.5% in from the left and 4.4%
-   down from the top, so it is the first thing to go on the shapes
-   furthest from 16:9. Supplying extra crops here — the way the mobile
-   ones below are cut per handset — is what would fix that. */
-export const DOOR_DESKTOP_CROPS = [
-  { w: 1600, h: 900, file: "/assets/gate-background.jpg" },
-];
-
-/* ---------- Gate: mobile crops ----------
-   Four creatives, each composed for a specific handset rather than one
-   crop stretched to fit all of them. TempleGate picks whichever one's
-   shape is closest to the actual viewport, because matching on width
-   alone hands a phone a crop that doesn't fit it: 390x844 and 414x896
-   are the SAME shape (0.462), as are 360x800 and 412x915 (0.450).
-
-   `w`/`h` are each file's real pixel size, not what its name claims.
-   Note gate-mobile-390x844.jpg is genuinely 390x915 on disk — it was
-   exported at the wrong height, so it fits no 390x844 screen. Listed
-   honestly here so the picker doesn't choose it for one; re-export it
-   at 390x844 and this entry just starts matching those phones again. */
-export const DOOR_MOBILE_CROPS = [
-  { w: 414, h: 896, file: "/assets/gate-mobile-414x896.jpg" },
-  { w: 412, h: 915, file: "/assets/gate-mobile-412x915.jpg" },
-  { w: 390, h: 915, file: "/assets/gate-mobile-390x844.jpg" },
-  { w: 360, h: 800, file: "/assets/gate-mobile-360x800.jpg" },
-];
 
 /* ---------- Gallery: your own photographs ---------- */
 export const GALLERY = [

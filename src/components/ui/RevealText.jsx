@@ -27,7 +27,7 @@ export function RevealText({ lines, as: Tag = "h2", className, lineClassName, de
   return (
     <Tag ref={ref} className={className}>
       {lines.map((line, i) => (
-        <span key={i} className="line-clip">
+        <span key={i} className="block overflow-hidden">
           <span data-line className={cx("block", lineClassName)}>
             {line}
           </span>

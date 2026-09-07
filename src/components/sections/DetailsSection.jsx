@@ -17,7 +17,7 @@ export function DetailsSection() {
         style={{ zIndex: "var(--z-content)" }}
       >
         <ScrollReveal className="mt-0">
-          <p className="display-type gilt text-[clamp(1.9rem,5vw,3.6rem)] leading-none">{dates}</p>
+          <p className="display-type bg-[linear-gradient(100deg,var(--color-ivory)_0%,var(--color-gold)_45%,var(--color-antique)_100%)] bg-clip-text text-[clamp(1.9rem,5vw,3.6rem)] leading-none text-transparent">{dates}</p>
           <p className="label mt-3 text-antique">{location}</p>
         </ScrollReveal>
 

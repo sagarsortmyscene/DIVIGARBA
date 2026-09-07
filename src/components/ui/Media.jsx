@@ -1,23 +1,19 @@
-import { unsplash, unsplashSrcSet, SIZES } from "../../data/images";
 import { cx } from "../../lib/utils";
 
 /**
- * The single image primitive. Every photograph on the site goes
- * through here, so responsive srcset, focal point and lazy-loading
- * behaviour are defined once.
+ * The single image primitive. Every photograph on the site goes through
+ * here, so focal point and loading behaviour are defined once.
  *
- * `image.file` is either an Unsplash photo id (built into a CDN URL
- * with a srcset) or a local path starting with "/" (our own uploaded
- * photos — served as-is, no CDN to derive a srcset from).
+ * It used to branch on whether `image.file` was an Unsplash id or a
+ * local path, building a CDN URL and a srcset for the former. Every
+ * asset is local now, so that branch — and the `unsplash`,
+ * `unsplashSrcSet` and `sizes` machinery behind it — was dead weight
+ * that only ever took the local path.
  */
-export function Media({ image, sizes = SIZES.full, priority = false, className, style, ...rest }) {
-  const local = image.file.startsWith("/");
-
+export function Media({ image, priority = false, className, style, ...rest }) {
   return (
     <img
-      src={local ? image.file : unsplash(image.file, { w: priority ? 2000 : 1600 })}
-      srcSet={local ? undefined : unsplashSrcSet(image.file)}
-      sizes={local ? undefined : sizes}
+      src={image.file}
       alt={image.alt}
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : "auto"}

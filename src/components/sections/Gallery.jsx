@@ -3,7 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Media } from "../ui/Media";
 import { Lightbox } from "../ui/Lightbox";
-import { GALLERY, IMAGES, SIZES, unsplash } from "../../data/images";
+import { GALLERY, IMAGES } from "../../data/images";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
 
 /**
@@ -56,13 +56,19 @@ export function Gallery() {
       aria-label="The nights"
     >
       {/* Maa Durga, aged into the wall behind the panels */}
+      {/* The grade and the mask stay inline: a sepia filter chain and a
+          radial mask have no Tailwind equivalents worth the arbitrary
+          syntax, and this is the only element on the site that wants
+          them. Everything expressible as a class is one. */}
       <div
         data-ground
         aria-hidden
-        className="devi-ground opacity-0"
+        className="pointer-events-none absolute inset-0 bg-cover bg-position-[center_26%] opacity-0"
         style={{
-          backgroundImage: `url(${unsplash(IMAGES.devi.file, { w: 1600, q: 62 })})`,
+          backgroundImage: `url(${IMAGES.devi.file})`,
           zIndex: "var(--z-background)",
+          filter: "sepia(0.55) saturate(0.75) contrast(1.05) brightness(0.62)",
+          maskImage: "radial-gradient(72% 62% at 50% 42%, #000 18%, transparent 78%)",
         }}
       />
 
@@ -95,7 +101,6 @@ export function Gallery() {
               >
                 <Media
                   image={shot}
-                  sizes={SIZES.card}
                   className="scale-[1.08] transition-transform duration-700 ease-out group-hover:scale-100"
                 />
 
@@ -114,10 +119,7 @@ export function Gallery() {
 
                 <div className="absolute inset-x-4 bottom-4">
                   <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
-                  <p
-                    className="mt-1.5 max-w-[34ch] text-xs leading-snug text-ivory/60"
-                    style={{ fontFamily: "Poppins, sans-serif" }}
-                  >
+                  <p className="mt-1.5 max-w-[34ch] text-xs leading-snug text-ivory/60">
                     {shot.line}
                   </p>
                 </div>

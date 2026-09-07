@@ -15,10 +15,12 @@ const SIDE = {
 const ALIGN = { start: "top-[22%]", center: "top-1/2 -translate-y-1/2", end: "bottom-[22%]" };
 
 /**
- * HOME — the page proper, arriving right after the gate has opened and
- * the mark has docked in the header. A pinned scroll-scrubbed sequence
- * of real event photos, one per scene, crossfading as captions slide
- * through them.
+ * THE FILM — a pinned scroll-scrubbed sequence of real event photos,
+ * one per scene, crossfading as captions slide through them.
+ *
+ * It follows HomeHero, which is the actual opening screen. This used
+ * to carry the home background itself; that moved into HomeHero when
+ * the hero became its own section.
  */
 export function CinematicHero() {
   const sectionRef = useRef(null);
@@ -129,7 +131,7 @@ export function CinematicHero() {
             )}
             style={{ zIndex: "var(--z-content)" }}
           >
-            <span className="home-eyebrow text-antique">{scene.eyebrow}</span>
+            <span className="text-[clamp(0.68rem,1vw,0.8rem)] tracking-[0.4em] uppercase text-antique">{scene.eyebrow}</span>
             <h2 className="display-type mt-5 text-[clamp(1.8rem,4.4vw,3.4rem)] leading-[1.05] text-ivory">
               {scene.heading}
             </h2>

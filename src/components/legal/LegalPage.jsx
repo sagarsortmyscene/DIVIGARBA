@@ -42,7 +42,7 @@ export function LegalPage({ title, effective, intro, sections = [], footnote, ch
         <img
           src={BRAND.logo}
           alt={EVENT_CONFIG.brandLine}
-          className="emblem-slot object-contain"
+          className="aspect-square w-[clamp(100px,26vw,120px)] object-contain md:w-45"
         />
       </header>
 

@@ -3,7 +3,6 @@ import { createPortal } from "react-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Media } from "./Media";
-import { SIZES } from "../../data/images";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
 
 /**
@@ -105,7 +104,7 @@ export function Lightbox({ shot, onClose }) {
         style={{ transformStyle: "preserve-3d" }}
       >
         <div className="relative aspect-3/4 max-h-[74svh] w-full min-h-0 shrink overflow-hidden sm:aspect-4/3">
-          <Media image={shot} sizes={SIZES.full} priority />
+          <Media image={shot} priority />
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"

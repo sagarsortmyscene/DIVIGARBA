@@ -19,6 +19,40 @@
   unicode-range: U+0020-002F, U+003A-007E, U+00A0-00FF, U+2010-2027;
 }
 
+/* ANEK GUJARATI — the site's writing face. Two files, Regular and Bold.
+   Bold is here because it is the only way a `font-bold` can actually
+   look bold: with Regular alone declared across the whole 100-900
+   range, the browser has a face for every weight asked of it and
+   renders them all at Regular. The alternative — dropping the range so
+   it synthesizes — smears the Regular into a fake bold, which on a
+   text face looks worse than no bold at all.
+
+   The two ranges do NOT overlap (100-600 and 700-900) on purpose. If
+   both faces claimed 700, which one won would be down to the browser's
+   matching order rather than anything stated here.
+
+   The unicode-range does the same job as it does on Sregs, for a
+   different reason: it lists everything Anek should render and leaves
+   the DIGITS (U+0030-0039) out, so numerals fall past this face to
+   Poppins — the one thing Poppins is loaded for. Both faces need it;
+   a digit must miss BOTH to reach Poppins. */
+@font-face {
+  font-family: "Anek Gujarati";
+  src: url("/fonts/AnekGujarati-Regular.ttf") format("truetype");
+  font-weight: 100 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-002F, U+003A-007E, U+00A0-00FF, U+0A80-0AFF, U+2010-2027, U+20B9;
+}
+@font-face {
+  font-family: "Anek Gujarati";
+  src: url("/fonts/AnekGujarati-Bold.ttf") format("truetype");
+  font-weight: 700 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0020-002F, U+003A-007E, U+00A0-00FF, U+0A80-0AFF, U+2010-2027, U+20B9;
+}
+
 /* ============================================================
    TAILWIND V4 — CSS-FIRST CONFIG
    Everything below becomes a utility: bg-obsidian, text-gold,
@@ -39,13 +73,17 @@
   --color-gold: #edc766;
   --color-ivory: #f4e8d0;
 
-  /* --- TYPE --- Two fonts on this site, full stop: Sregs Serif and
-     Poppins. "Poppins" sits right after Sregs Serif: the trial font's
-     unicode-range above excludes digits, so numbers cascade straight
-     to Poppins (which has real numerals) instead of rendering as its
-     "Sregs" watermark — everything else still renders in Sregs Serif. */
-  --font-display: "Sregs Serif", "Poppins", sans-serif;
-  --font-ui: "Poppins", "Sregs Serif", sans-serif;
+  /* --- TYPE --- Two faces on this site, and Poppins for numerals only.
+     Fallback is per CHARACTER, not per element, which is what makes
+     this work: both local faces declare a unicode-range with the
+     digits left out, so a digit finds no cover in them and drops to
+     the next entry. Poppins therefore sets every number on the site
+     and nothing else.
+     Order matters. Poppins sits ahead of Anek in the display stack so
+     digits reach it first; Gujarati has no cover in Sregs or Poppins,
+     so it falls all the way through to Anek. */
+  --font-display: "Sregs Serif", "Poppins", "Anek Gujarati", sans-serif;
+  --font-ui: "Anek Gujarati", "Poppins", sans-serif;
 
   --text-hero: clamp(4rem, 11vw, 12rem);
   --text-display: clamp(3rem, 7vw, 8rem);
@@ -145,27 +183,6 @@
    Composed here rather than repeated as long class strings.
    ============================================================ */
 
-/* The gate's pinned section needs a reliable height no matter what —
-   everything inside it is absolutely positioned, so if `min-height`
-   ever resolves to nothing, the section collapses toward 0px and the
-   pinned scroll distance (a % of its own height) collapses with it,
-   completing the whole gate animation in a single tiny scroll tick.
-   `@supports` gates the svh upgrade so a minifier can't collapse the
-   two declarations into one and silently drop the fallback the way it
-   would with two plain `min-height` lines in the same rule (tried
-   first — the build's CSS minifier deduped them, keeping only the
-   later one). A Tailwind `min-h-screen min-h-[100svh]` pairing was
-   tried before that; Tailwind v4 emits the arbitrary value first,
-   so the cascade order wasn't guaranteed either. */
-.gate-min-h {
-  min-height: 100vh;
-}
-@supports (min-height: 100svh) {
-  .gate-min-h {
-    min-height: 100svh;
-  }
-}
-
 /* The gallery's marquee row — renders its shots twice back to back
    and slides exactly one set-width, so the loop point is invisible. */
 @keyframes marquee-left {
@@ -182,80 +199,26 @@
   text-transform: uppercase;
 }
 
+/* The filled gold call-to-action: Book ticket, Book your passes,
+   Tickets. Same as `label` but heavier, and its own utility for the
+   same reason nav-link is — `label` sets font-weight: 400, so pairing
+   it with a `font-bold` class leaves two rules of equal specificity
+   fighting, and the winner would depend on the order Tailwind emits
+   them. 700 resolves to the real Bold file declared above, not a
+   synthesized one. */
+@utility cta-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
 @utility display-type {
   font-family: var(--font-display);
   font-weight: 300;
   line-height: 0.92;
   letter-spacing: -0.02em;
-}
-
-/* Gold is jewelry — used on type only at these two moments */
-@utility gilt {
-  background: linear-gradient(
-    100deg,
-    var(--color-ivory) 0%,
-    var(--color-gold) 45%,
-    var(--color-antique) 100%
-  );
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* A reveal mask: child slides up out of a clipped line box */
-@utility line-clip {
-  display: block;
-  overflow: hidden;
-}
-
-/* ---------- HOME — the editorial hero that follows the gate ---------- */
-@utility home-title {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(3.6rem, 10vw, 10.5rem);
-  line-height: 0.88;
-  letter-spacing: -0.03em;
-}
-
-@utility home-eyebrow {
-  font-family: var(--font-ui);
-  font-size: clamp(0.68rem, 1vw, 0.8rem);
-  font-weight: 400;
-  letter-spacing: 0.4em;
-  text-transform: uppercase;
-}
-
-@utility home-body {
-  font-family: var(--font-ui);
-  font-weight: 300;
-  font-size: clamp(1rem, 1.25vw, 1.15rem);
-  line-height: 1.7;
-}
-
-/* ============================================================
-   ATMOSPHERE — the textures the design leans on
-   ============================================================ */
-.grain {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-foreground);
-  pointer-events: none;
-  opacity: 0.26;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
-}
-
-
-/* The one place heavy blur is allowed: light scattering off the artwork */
-.scatter {
-  filter: blur(80px) saturate(1.45) brightness(0.78);
-}
-
-@media (max-width: 768px) {
-  /* Large blur radii are the main mobile GPU cost — halve it */
-  .scatter {
-    filter: blur(42px) saturate(1.4) brightness(0.8);
-  }
 }
 
 /* ============================================================
@@ -271,63 +234,12 @@
   }
 }
 
-@keyframes cue {
-  0% { transform: scaleY(0); transform-origin: top; }
-  45% { transform: scaleY(1); transform-origin: top; }
-  55% { transform: scaleY(1); transform-origin: bottom; }
-  100% { transform: scaleY(0); transform-origin: bottom; }
-}
-
-/* Transform-only rotation for Mandala — stays on the compositor,
-   never triggers layout or paint. The reduced-motion block above
-   already zeroes every animation-duration site-wide, this included. */
-@keyframes mandala-spin {
-  to { transform: rotate(360deg); }
-}
-
-/* ============================================================
-   ANCIENT SURFACE — brass leaf over aged pigment.
-   Two woven gradients + a hairline weave read as beaten metal
-   without shipping a texture file.
-   ============================================================ */
-.brass-leaf {
-  background-color: var(--color-maroon);
-  background-image:
-    radial-gradient(60% 40% at 20% 12%, rgba(240, 193, 75, 0.18), transparent 62%),
-    radial-gradient(50% 40% at 82% 78%, rgba(216, 100, 30, 0.16), transparent 60%),
-    repeating-linear-gradient(102deg, rgba(240, 193, 75, 0.05) 0 2px, transparent 2px 7px),
-    repeating-linear-gradient(14deg, rgba(7, 5, 4, 0.30) 0 3px, transparent 3px 9px);
-}
-
-/* Hairline brass rule used between blocks */
-.rule-brass {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-antique), transparent);
-  opacity: 0.4;
-}
-
 /* While a gallery photo is open, its Close button sits in the same
    corner as the header's Book ticket button. Only Close means anything
    at that moment, so the CTA steps aside until the photo is dismissed
    — on phones and desktop alike. Set by Lightbox on <body>. */
 body.lightbox-open #buy-btn {
   display: none;
-}
-
-/* The emblem docks into the header; this reserves its slot, and
-   FlyingEmblem measures it to work out where and how small to land —
-   so this width alone controls the docked logo's size.
-   140px on desktop; phones keep the previous fluid 72-100px, since a
-   140px mark would be a third of a 360px-wide screen. The breakpoint
-   matches useIsMobile() so the two never disagree. */
-.emblem-slot {
-  width: 180px;
-  aspect-ratio: 1;
-}
-@media (max-width: 768px) {
-  .emblem-slot {
-    width: clamp(100px, 26vw, 120px);
-  }
 }
 
 /* ============================================================
@@ -385,37 +297,4 @@ body.lightbox-open #buy-btn {
   flex: 1;
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(201, 162, 74, 0.5), transparent);
-}
-
-/* The Devi, aged into the background of a section */
-.devi-ground {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-position: center 26%;
-  background-size: cover;
-  opacity: 0.16;
-  filter: sepia(0.55) saturate(0.75) contrast(1.05) brightness(0.62);
-  mask-image: radial-gradient(72% 62% at 50% 42%, #000 18%, transparent 78%);
-}
-/* ---------- The gate's mobile card fan (feral-blinds) ----------
-   blinds.css is fully scoped under .bld, so it clashes with nothing
-   here. These are the only things worth overriding: the component
-   picks its own system font stack, and the site is meant to use
-   exactly two faces. Card titles are UI-weight Poppins to match the
-   gallery captions rather than the display serif, which at this size
-   would be unreadable on a 130px card. */
-.bld-title,
-.bld-sub,
-.bld-meta {
-  font-family: var(--font-ui);
-}
-
-/* The fan sits inside a pinned GSAP scene, so a vertical drag that
-   starts on a card must still scroll the gate. Blinds only ever moves
-   the hand horizontally; this hands the vertical axis back to the
-   browser instead of letting the card swallow the gesture. */
-.bld--fan .bld-track,
-.bld--fan .bld-slat {
-  touch-action: pan-y;
 }
