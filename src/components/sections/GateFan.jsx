@@ -37,16 +37,23 @@ export function GateFan({ shots }) {
           On a 390px phone rootW * 0.21 is 82, so the width sits on the
           100px FLOOR — no phone is wide enough to lift it. `cardScale`
           is therefore the size knob; this box only has to stay tall
-          enough not to become the cap. At cardScale 1.3 the card wants
-          188px and 0.66 of 520 is 343, so it is clear. */}
-      <div className="pointer-events-auto w-full" style={{ height: 520 }}>
+          enough not to become the cap. At cardScale 2.6 the card wants
+          260 x 377, and 0.66 of 600 is 396 — clear of it. At the old
+          520 the height would have been clipped back to 343, so this
+          went up with the card size rather than staying put. */}
+      <div className="pointer-events-auto w-full" style={{ height: 600 }}>
         <Blinds
           items={shots.map((s) => ({ title: s.title, image: s.file }))}
           mode="fan"
           labelStyle="steady"
           labelPosition="bottom"
           shape="cut"
-          cardScale={1.3}
+          /* 200% of 1.3. Card goes 130x188 -> 260x377 on a phone. */
+          cardScale={2.6}
+          /* Kept as you wrote it, but be aware fan mode applies
+             `Math.min(spread, 1.05)` — anything above 1.05 is the same
+             as 1.05, so this is already at the ceiling and raising it
+             further does nothing. See the note below the component. */
           spread={1.5}
           radius={16}
           gap={0}
@@ -64,6 +71,20 @@ export function GateFan({ shots }) {
       </div>
 
       {open && <Lightbox shot={open} onClose={() => setOpen(null)} />}
+      {/*
+          ON SPREADING THE HAND WIDER — it cannot be done from here.
+          The angle between cards is
+            fanStep = fanLo / 2.9 * Math.min(spread, 1.05)
+          where fanLo comes from a fit loop that widens the arc only
+          while the outermost card still lands inside the box. On a
+          390px-wide phone that test fails even at the loop's MINIMUM,
+          so fanLo stays at its floor and every phone already gets the
+          tightest arc the component will draw — roughly 7 degrees a
+          card. `spread` is capped at 1.05 on top of that.
+          Wider cards make the test fail harder, not the arc narrower
+          (it is already floored), so size and spread do not trade off
+          here — but neither can spread be bought back. The only real
+          lever would be a wider box, which a phone does not have. */}
     </>
   );
 }
