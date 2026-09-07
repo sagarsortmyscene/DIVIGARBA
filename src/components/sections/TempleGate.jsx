@@ -207,10 +207,17 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
       const tl = createScene(ref.current, LENGTH, {
         onLeave: () => {
           gsap.set(q("[data-doors], [data-scatter]"), { opacity: 0 });
+          /* The gate itself is being hidden, so the mark goes with it.
+             On mobile the mark belongs to the gate's open moment and
+             nothing else — it is not a persistent header logo there. */
+          if (mobile) gsap.set(emblemRef.current, { opacity: 0 });
           onGateOpen?.();
         },
         onEnterBack: () => {
           gsap.set(q("[data-doors], [data-scatter]"), { opacity: 1 });
+          /* Scrolled back into the gate, which is at the END of its
+             timeline here — doors fully open, so the mark is shown. */
+          if (mobile) gsap.set(emblemRef.current, { opacity: 1 });
           onGateClose?.();
         },
       });
@@ -260,7 +267,21 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
          an 88vw emblem and a readable hand of cards at once.
          Added after the chain rather than inside it because a timeline
          is ordered by its position parameter, not by call order. */
-      if (!mobile) {
+      if (mobile) {
+        /* On a phone the mark does not grow out of the light — it is
+           already parked in the header at full size, just invisible.
+           It fades in only once the doors have COMPLETELY parted: the
+           door tween starts at 0.5 and runs 3.2, so DOORS_OPEN is 3.7.
+           Because this lives on the scrubbed timeline, scrolling back
+           up fades it out again for free — no second rule needed. */
+        const DOORS_OPEN = 3.7;
+        tl.fromTo(
+          emblemRef.current,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.5, ease: "power2.out" },
+          DOORS_OPEN
+        );
+      } else {
         tl.fromTo(
           emblemRef.current,
           { scale: 0.12, opacity: 0 },

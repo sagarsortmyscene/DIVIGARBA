@@ -62,7 +62,12 @@ export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
         if (to) gsap.set(wrapRef.current, to);
       };
       dock();
-      gsap.set(emblemRef.current, { scale: 1, opacity: 1 });
+      /* Docked at full size but INVISIBLE. It is placed here from the
+         first frame so it never has to travel, but it does not show
+         until the doors have finished parting — the gate timeline
+         fades it in, and hides it again whenever the gate is not
+         fully open. See the mobile branch in TempleGate. */
+      gsap.set(emblemRef.current, { scale: 1, opacity: 0 });
       /* Re-measure on orientation change. The slot's width is a vw
          clamp, so landscape moves it. */
       window.addEventListener("resize", dock);

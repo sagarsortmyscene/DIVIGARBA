@@ -28,42 +28,35 @@ export function GateFan({ shots }) {
 
   return (
     <>
-      {/* Height alone does NOT size these cards, which is worth knowing
+      {/* Height does NOT size these cards on its own — worth knowing
           before reaching for it. Blinds computes a fan card as:
 
             width  = clamp(min(rootW * 0.21, 216), 100, 260) * cardScale
             height = min(containerHeight * 0.66, width * 1.45)
 
-          On a 390px-wide phone rootW * 0.21 is 82, so the width lands
-          on the 100px FLOOR — no phone is wide enough to raise it, and
-          the height is then capped at 100 * 1.45 = 145px regardless of
-          how tall this box is. Past roughly 220px the container stopped
-          mattering entirely.
-
-          So the size knob is `cardScale` below; the height here only
-          has to be tall enough not to become the cap again. At
-          cardScale 2 the card wants 290px, and 0.66 of this box clears
-          that on any phone taller than ~700px. */}
-      <div className="pointer-events-auto w-full" style={{ height: "clamp(340px, 62svh, 560px)" }}>
+          On a 390px phone rootW * 0.21 is 82, so the width sits on the
+          100px FLOOR — no phone is wide enough to lift it. `cardScale`
+          is therefore the size knob; this box only has to stay tall
+          enough not to become the cap. At cardScale 1.3 the card wants
+          188px and 0.66 of 520 is 343, so it is clear. */}
+      <div className="pointer-events-auto w-full" style={{ height: 520 }}>
         <Blinds
           items={shots.map((s) => ({ title: s.title, image: s.file }))}
           mode="fan"
-          /* 200% of the previous size: 100x145 -> 200x290 on a phone.
-             This is the multiplier to change if you want them bigger
-             again — 2.5 gives 250x362, and past that a card is wider
-             than half a 390px screen and the hand starts to overrun
-             the edges. */
-          cardScale={2}
           labelStyle="steady"
           labelPosition="bottom"
+          shape="cut"
+          cardScale={1.3}
+          spread={1.5}
           radius={16}
           gap={0}
-          textSize={1.05}
+          textSize={1.45}
           expandRatio={1.35}
-          tuning={{ k: 150, c: 18, lean: 0.3, squeeze: 1 }}
-          /* No self-playing card shuffle for anyone who asked the OS
-             for less motion — the gate is already a moving scene. */
-          autoPlay={reduced ? false : 3000}
+          tuning={{ k: 175, c: 18, lean: 0.3, squeeze: 1 }}
+          /* Your 2200 everywhere except under prefers-reduced-motion,
+             where the hand does not deal itself — the gate is already
+             a moving scene for anyone who asked the OS for less of it. */
+          autoPlay={reduced ? false : 2200}
           showIndex={false}
           showBody={false}
           onActivate={handleActivate}
