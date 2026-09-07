@@ -28,17 +28,32 @@ export function GateFan({ shots }) {
 
   return (
     <>
-      {/* Blinds fills whatever box it is given, so the height here is
-          what actually sizes the cards. The emblem no longer sits in
-          the middle of the gate on a phone, so the fan gets the room
-          it was competing for — this is roughly triple the band it
-          started as. Still clamped rather than a flat svh: at 52% of a
-          short phone the hand would crowd the tagline, and on a tall
-          one it would outgrow the screen's width. */}
-      <div className="pointer-events-auto w-full" style={{ height: "clamp(280px, 52svh, 460px)" }}>
+      {/* Height alone does NOT size these cards, which is worth knowing
+          before reaching for it. Blinds computes a fan card as:
+
+            width  = clamp(min(rootW * 0.21, 216), 100, 260) * cardScale
+            height = min(containerHeight * 0.66, width * 1.45)
+
+          On a 390px-wide phone rootW * 0.21 is 82, so the width lands
+          on the 100px FLOOR — no phone is wide enough to raise it, and
+          the height is then capped at 100 * 1.45 = 145px regardless of
+          how tall this box is. Past roughly 220px the container stopped
+          mattering entirely.
+
+          So the size knob is `cardScale` below; the height here only
+          has to be tall enough not to become the cap again. At
+          cardScale 2 the card wants 290px, and 0.66 of this box clears
+          that on any phone taller than ~700px. */}
+      <div className="pointer-events-auto w-full" style={{ height: "clamp(340px, 62svh, 560px)" }}>
         <Blinds
           items={shots.map((s) => ({ title: s.title, image: s.file }))}
           mode="fan"
+          /* 200% of the previous size: 100x145 -> 200x290 on a phone.
+             This is the multiplier to change if you want them bigger
+             again — 2.5 gives 250x362, and past that a card is wider
+             than half a 390px screen and the hand starts to overrun
+             the edges. */
+          cardScale={2}
           labelStyle="steady"
           labelPosition="bottom"
           radius={16}
