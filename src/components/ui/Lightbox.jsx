@@ -64,12 +64,21 @@ export function Lightbox({ shot, onClose }) {
         className="absolute inset-0 cursor-zoom-out bg-obsidian/92 backdrop-blur-sm"
       />
 
+      {/* Column flex, and the two children carry the whole fix for short
+          laptop viewports (roughly 1200-1400px wide but under ~800px tall):
+          - `w-full` on the media box keeps its width definite, so when
+            max-height clamps it the aspect-ratio can only give up height.
+            Without it the ratio shrank the WIDTH to match the clamped
+            height, leaving a band of dead maroon down the right side.
+          - the caption is `shrink-0` and the media box may shrink, so the
+            figure's own max-height is paid for out of the image instead
+            of clipping the title and line off the bottom. */}
       <figure
         ref={cardRef}
-        className="frame-ancient frame-pips relative max-h-[86svh] w-[min(92vw,760px)] bg-maroon will-change-transform"
+        className="frame-ancient frame-pips relative flex max-h-[86svh] w-[min(92vw,760px)] flex-col bg-maroon will-change-transform"
         style={{ transformStyle: "preserve-3d" }}
       >
-        <div className="relative aspect-3/4 max-h-[74svh] overflow-hidden sm:aspect-4/3">
+        <div className="relative aspect-3/4 max-h-[74svh] w-full min-h-0 shrink overflow-hidden sm:aspect-4/3">
           <Media image={shot} sizes={SIZES.full} priority />
           <div
             aria-hidden
@@ -81,7 +90,7 @@ export function Lightbox({ shot, onClose }) {
           </span>
         </div>
 
-        <figcaption className="px-6 pt-4 pb-5">
+        <figcaption className="shrink-0 px-6 pt-4 pb-5">
           <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
           <p className="mt-1 text-sm text-ivory/60">{shot.line}</p>
         </figcaption>

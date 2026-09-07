@@ -2,19 +2,19 @@
 export const EVENT_CONFIG = {
   name: "Divi Garba",
   dates: "11 — 20 October 2026",
-  location: "Ahmedabad",
-  gateEntry: "12:00 AM (00:00)",
-  entryCloses: "7:00 AM",
+  location: "Master Farm, B/s Sardardham, Vaishnodevi Circle",
+  gateEntry: "8:00 PM",
+  entryCloses: "2:00 AM",
 
   /* The calendar highlights exactly these nights. */
   year: 2026,
   month: 9,               // 0-indexed: 9 = October
   openNights: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
 
-  phone: "+91 99744 48244",
-  email: "devi@gmail.com",
-  instagram: "https://www.instagram.com/shunyachakra/",
-  instagramHandle: "@shunyachakra",
+  phone: "+91 99797 87914",
+  email: "panchatva@divigarba.com",
+  instagram: "https://www.instagram.com/divigarba/",
+  instagramHandle: "@divigarba",
   maps: "https://maps.app.goo.gl/BTfX64dfCBcKsEip9",
 
   terms: "#terms",

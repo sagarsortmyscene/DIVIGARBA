@@ -13,7 +13,7 @@ import { useReducedMotion } from "../../hooks/useMediaQuery";
  * set-width, so the seam where it repeats is never visible. Click a
  * plate to view it full screen.
  */
-const ROW = { shots: GALLERY, direction: "marquee-left", duration: 46 };
+const ROW = { shots: GALLERY, direction: "marquee-left", duration: 70 };
 
 export function Gallery() {
   const ref = useRef(null);

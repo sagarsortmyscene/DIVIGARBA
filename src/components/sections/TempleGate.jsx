@@ -1,10 +1,25 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { IMAGES, GALLERY, DOOR_MOBILE_CROPS } from "../../data/images";
 import { createScene } from "../../lib/animations";
-import { useReducedMotion, useIsMobile, useViewportWidth } from "../../hooks/useMediaQuery";
+import {
+  useReducedMotion,
+  useIsMobile,
+  useViewportWidth,
+  useMediaQuery,
+} from "../../hooks/useMediaQuery";
+
+/* Fills the letterbox wherever the door artwork is contained rather
+   than covered. Sampled from the creatives' own corner pixels (desktop
+   ~#33 dark brown, the mobile crops ~#4f), so the bars read as the
+   canvas continuing rather than as a gap onto the white glow behind. */
+const DOOR_MATTE = "#3d1704";
+
+/* Never matched, so the door starts on cover and only switches once
+   the artwork's real aspect ratio is known (measured on load). */
+const NEVER = "(min-aspect-ratio: 100000/1)";
 
 /** The exact-width crop for this viewport, or the generic mobile
  *  background if none of the four purpose-made crops fit. */
@@ -13,19 +28,18 @@ function pickDoorMobileFile(width) {
   return match ? match.file : IMAGES.door.fileMobile;
 }
 
-/* Snapshots scattered around the emblem.
-   `at` carries responsive position classes; `rotate` is applied by GSAP
-   (as `rotation`) rather than a Tailwind class, because GSAP writes
-   `transform` directly and would otherwise clobber a class-based rotate.
-   `wide` cards are hidden below md — six cards around a 360px screen
-   collide with both the emblem and the tagline. */
+/* Snapshots scattered around the emblem — all six show at every size,
+   including mobile. `at` carries responsive position classes; `rotate`
+   is applied by GSAP (as `rotation`) rather than a Tailwind class,
+   because GSAP writes `transform` directly and would otherwise
+   clobber a class-based rotate. */
 const SCATTER = [
   { shot: GALLERY[0], at: "top-[8%] left-[4%] sm:left-[6%] lg:left-[8%] xl:left-[11%]",            rotate: -8 },
   { shot: GALLERY[2], at: "top-[7%] right-[4%] sm:right-[6%] lg:right-[8%] xl:right-[11%]",         rotate: 6 },
   { shot: GALLERY[4], at: "bottom-[16%] left-[5%] sm:left-[8%] lg:left-[10%] xl:left-[13%]",        rotate: 5 },
   { shot: GALLERY[6], at: "bottom-[15%] right-[5%] sm:right-[8%] lg:right-[10%] xl:right-[13%]",    rotate: -7 },
-  { shot: GALLERY[1], at: "top-[40%] left-[1%] lg:left-[2%] xl:left-[4%]",  rotate: 4,  wide: true },
-  { shot: GALLERY[3], at: "top-[42%] right-[1%] lg:right-[2%] xl:right-[4%]", rotate: -5, wide: true },
+  { shot: GALLERY[1], at: "top-[40%] left-[1%] lg:left-[2%] xl:left-[4%]",  rotate: 4 },
+  { shot: GALLERY[3], at: "top-[42%] right-[1%] lg:right-[2%] xl:right-[4%]", rotate: -5 },
 ];
 
 /**
@@ -52,6 +66,21 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
   const viewportWidth = useViewportWidth();
   const doorSrc  = mobile ? pickDoorMobileFile(viewportWidth) : IMAGES.door.file;
   const doorFocal = mobile ? IMAGES.door.focalMobile : IMAGES.door.focal;
+
+  /* Which fit to use is decided by the crop DIRECTION, not by screen
+     size — so it holds for any viewport, including ones nobody tested.
+     The artwork's own ratio is measured from the file on load rather
+     than hardcoded, so swapping a creative can't put this out of date.
+       - viewport WIDER than the artwork -> cover would crop top and
+         bottom, and the "Event by panchatva" mark sits hard against
+         the top edge, so use contain and letterbox the sides instead.
+       - viewport TALLER than the artwork (e.g. 1325x918) -> cover only
+         crops left and right, which the mark has margin to survive, so
+         cover it is: full-bleed, no bars. */
+  const [artSize, setArtSize] = useState(null);
+  const doorContain = useMediaQuery(
+    artSize ? `(min-aspect-ratio: ${artSize.w}/${artSize.h})` : NEVER
+  );
 
   useGSAP(
     () => {
@@ -130,16 +159,39 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
     { scope: ref, dependencies: [reduced, mobile] }
   );
 
-  /** One half of the photograph. All offsets are % of the panel. */
+  /** One half of the photograph. All offsets are % of the panel.
+   *
+   *  `doorContain` above decides cover vs contain from the crop
+   *  direction. When contain is in play the artwork can't fill the
+   *  panel, so rather than flat bars a blurred cover-scaled copy of
+   *  the same file sits behind it and fills the gap, letting the edges
+   *  read as the canvas continuing. It uses the panel's exact
+   *  geometry, so the two halves stay aligned across the seam; the
+   *  flat matte stays under it as a base, since a blur softens its own
+   *  outer edge. */
   const Door = ({ edge }) => {
     const stacked = edge === "t" || edge === "b";
+    const geometry = stacked
+      ? `left-0 h-[200%] w-full ${edge === "t" ? "top-0" : "top-[-100%]"}`
+      : `top-0 w-[200%] h-full ${edge === "l" ? "left-0" : "left-[-100%]"}`;
     return (
       <div
         {...{ [`data-door-${edge}`]: true }}
         className={`relative overflow-hidden will-change-transform ${
           stacked ? "h-1/2 w-full" : "h-full w-1/2"
         }`}
+        style={doorContain ? { backgroundColor: DOOR_MATTE } : undefined}
       >
+        {doorContain && (
+          <img
+            src={doorSrc}
+            alt=""
+            aria-hidden
+            decoding="async"
+            draggable="false"
+            className={`absolute max-w-none scale-110 object-cover blur-2xl ${geometry}`}
+          />
+        )}
         <img
           src={doorSrc}
           alt=""
@@ -147,12 +199,17 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
           fetchPriority="high"
           decoding="async"
           draggable="false"
+          onLoad={(e) => {
+            const w = e.currentTarget.naturalWidth;
+            const h = e.currentTarget.naturalHeight;
+            // both halves load the same file and fire this — keep the
+            // identical second call from causing another render
+            setArtSize((prev) => (prev?.w === w && prev?.h === h ? prev : { w, h }));
+          }}
           style={{ objectPosition: doorFocal }}
-          className={`absolute max-w-none object-cover ${
-            stacked
-              ? `left-0 h-[200%] w-full ${edge === "t" ? "top-0" : "top-[-100%]"}`
-              : `top-0 w-[200%] h-full ${edge === "l" ? "left-0" : "left-[-100%]"}`
-          }`}
+          className={`absolute max-w-none ${
+            doorContain ? "object-contain" : "object-cover"
+          } ${geometry}`}
         />
       </div>
     );
@@ -196,16 +253,15 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
           The max-height query is the one that matters for 1366×768 and
           1280×720: those are wide but SHORT, and at xl:w-44 the cards
           would run into the emblem. */}
-      {SCATTER.map(({ shot, at, wide }) => (
+      {SCATTER.map(({ shot, at }) => (
         <div
           key={shot.file}
           data-scatter
           aria-hidden
           className={[
             "absolute aspect-3/4 bg-ivory p-1 opacity-0 shadow-[0_10px_28px_rgba(0,0,0,0.35)] sm:p-1.5",
-            "w-20 sm:w-28 md:w-32 lg:w-36 xl:w-44 2xl:w-48",
-            "[@media(max-height:820px)]:w-16 [@media(max-height:820px)]:sm:w-24 [@media(max-height:820px)]:lg:w-28 [@media(max-height:820px)]:xl:w-32",
-            wide ? "hidden md:block" : "",
+            "w-24 sm:w-32 md:w-40 lg:w-48 xl:w-56 2xl:w-64",
+            "[@media(max-height:820px)]:w-20 [@media(max-height:820px)]:sm:w-28 [@media(max-height:820px)]:lg:w-36 [@media(max-height:820px)]:xl:w-40",
             at,
           ].join(" ")}
           style={{ zIndex: "var(--z-content)" }}
@@ -226,7 +282,7 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         className="display-type absolute bottom-6 px-6 text-center text-base text-ivory/70 sm:bottom-8 sm:text-xl lg:bottom-10 lg:text-2xl [@media(max-height:820px)]:bottom-4 [@media(max-height:820px)]:text-base"
         style={{ zIndex: "var(--z-content)" }}
       >
-        Nine nights. One circle.
+        Ten nights. One circle.
       </p>
     </section>
   );

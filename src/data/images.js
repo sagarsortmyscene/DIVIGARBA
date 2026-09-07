@@ -100,7 +100,7 @@ export const DOOR_MOBILE_CROPS = [
 
 /* ---------- Gallery: your own photographs ---------- */
 export const GALLERY = [
-  { n: "01", file: "/assets/gallery/DSC08780.jpg", title: "The turn",      line: "Nine nights. Every one of them like this.",              alt: "A woman in white dancing joyfully at night, arm raised",  focal: "center 30%", span: "tall" },
+  { n: "01", file: "/assets/gallery/DSC08780.jpg", title: "The turn",      line: "Ten nights. Every one of them like this.",              alt: "A woman in white dancing joyfully at night, arm raised",  focal: "center 30%", span: "tall" },
   { n: "02", file: "/assets/gallery/DSC01683.jpg", title: "The ground",    line: "Ten thousand people, one direction of travel.",          alt: "A vast crowd dancing under a lit canopy at night",        focal: "center 55%", span: "wide" },
   { n: "03", file: "/assets/gallery/DSC00509.jpg", title: "The floor",     line: "Everyone arrives at the same beat without being told.",  alt: "A group dancing together, close in the crowd",            focal: "center 32%", span: "tall" },
   { n: "04", file: "/assets/gallery/DSC00688.jpg", title: "Ajrakh",        line: "Block-printed, mirrored, and built to open like a wheel.", alt: "A dancer twirling with her arms raised",                focal: "center 35%", span: "tall" },

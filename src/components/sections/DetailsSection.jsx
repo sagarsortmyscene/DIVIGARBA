@@ -33,8 +33,8 @@ export function DetailsSection() {
 
         <ScrollReveal stagger={0.08} className="mt-8 space-y-1.5 text-sm text-ivory/55 sm:text-base">
           <p>These are event-night dates.</p>
-          <p>Gate entry: {gateEntry} on the following morning.</p>
-          <p>Entry closes: {entryCloses} that same morning.</p>
+          <p>Gates open: {gateEntry}.</p>
+          <p>Last entry: {entryCloses}. No re-entry.</p>
         </ScrollReveal>
 
         <div className="divider-carved my-8">

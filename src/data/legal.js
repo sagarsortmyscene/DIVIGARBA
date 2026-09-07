@@ -5,113 +5,34 @@
    ============================================================ */
 import { EVENT_CONFIG } from "./event";
 
-const { brandLine, phone, email, dates } = EVENT_CONFIG;
+const { brandLine, phone, email, dates, location, gateEntry, entryCloses } =
+  EVENT_CONFIG;
 
 export const TERMS = {
   title: "Terms & Conditions",
   intro: `${brandLine} is owned and operated by INCEPT EVENTS, a proprietorship registered in India.`,
   sections: [
     {
-      heading: "Circle of Authenticity",
+      heading: "Single Pass — Entry Terms",
       bullets: [
-        `Passes flow only through our official ${brandLine} channel: ${phone}.`,
-        "Any entry sought with passes from elsewhere shall not be honoured — the Circle recognizes only what is truly aligned.",
+        "Entry & Passes — Valid event pass required. Non-transferable. QR codes valid for single scan only.",
+        "Dress Code — Traditional attire encouraged; must respect cultural values.",
+        `Timing & Entry — Gates open at ${gateEntry}; last entry at ${entryCloses}. No re-entry allowed.`,
+        "Refunds — Passes are non-refundable; rescheduling policy applies for cancellations.",
       ],
     },
     {
-      heading: "Entry into the Circle",
+      heading: "Couple Pass — Entry Terms",
       bullets: [
-        `The gates open only to those carrying a valid ${brandLine} pass.`,
-        "Digital or printed passes must be presented for entry.",
-        "Each pass is sacred and unique to the soul it belongs to — duplication, resale, or misuse shall break the flow and deny entry.",
-        "All offerings (passes) are non-refundable and non-transferable.",
-        "Tickets must be personalised at least 10 hours before the relevant event entry time. An unpersonalised ticket may be rendered unusable, and the organisers reserve the right to revoke it.",
-        `The displayed ticket date is the event-night date. For the ${dates} event, gate entry begins at 12:00 AM (00:00) on the following calendar morning and closes at 7:00 AM that morning. A 19 October ticket therefore admits on 20 October from midnight until 7:00 AM.`,
-      ],
-    },
-    {
-      heading: "Age of Awakening",
-      bullets: [
-        "The Circle welcomes seekers aged 15 and above.",
-        "Proof of age may be requested at the gate to honour this boundary.",
-      ],
-    },
-    {
-      heading: "Attire of the Earth",
-      bullets: [
-        "Entry is a celebration of tradition: cultural/ethnic attire is essential.",
-        "The Circle reserves the right to turn away those not in resonance with this spirit.",
-      ],
-    },
-    {
-      heading: "Guardians of the Gate",
-      bullets: [
-        "Every being shall undergo respectful security checks before entering.",
-        "The following have no place in the sacred space: weapons or harmful objects, alcohol, tobacco, or narcotics, and outside food or drink.",
-        "Once you step out, the Circle shall not open again for re-entry.",
-      ],
-    },
-    {
-      heading: "Flow of Belongings",
-      bullets: [
-        "The Circle is not accountable for items lost or misplaced.",
-        "Each seeker is asked to care for their belongings mindfully.",
-      ],
-    },
-    {
-      heading: "Companions",
-      bullets: ["The Circle is a human gathering — pets cannot be accommodated inside."],
-    },
-    {
-      heading: "Memory & Capture",
-      bullets: [
-        "Mobile photography and videography, for personal joy, are welcome.",
-        "Professional cameras or recording equipment require prior written permission from the organizers.",
-      ],
-    },
-    {
-      heading: "Parking & Passage",
-      bullets: [
-        "Parking is at your own responsibility.",
-        "The Circle does not carry liability for any loss or damage to vehicles or their contents.",
-      ],
-    },
-    {
-      heading: "Nourishment",
-      bullets: ["Outside food or beverages shall not enter the Circle — curated offerings within will serve the flow."],
-    },
-    {
-      heading: "Conduct of Resonance",
-      bullets: [
-        "Every seeker is expected to embody grace, respect, and harmony.",
-        "Any act of disturbance, harassment, or disharmony shall lead to removal from the Circle without refund.",
-        `Honour fellow seekers, performers, volunteers, and the custodians of ${brandLine}.`,
-      ],
-    },
-    {
-      heading: "If the Cosmos Shifts",
-      bullets: [
-        "Should unforeseen forces (weather, safety, or acts beyond control) intervene, the Circle may pause, reschedule, or close.",
-        "Refunds shall only flow if announced by the organizers.",
-      ],
-    },
-    {
-      heading: "Disclaimer of the Circle",
-      bullets: [
-        "The organizers do not hold responsibility for personal injury, theft, or property damage.",
-        "Entry into the Circle is at one's own choice and responsibility.",
-      ],
-    },
-    {
-      heading: `By entering ${brandLine}, you offer your consent to`,
-      bullets: [
-        "Flow with the Circle's harmony and abide by its sacred guidelines.",
-        `Cooperate with the ${brandLine} Team at all times.`,
-        `Allow your presence to be captured in memory (photography/videography) for the story and celebration of ${brandLine}.`,
+        "Entry & Passes — Valid event pass required. Non-transferable. QR codes valid for single scan only.",
+        "Dress Code — Traditional attire encouraged; must respect cultural values.",
+        "Couple Pass — One male and one female are mandatory on a Couple Pass. 2 male or 2 female are not allowed on couple entry.",
+        `Timing & Entry — Gates open at ${gateEntry}; last entry at ${entryCloses}. No re-entry allowed.`,
+        "Refunds — Passes are non-refundable; rescheduling policy applies for cancellations.",
       ],
     },
   ],
-  footnote: `Event dates: ${dates}, Ahmedabad. Contact: ${phone}.`,
+  footnote: `Event dates: ${dates}. Venue: ${location}. Contact: ${phone}.`,
 };
 
 export const PRIVACY = {

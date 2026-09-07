@@ -46,7 +46,7 @@ export const SCENES = [
     align: "end",
     eyebrow: "The circle",
     heading: "Everyone you know is here.",
-    body: "Old friends, new outfits, the same nine nights.",
+    body: "Old friends, new outfits, the same ten nights.",
     image: {
       file: "/assets/img-3.jpg",
       // no mobile crop was uploaded for this one — falls back to the

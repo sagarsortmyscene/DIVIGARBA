@@ -30,13 +30,18 @@ export function SiteHeader({ slotRef }) {
         <span ref={slotRef} className="emblem-slot block" aria-hidden />
       </a>
 
-      <a
-        href="#book"
+      {/* A real <button>, and #buy-btn is the selector the SortMyScene
+          embed in index.html binds to (data-trigger="#buy-btn"). It
+          attaches its own click handler, so this deliberately has none
+          of ours — adding one would open the widget twice. */}
+      <button
+        type="button"
+        id="buy-btn"
         data-cursor="cta"
-        className="label rounded-full border border-antique/40 bg-obsidian/45 px-5 py-2.5 text-mukut transition-colors duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian"
+        className="label cursor-pointer rounded-full border border-antique/40 bg-obsidian/45 px-5 py-2.5 text-mukut transition-colors duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian"
       >
         Book ticket
-      </a>
+      </button>
     </header>
   );
 }
