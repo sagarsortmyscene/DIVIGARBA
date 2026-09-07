@@ -398,3 +398,24 @@ body.lightbox-open #buy-btn {
   filter: sepia(0.55) saturate(0.75) contrast(1.05) brightness(0.62);
   mask-image: radial-gradient(72% 62% at 50% 42%, #000 18%, transparent 78%);
 }
+/* ---------- The gate's mobile card fan (feral-blinds) ----------
+   blinds.css is fully scoped under .bld, so it clashes with nothing
+   here. These are the only things worth overriding: the component
+   picks its own system font stack, and the site is meant to use
+   exactly two faces. Card titles are UI-weight Poppins to match the
+   gallery captions rather than the display serif, which at this size
+   would be unreadable on a 130px card. */
+.bld-title,
+.bld-sub,
+.bld-meta {
+  font-family: var(--font-ui);
+}
+
+/* The fan sits inside a pinned GSAP scene, so a vertical drag that
+   starts on a card must still scroll the gate. Blinds only ever moves
+   the hand horizontally; this hands the vertical axis back to the
+   browser instead of letting the card swallow the gesture. */
+.bld--fan .bld-track,
+.bld--fan .bld-slat {
+  touch-action: pan-y;
+}

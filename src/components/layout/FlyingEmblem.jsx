@@ -5,11 +5,28 @@ import { Emblem } from "../ui/Emblem";
 import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
 
 /** Where the mark sits while the gate is still open: centred in the
- *  viewport, as an absolute transform from the 0,0 origin. */
+ *  viewport, as an absolute transform from the 0,0 origin.
+ *  DESKTOP ONLY — on a phone the mark starts docked instead. */
 function centreOf(el) {
   return {
     x: (window.innerWidth - el.offsetWidth) / 2,
     y: (window.innerHeight - el.offsetHeight) / 2,
+  };
+}
+
+/** The header slot's position and scale, measured live and expressed as
+ *  ABSOLUTE values from the 0,0 origin — never a delta from wherever
+ *  the mark currently sits, which would be stale the moment the
+ *  viewport height changed. The slot lives in a fixed header pinned to
+ *  the top, so its coordinates hold no matter how far the page has
+ *  scrolled. Returns null until both elements have been measured. */
+function dockOf(wrap, slotEl) {
+  const slot = slotEl?.getBoundingClientRect();
+  if (!slot || !wrap || !wrap.offsetWidth) return null;
+  return {
+    x: slot.left + slot.width / 2 - wrap.offsetWidth / 2,
+    y: slot.top + slot.height / 2 - wrap.offsetHeight / 2,
+    scale: slot.width / wrap.offsetWidth,
   };
 }
 
@@ -33,8 +50,27 @@ export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
      base never moves, and both positions below are plain transforms. */
   useLayoutEffect(() => {
     gsap.set(wrapRef.current, { xPercent: 0, yPercent: 0, top: 0, left: 0 });
+
+    /* PHONE — no centre-grow and no flight. The mark is simply in the
+       header from the first frame, which is what leaves the middle of
+       the gate free for the card fan. A phone screen cannot hold both
+       an 88vw emblem and a readable hand of cards, so the emblem is
+       the one that gives way; the header still carries the brand. */
+    if (mobile) {
+      const dock = () => {
+        const to = dockOf(wrapRef.current, slotRef.current);
+        if (to) gsap.set(wrapRef.current, to);
+      };
+      dock();
+      gsap.set(emblemRef.current, { scale: 1, opacity: 1 });
+      /* Re-measure on orientation change. The slot's width is a vw
+         clamp, so landscape moves it. */
+      window.addEventListener("resize", dock);
+      return () => window.removeEventListener("resize", dock);
+    }
+
     gsap.set(wrapRef.current, centreOf(wrapRef.current));
-  }, []);
+  }, [mobile, emblemRef, slotRef]);
 
   const { contextSafe } = useGSAP(
     () => {
@@ -47,26 +83,12 @@ export function FlyingEmblem({ emblemRef, slotRef, gateSelector = "#gate" }) {
 
   useGSAP(
     () => {
-      if (reduced) return;
+      /* Nothing to fly on a phone — the layout effect above already
+         parked it in the header. */
+      if (reduced || mobile) return;
 
-      /* Where the header slot is, measured live. These are ABSOLUTE
-         positions from the 0,0 origin, not deltas from wherever the
-         mark currently sits — a delta would be stale the moment the
-         viewport height changed, and ignoreMobileResize (see
-         LenisProvider) deliberately stops ScrollTrigger re-measuring
-         when a URL bar opens or closes. The slot itself lives in a
-         fixed header pinned to the top, so its coordinates hold no
-         matter how far the page has scrolled. */
-      const target = () => {
-        const slot = slotRef.current?.getBoundingClientRect();
-        const self = wrapRef.current;
-        if (!slot || !self) return { x: 0, y: 0, scale: 0.16 };
-        return {
-          x: slot.left + slot.width / 2 - self.offsetWidth / 2,
-          y: slot.top + slot.height / 2 - self.offsetHeight / 2,
-          scale: slot.width / self.offsetWidth,
-        };
-      };
+      const target = () =>
+        dockOf(wrapRef.current, slotRef.current) ?? { x: 0, y: 0, scale: 0.16 };
 
       // deferred a frame: TempleGate's pin (created in a sibling mounted
       // after this one, so its ref is populated in time) must exist

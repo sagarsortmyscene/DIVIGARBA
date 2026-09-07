@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { lazy, Suspense, useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -9,6 +9,15 @@ import {
   DOOR_DESKTOP_CROPS,
 } from "../../data/images";
 import { createScene } from "../../lib/animations";
+
+/* Lazy, because it is mobile-only and drags feral-blinds' JS and CSS in
+   with it — no reason for a desktop visitor to download a fan they will
+   never be shown. Safe to defer specifically because the `data-scatter`
+   element the gate timeline animates is the WRAPPER below, which is
+   eager: GSAP always finds it, whether or not the cards have arrived. */
+const GateFan = lazy(() =>
+  import("./GateFan").then((m) => ({ default: m.GateFan }))
+);
 import {
   useReducedMotion,
   useIsMobile,
@@ -95,11 +104,36 @@ function pickClosestCrop(crops, width, height, fallback) {
   return best;
 }
 
-/* Snapshots scattered around the emblem — all six show at every size,
-   including mobile. `at` carries responsive position classes; `rotate`
-   is applied by GSAP (as `rotation`) rather than a Tailwind class,
-   because GSAP writes `transform` directly and would otherwise
-   clobber a class-based rotate. */
+/* ---------- Desktop: nudge the artwork right around 1250 / 1350 ----------
+   The creative is 1600x900 (1.78). A browser window at 1250 or 1350
+   wide is, after chrome, proportionally TALLER than that — so cover
+   scales the artwork to the height and trims the sides instead. At
+   1250x800 it renders 1422px wide and loses ~86px off each edge, and
+   the "Event by panchatva" mark sits only ~2.5% in from the LEFT
+   (~35px of that render), so the left edge is the first thing to go.
+
+   Pulling the focal point left of centre slides the artwork RIGHT
+   inside the frame, which is what brings that edge back. FOCAL_X is
+   the knob: 50% is dead centre (the default), 0% pins the artwork's
+   left edge to the viewport's. 12% leaves ~17px trimmed at 1250 —
+   clear of the mark, without throwing the composition hard to one
+   side. Raise it to move the artwork LESS, lower it to move it more. */
+const NUDGE_RANGE = [1200, 1400];
+const FOCAL_X = "12%";
+
+function desktopFocal(width) {
+  const [min, max] = NUDGE_RANGE;
+  return width >= min && width <= max ? `${FOCAL_X} center` : IMAGES.door.focal;
+}
+
+/* The six snapshots that frame the emblem. All six show at every size,
+   but in two different arrangements: scattered loose around the emblem
+   on desktop, and dealt into a draggable fan below it on mobile (see
+   GateFan) — a phone has no room to ring a logo that is already 88vw
+   wide. `at` and `rotate` are therefore DESKTOP-only; the fan lays its
+   own cards out. `rotate` is applied by GSAP (as `rotation`) rather
+   than a Tailwind class, because GSAP writes `transform` directly and
+   would otherwise clobber a class-based rotate. */
 const SCATTER = [
   /* The four corner cards sit above and below the emblem, so on a phone
      they can be pulled well in from the edges without touching it. */
@@ -139,7 +173,7 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
   const doorSrc = mobile
     ? pickClosestCrop(DOOR_MOBILE_CROPS, viewport.w, viewport.h, IMAGES.door.fileMobile)
     : pickClosestCrop(DOOR_DESKTOP_CROPS, viewport.w, viewport.h, IMAGES.door.file);
-  const doorFocal = mobile ? IMAGES.door.focalMobile : IMAGES.door.focal;
+  const doorFocal = mobile ? IMAGES.door.focalMobile : desktopFocal(viewport.w);
 
   /* Always cover, never contain — so the gate is full-bleed on every
      device, with no letterbox bars anywhere. That is only safe because
@@ -196,27 +230,44 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
             : { xPercent: 100, duration: 3.2, ease: "power2.inOut" },
           0.5
         )
+        /* Two shapes for the same beat. Desktop staggers six loose
+           cards into place, each landing at its own angle. Mobile has
+           one element — the fan — which owns its own internal layout,
+           so it just rises as a block; giving it a `rotation` here
+           would tilt the whole hand. */
         .fromTo(
+          q("[data-scatter]"),
+          { opacity: 0, scale: 0.7, y: 24, rotation: 0 },
+          mobile
+            ? { opacity: 1, scale: 1, y: 0, duration: 1.1, ease: "back.out(1.6)" }
+            : {
+                opacity: 1,
+                scale: 1,
+                y: 0,
+                rotation: (i) => SCATTER[i].rotate,
+                duration: 1.1,
+                stagger: 0.15,
+                ease: "back.out(1.6)",
+              },
+          HALF_OPEN + 0.6
+        )
+        .from(q("[data-tagline]"), { opacity: 0, y: 20, duration: 1.1 }, 3.4);
+
+      /* The emblem growing out of the light is DESKTOP ONLY. On a phone
+         it never appears in the middle of the gate at all — FlyingEmblem
+         parks it in the header from the first frame, which is what frees
+         the centre of the screen for the card fan. A phone cannot hold
+         an 88vw emblem and a readable hand of cards at once.
+         Added after the chain rather than inside it because a timeline
+         is ordered by its position parameter, not by call order. */
+      if (!mobile) {
+        tl.fromTo(
           emblemRef.current,
           { scale: 0.12, opacity: 0 },
           { scale: 1, opacity: 1, duration: 2.0, ease: "power2.out" },
           HALF_OPEN
-        )
-        .fromTo(
-          q("[data-scatter]"),
-          { opacity: 0, scale: 0.7, y: 24, rotation: 0 },
-          {
-            opacity: 1,
-            scale: 1,
-            y: 0,
-            rotation: (i) => SCATTER[i].rotate,
-            duration: 1.1,
-            stagger: 0.15,
-            ease: "back.out(1.6)",
-          },
-          HALF_OPEN + 0.6
-        )
-        .from(q("[data-tagline]"), { opacity: 0, y: 20, duration: 1.1 }, 3.4);
+        );
+      }
 
       /* The layout differs above and below md, so the pin distance
          changes when that line is crossed. Without this the pin keeps
@@ -258,13 +309,45 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
         )}
       </div>
 
-      {/* Snapshots.
+      {/* MOBILE — the same six photographs, held as a hand of cards.
+          With the emblem docked in the header from the start, this is
+          now the centrepiece of the gate rather than a band beneath it.
+
+          Centred with `inset-0 flex items-center`, NOT with
+          `top-1/2 -translate-y-1/2`: GSAP animates this element's `y`
+          and writes `transform` directly, which would clobber a
+          class-based translate. Flex centring uses no transform, so
+          the two never fight.
+
+          `pointer-events-none` because the wrapper now spans the whole
+          gate — without it, it would be an invisible sheet swallowing
+          clicks meant for anything underneath. The cards take their
+          own events back.
+
+          It keeps `data-scatter` so the timeline above and the gate's
+          leave/enter-back opacity both still find it. */}
+      {mobile && (
+        <div
+          data-scatter
+          className="pointer-events-none absolute inset-0 flex items-center opacity-0"
+          style={{ zIndex: "var(--z-content)" }}
+        >
+          {/* The fallback is deliberately empty: the band is already
+              at opacity 0 until the doors are open, so there is nothing
+              to spin over — the cards simply appear when they land. */}
+          <Suspense fallback={null}>
+            <GateFan shots={SCATTER.map((s) => s.shot)} />
+          </Suspense>
+        </div>
+      )}
+
+      {/* DESKTOP — the loose scatter.
           Width steps through every breakpoint; aspect-[3/4] keeps them
           undistorted instead of fixed w/h pairs.
           The max-height query is the one that matters for 1366×768 and
           1280×720: those are wide but SHORT, and at xl:w-44 the cards
           would run into the emblem. */}
-      {SCATTER.map(({ shot, at }) => (
+      {!mobile && SCATTER.map(({ shot, at }) => (
         <div
           key={shot.file}
           data-scatter
