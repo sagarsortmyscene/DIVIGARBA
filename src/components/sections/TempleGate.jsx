@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -7,8 +7,7 @@ import { createScene } from "../../lib/animations";
 import {
   useReducedMotion,
   useIsMobile,
-  useViewportWidth,
-  useMediaQuery,
+  useStableViewport,
 } from "../../hooks/useMediaQuery";
 
 /* Fills the letterbox wherever the door artwork is contained rather
@@ -17,15 +16,82 @@ import {
    canvas continuing rather than as a gap onto the white glow behind. */
 const DOOR_MATTE = "#3d1704";
 
-/* Never matched, so the door starts on cover and only switches once
-   the artwork's real aspect ratio is known (measured on load). */
-const NEVER = "(min-aspect-ratio: 100000/1)";
 
-/** The exact-width crop for this viewport, or the generic mobile
- *  background if none of the four purpose-made crops fit. */
-function pickDoorMobileFile(width) {
-  const match = DOOR_MOBILE_CROPS.find((c) => width >= c.minWidth);
-  return match ? match.file : IMAGES.door.fileMobile;
+/** One half of the photograph. All offsets are % of the panel.
+ *
+ *  Declared at module scope, NOT inside TempleGate. Defined inline it
+ *  was a new function identity on every render, so React remounted
+ *  both panels and rebuilt their <img> elements — while the GSAP
+ *  timeline went on animating the original, now-detached nodes. That
+ *  is what made the gate stutter and lose its animation mid-scroll.
+ *
+ *  `contain` decides cover vs contain from the crop direction. When
+ *  contain is in play the artwork can't fill the panel, so rather than
+ *  flat bars a blurred cover-scaled copy of the same file sits behind
+ *  it and fills the gap, letting the edges read as the canvas
+ *  continuing. It uses the panel's exact geometry, so the two halves
+ *  stay aligned across the seam; the flat matte stays under it as a
+ *  base, since a blur softens its own outer edge. */
+function Door({ edge, src, focal, contain, onMeasure }) {
+  const stacked = edge === "t" || edge === "b";
+  const geometry = stacked
+    ? `left-0 h-[200%] w-full ${edge === "t" ? "top-0" : "top-[-100%]"}`
+    : `top-0 w-[200%] h-full ${edge === "l" ? "left-0" : "left-[-100%]"}`;
+
+  return (
+    <div
+      {...{ [`data-door-${edge}`]: true }}
+      className={`relative overflow-hidden will-change-transform ${
+        stacked ? "h-1/2 w-full" : "h-full w-1/2"
+      }`}
+      style={contain ? { backgroundColor: DOOR_MATTE } : undefined}
+    >
+      {contain && (
+        <img
+          src={src}
+          alt=""
+          aria-hidden
+          decoding="async"
+          draggable="false"
+          className={`absolute max-w-none scale-110 object-cover blur-2xl ${geometry}`}
+        />
+      )}
+      <img
+        src={src}
+        alt=""
+        aria-hidden
+        fetchPriority="high"
+        decoding="async"
+        draggable="false"
+        onLoad={(e) =>
+          onMeasure(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)
+        }
+        style={{ objectPosition: focal }}
+        className={`absolute max-w-none ${
+          contain ? "object-contain" : "object-cover"
+        } ${geometry}`}
+      />
+    </div>
+  );
+}
+
+/** Whichever mobile crop is shaped closest to this viewport, so the
+ *  artwork fills the screen with the least cropping or letterboxing.
+ *  Falls back to the generic mobile background before the viewport
+ *  has been measured. */
+function pickDoorMobileFile(width, height) {
+  if (!width || !height) return IMAGES.door.fileMobile;
+  const target = width / height;
+  let best = null;
+  let bestGap = Infinity;
+  for (const crop of DOOR_MOBILE_CROPS) {
+    const gap = Math.abs(crop.w / crop.h - target);
+    if (gap < bestGap) {
+      bestGap = gap;
+      best = crop;
+    }
+  }
+  return best ? best.file : IMAGES.door.fileMobile;
 }
 
 /* Snapshots scattered around the emblem — all six show at every size,
@@ -63,8 +129,10 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
   const ref = useRef(null);
   const reduced = useReducedMotion();
   const mobile = useIsMobile();
-  const viewportWidth = useViewportWidth();
-  const doorSrc  = mobile ? pickDoorMobileFile(viewportWidth) : IMAGES.door.file;
+  const viewport = useStableViewport();
+  const doorSrc = mobile
+    ? pickDoorMobileFile(viewport.w, viewport.h)
+    : IMAGES.door.file;
   const doorFocal = mobile ? IMAGES.door.focalMobile : IMAGES.door.focal;
 
   /* Which fit to use is decided by the crop DIRECTION, not by screen
@@ -76,11 +144,26 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
          the top edge, so use contain and letterbox the sides instead.
        - viewport TALLER than the artwork (e.g. 1325x918) -> cover only
          crops left and right, which the mark has margin to survive, so
-         cover it is: full-bleed, no bars. */
+         cover it is: full-bleed, no bars.
+     Measured against the STABLE viewport, not a live media query: on a
+     phone a well-matched crop sits right on the boundary, so a URL bar
+     collapsing mid-scroll would otherwise flip the fit back and forth. */
   const [artSize, setArtSize] = useState(null);
-  const doorContain = useMediaQuery(
-    artSize ? `(min-aspect-ratio: ${artSize.w}/${artSize.h})` : NEVER
-  );
+  const doorContain =
+    !!artSize && !!viewport.h && viewport.w / viewport.h > artSize.w / artSize.h;
+
+  const measureArt = useCallback((w, h) => {
+    // both halves load the same file and fire this — keep the
+    // identical second call from causing another render
+    setArtSize((prev) => (prev?.w === w && prev?.h === h ? prev : { w, h }));
+  }, []);
+
+  const doorProps = {
+    src: doorSrc,
+    focal: doorFocal,
+    contain: doorContain,
+    onMeasure: measureArt,
+  };
 
   useGSAP(
     () => {
@@ -159,62 +242,6 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
     { scope: ref, dependencies: [reduced, mobile] }
   );
 
-  /** One half of the photograph. All offsets are % of the panel.
-   *
-   *  `doorContain` above decides cover vs contain from the crop
-   *  direction. When contain is in play the artwork can't fill the
-   *  panel, so rather than flat bars a blurred cover-scaled copy of
-   *  the same file sits behind it and fills the gap, letting the edges
-   *  read as the canvas continuing. It uses the panel's exact
-   *  geometry, so the two halves stay aligned across the seam; the
-   *  flat matte stays under it as a base, since a blur softens its own
-   *  outer edge. */
-  const Door = ({ edge }) => {
-    const stacked = edge === "t" || edge === "b";
-    const geometry = stacked
-      ? `left-0 h-[200%] w-full ${edge === "t" ? "top-0" : "top-[-100%]"}`
-      : `top-0 w-[200%] h-full ${edge === "l" ? "left-0" : "left-[-100%]"}`;
-    return (
-      <div
-        {...{ [`data-door-${edge}`]: true }}
-        className={`relative overflow-hidden will-change-transform ${
-          stacked ? "h-1/2 w-full" : "h-full w-1/2"
-        }`}
-        style={doorContain ? { backgroundColor: DOOR_MATTE } : undefined}
-      >
-        {doorContain && (
-          <img
-            src={doorSrc}
-            alt=""
-            aria-hidden
-            decoding="async"
-            draggable="false"
-            className={`absolute max-w-none scale-110 object-cover blur-2xl ${geometry}`}
-          />
-        )}
-        <img
-          src={doorSrc}
-          alt=""
-          aria-hidden
-          fetchPriority="high"
-          decoding="async"
-          draggable="false"
-          onLoad={(e) => {
-            const w = e.currentTarget.naturalWidth;
-            const h = e.currentTarget.naturalHeight;
-            // both halves load the same file and fire this — keep the
-            // identical second call from causing another render
-            setArtSize((prev) => (prev?.w === w && prev?.h === h ? prev : { w, h }));
-          }}
-          style={{ objectPosition: doorFocal }}
-          className={`absolute max-w-none ${
-            doorContain ? "object-contain" : "object-cover"
-          } ${geometry}`}
-        />
-      </div>
-    );
-  };
-
   return (
     <section
       ref={ref}
@@ -236,13 +263,13 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
       >
         {mobile ? (
           <>
-            <Door edge="t" />
-            <Door edge="b" />
+            <Door edge="t" {...doorProps} />
+            <Door edge="b" {...doorProps} />
           </>
         ) : (
           <>
-            <Door edge="l" />
-            <Door edge="r" />
+            <Door edge="l" {...doorProps} />
+            <Door edge="r" {...doorProps} />
           </>
         )}
       </div>

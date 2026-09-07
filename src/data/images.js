@@ -85,17 +85,23 @@ export const IMAGES = {
   },
 };
 
-/* ---------- Gate: exact-width mobile crops ----------
-   Four creatives, each composed for one specific device width rather
-   than one crop stretched/squeezed to fit all of them. Sorted by
-   width so TempleGate can pick the first one the viewport is at
-   least as wide as, falling back to IMAGES.door.fileMobile below
-   360px or above 414px (still under the sm breakpoint). */
+/* ---------- Gate: mobile crops ----------
+   Four creatives, each composed for a specific handset rather than one
+   crop stretched to fit all of them. TempleGate picks whichever one's
+   shape is closest to the actual viewport, because matching on width
+   alone hands a phone a crop that doesn't fit it: 390x844 and 414x896
+   are the SAME shape (0.462), as are 360x800 and 412x915 (0.450).
+
+   `w`/`h` are each file's real pixel size, not what its name claims.
+   Note gate-mobile-390x844.jpg is genuinely 390x915 on disk — it was
+   exported at the wrong height, so it fits no 390x844 screen. Listed
+   honestly here so the picker doesn't choose it for one; re-export it
+   at 390x844 and this entry just starts matching those phones again. */
 export const DOOR_MOBILE_CROPS = [
-  { minWidth: 414, file: "/assets/gate-mobile-414x896.jpg" },
-  { minWidth: 412, file: "/assets/gate-mobile-412x915.jpg" },
-  { minWidth: 390, file: "/assets/gate-mobile-390x844.jpg" },
-  { minWidth: 360, file: "/assets/gate-mobile-360x800.jpg" },
+  { w: 414, h: 896, file: "/assets/gate-mobile-414x896.jpg" },
+  { w: 412, h: 915, file: "/assets/gate-mobile-412x915.jpg" },
+  { w: 390, h: 915, file: "/assets/gate-mobile-390x844.jpg" },
+  { w: 360, h: 800, file: "/assets/gate-mobile-360x800.jpg" },
 ];
 
 /* ---------- Gallery: your own photographs ---------- */
