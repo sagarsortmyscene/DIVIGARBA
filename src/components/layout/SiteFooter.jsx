@@ -23,17 +23,15 @@ export function SiteFooter() {
   ];
 
   return (
-    <footer className="relative px-5 pb-10 sm:px-10" style={{ zIndex: "var(--z-content)" }}>
+    <footer
+      id="footer"
+      className="relative px-5 pb-10 sm:px-10"
+      style={{ zIndex: "var(--z-content)" }}
+    >
       <div className="divider-carved mb-10"><span className="h-1.5 w-1.5 rotate-45 bg-mukut/70" /></div>
 
       <div className="mx-auto max-w-5xl">
-        <img
-          src="/assets/logo-divi.png"
-          alt={brandLine}
-          className="mx-auto h-24 w-auto object-contain sm:h-32"
-        />
-
-        <ul className="mt-7 grid gap-px border border-antique/15 bg-antique/15 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="grid gap-px border border-antique/15 bg-antique/15 sm:grid-cols-2 lg:grid-cols-4">
           {contacts.map(({ Icon, label, href }) => (
             <li key={label} className="bg-obsidian/90">
               <a
@@ -49,7 +47,7 @@ export function SiteFooter() {
           ))}
         </ul>
 
-        <p className="label mt-7 text-center text-ivory/35">
+        <p className="label mt-7 text-center text-sm text-ivory/75">
           {dates} · {location}
         </p>
 
@@ -67,16 +65,16 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <p className="mt-8 text-center text-xs text-ivory/30">
+        <p className="mt-8 text-center text-sm text-ivory/70">
           {brandLine.split(" ").slice(0, 2).join(" ")} is a Navratri experience by{" "}
-          <a href={organiserUrl} target="_blank" rel="noreferrer noopener" className="text-mukut/80 hover:text-mukut">
+          <a href={organiserUrl} target="_blank" rel="noreferrer noopener" className="text-mukut hover:text-mukut">
             {organiserName}
           </a>
           .
         </p>
 
-        <p className="mt-3 text-center text-xs text-ivory/20">
-          This photography is from live events only. © 2026 {brandLine}.
+        <p className="mt-3 text-center text-sm text-ivory/70">
+          All photographs are owned by {brandLine}. © 2026 {brandLine}.
         </p>
       </div>
     </footer>

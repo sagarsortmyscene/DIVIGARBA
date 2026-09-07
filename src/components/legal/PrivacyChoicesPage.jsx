@@ -1,20 +1,23 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { LegalPage } from "./LegalPage";
 import { EVENT_CONFIG } from "../../data/event";
 
 const KEY = "privacy-choices:optional-tracking";
 
-export function PrivacyChoicesPage() {
-  const [allowed, setAllowed] = useState(false);
-  const [saved, setSaved] = useState(false);
+/** Read once, at first render. In an effect this rendered the page with
+ *  the wrong answer and then immediately re-rendered with the right one. */
+function storedChoice() {
+  try {
+    return localStorage.getItem(KEY) === "true";
+  } catch {
+    /* private browsing, storage blocked — default stays off */
+    return false;
+  }
+}
 
-  useEffect(() => {
-    try {
-      setAllowed(localStorage.getItem(KEY) === "true");
-    } catch {
-      /* private browsing, storage blocked — default stays off */
-    }
-  }, []);
+export function PrivacyChoicesPage() {
+  const [allowed, setAllowed] = useState(storedChoice);
+  const [saved, setSaved] = useState(false);
 
   function save(next) {
     setAllowed(next);

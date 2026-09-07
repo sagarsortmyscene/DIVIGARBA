@@ -19,14 +19,23 @@ export function SiteHeader({ slotRef }) {
   );
 
   return (
+    /* pointer-events-none on the bar, auto on the two things you can
+       actually click. The header is a full-width strip as tall as the
+       docked logo and has no background, so as a click target it was an
+       invisible sheet across the top of every page — it is what was
+       eating clicks meant for whatever sat underneath it. */
     <header
       ref={ref}
-      className="fixed top-0 left-0 flex w-full items-center justify-between px-5 py-4 transition-colors duration-500 sm:px-9"
+      className="pointer-events-none fixed top-0 left-0 flex w-full items-center justify-between px-5 py-4 transition-colors duration-500 sm:px-9"
       style={{ zIndex: "var(--z-nav)" }}
     >
       {/* the emblem lands here — FlyingEmblem docks it; this span just
           reserves its slot */}
-      <a href="#top" className="flex items-center gap-3" aria-label={`${EVENT_CONFIG.brandLine}, home`}>
+      <a
+        href="#top"
+        className="pointer-events-auto flex items-center gap-3"
+        aria-label={`${EVENT_CONFIG.brandLine}, home`}
+      >
         <span ref={slotRef} className="emblem-slot block" aria-hidden />
       </a>
 
@@ -38,7 +47,7 @@ export function SiteHeader({ slotRef }) {
         type="button"
         id="buy-btn"
         data-cursor="cta"
-        className="label cursor-pointer rounded-full border border-antique/40 bg-obsidian/45 px-5 py-2.5 text-mukut transition-colors duration-500 hover:border-mukut hover:bg-mukut hover:text-obsidian"
+        className="label pointer-events-auto cursor-pointer rounded-full border border-mukut bg-mukut px-5 py-2.5 text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold"
       >
         Book ticket
       </button>

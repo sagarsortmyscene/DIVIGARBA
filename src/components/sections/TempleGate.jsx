@@ -1,8 +1,13 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { IMAGES, GALLERY, DOOR_MOBILE_CROPS } from "../../data/images";
+import {
+  IMAGES,
+  GALLERY,
+  DOOR_MOBILE_CROPS,
+  DOOR_DESKTOP_CROPS,
+} from "../../data/images";
 import { createScene } from "../../lib/animations";
 import {
   useReducedMotion,
@@ -32,7 +37,7 @@ const DOOR_MATTE = "#3d1704";
  *  continuing. It uses the panel's exact geometry, so the two halves
  *  stay aligned across the seam; the flat matte stays under it as a
  *  base, since a blur softens its own outer edge. */
-function Door({ edge, src, focal, contain, onMeasure }) {
+function Door({ edge, src, focal, contain }) {
   const stacked = edge === "t" || edge === "b";
   const geometry = stacked
     ? `left-0 h-[200%] w-full ${edge === "t" ? "top-0" : "top-[-100%]"}`
@@ -63,9 +68,6 @@ function Door({ edge, src, focal, contain, onMeasure }) {
         fetchPriority="high"
         decoding="async"
         draggable="false"
-        onLoad={(e) =>
-          onMeasure(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)
-        }
         style={{ objectPosition: focal }}
         className={`absolute max-w-none ${
           contain ? "object-contain" : "object-cover"
@@ -75,23 +77,22 @@ function Door({ edge, src, focal, contain, onMeasure }) {
   );
 }
 
-/** Whichever mobile crop is shaped closest to this viewport, so the
- *  artwork fills the screen with the least cropping or letterboxing.
- *  Falls back to the generic mobile background before the viewport
- *  has been measured. */
-function pickDoorMobileFile(width, height) {
-  if (!width || !height) return IMAGES.door.fileMobile;
+/** Whichever crop in `crops` is shaped closest to this viewport, so the
+ *  artwork covers the screen with the least cropping. `fallback` covers
+ *  the moment before the viewport has been measured. */
+function pickClosestCrop(crops, width, height, fallback) {
+  if (!width || !height) return fallback;
   const target = width / height;
-  let best = null;
+  let best = fallback;
   let bestGap = Infinity;
-  for (const crop of DOOR_MOBILE_CROPS) {
+  for (const crop of crops) {
     const gap = Math.abs(crop.w / crop.h - target);
     if (gap < bestGap) {
       bestGap = gap;
-      best = crop;
+      best = crop.file;
     }
   }
-  return best ? best.file : IMAGES.door.fileMobile;
+  return best;
 }
 
 /* Snapshots scattered around the emblem — all six show at every size,
@@ -100,12 +101,17 @@ function pickDoorMobileFile(width, height) {
    because GSAP writes `transform` directly and would otherwise
    clobber a class-based rotate. */
 const SCATTER = [
-  { shot: GALLERY[0], at: "top-[8%] left-[4%] sm:left-[6%] lg:left-[8%] xl:left-[11%]",            rotate: -8 },
-  { shot: GALLERY[2], at: "top-[7%] right-[4%] sm:right-[6%] lg:right-[8%] xl:right-[11%]",         rotate: 6 },
-  { shot: GALLERY[4], at: "bottom-[16%] left-[5%] sm:left-[8%] lg:left-[10%] xl:left-[13%]",        rotate: 5 },
-  { shot: GALLERY[6], at: "bottom-[15%] right-[5%] sm:right-[8%] lg:right-[10%] xl:right-[13%]",    rotate: -7 },
-  { shot: GALLERY[1], at: "top-[40%] left-[1%] lg:left-[2%] xl:left-[4%]",  rotate: 4 },
-  { shot: GALLERY[3], at: "top-[42%] right-[1%] lg:right-[2%] xl:right-[4%]", rotate: -5 },
+  /* The four corner cards sit above and below the emblem, so on a phone
+     they can be pulled well in from the edges without touching it. */
+  { shot: GALLERY[0], at: "top-[8%] left-[11%] sm:left-[6%] lg:left-[8%] xl:left-[11%]",         rotate: -8 },
+  { shot: GALLERY[2], at: "top-[7%] right-[11%] sm:right-[6%] lg:right-[8%] xl:right-[11%]",     rotate: 6 },
+  { shot: GALLERY[4], at: "bottom-[16%] left-[12%] sm:left-[8%] lg:left-[10%] xl:left-[13%]",    rotate: 5 },
+  { shot: GALLERY[6], at: "bottom-[15%] right-[12%] sm:right-[8%] lg:right-[10%] xl:right-[13%]", rotate: -7 },
+  /* These two sit at the emblem's own height, so they stay near the
+     edges on a phone — pulled in any further at this size they would
+     cover the logo they are meant to frame. */
+  { shot: GALLERY[1], at: "top-[40%] left-[2%] lg:left-[2%] xl:left-[4%]",  rotate: 4 },
+  { shot: GALLERY[3], at: "top-[42%] right-[2%] lg:right-[2%] xl:right-[4%]", rotate: -5 },
 ];
 
 /**
@@ -131,39 +137,17 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
   const mobile = useIsMobile();
   const viewport = useStableViewport();
   const doorSrc = mobile
-    ? pickDoorMobileFile(viewport.w, viewport.h)
-    : IMAGES.door.file;
+    ? pickClosestCrop(DOOR_MOBILE_CROPS, viewport.w, viewport.h, IMAGES.door.fileMobile)
+    : pickClosestCrop(DOOR_DESKTOP_CROPS, viewport.w, viewport.h, IMAGES.door.file);
   const doorFocal = mobile ? IMAGES.door.focalMobile : IMAGES.door.focal;
 
-  /* Which fit to use is decided by the crop DIRECTION, not by screen
-     size — so it holds for any viewport, including ones nobody tested.
-     The artwork's own ratio is measured from the file on load rather
-     than hardcoded, so swapping a creative can't put this out of date.
-       - viewport WIDER than the artwork -> cover would crop top and
-         bottom, and the "Event by panchatva" mark sits hard against
-         the top edge, so use contain and letterbox the sides instead.
-       - viewport TALLER than the artwork (e.g. 1325x918) -> cover only
-         crops left and right, which the mark has margin to survive, so
-         cover it is: full-bleed, no bars.
-     Measured against the STABLE viewport, not a live media query: on a
-     phone a well-matched crop sits right on the boundary, so a URL bar
-     collapsing mid-scroll would otherwise flip the fit back and forth. */
-  const [artSize, setArtSize] = useState(null);
-  const doorContain =
-    !!artSize && !!viewport.h && viewport.w / viewport.h > artSize.w / artSize.h;
-
-  const measureArt = useCallback((w, h) => {
-    // both halves load the same file and fire this — keep the
-    // identical second call from causing another render
-    setArtSize((prev) => (prev?.w === w && prev?.h === h ? prev : { w, h }));
-  }, []);
-
-  const doorProps = {
-    src: doorSrc,
-    focal: doorFocal,
-    contain: doorContain,
-    onMeasure: measureArt,
-  };
+  /* Always cover, never contain — so the gate is full-bleed on every
+     device, with no letterbox bars anywhere. That is only safe because
+     the pickers above hand over a crop shaped close to this viewport,
+     which keeps the crop to a few percent, and because every generated
+     variant carries padding at the edge it gets cropped from. So what
+     cover trims is the padding, not the artwork. */
+  const doorProps = { src: doorSrc, focal: doorFocal, contain: false };
 
   useGSAP(
     () => {
@@ -287,8 +271,13 @@ export function TempleGate({ emblemRef, onGateOpen, onGateClose }) {
           aria-hidden
           className={[
             "absolute aspect-3/4 bg-ivory p-1 opacity-0 shadow-[0_10px_28px_rgba(0,0,0,0.35)] sm:p-1.5",
-            "w-24 sm:w-32 md:w-40 lg:w-48 xl:w-56 2xl:w-64",
-            "[@media(max-height:820px)]:w-20 [@media(max-height:820px)]:sm:w-28 [@media(max-height:820px)]:lg:w-36 [@media(max-height:820px)]:xl:w-40",
+            "w-32 sm:w-32 md:w-40 lg:w-48 xl:w-56 2xl:w-64",
+            /* The short-viewport step is for wide-but-short laptops
+               (1366x768, 1280x720), where full-size cards would run
+               into the emblem. It is scoped from sm up on purpose:
+               unscoped it also caught 800px-tall PHONES and shrank
+               them, which is the opposite of what a phone needs. */
+            "sm:[@media(max-height:820px)]:w-28 lg:[@media(max-height:820px)]:w-36 xl:[@media(max-height:820px)]:w-40",
             at,
           ].join(" ")}
           style={{ zIndex: "var(--z-content)" }}

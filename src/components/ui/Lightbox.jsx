@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { Media } from "./Media";
@@ -15,17 +16,33 @@ export function Lightbox({ shot, onClose }) {
   const backRef = useRef(null);
   const reduced = useReducedMotion();
 
-  /* Esc closes; scroll is locked while open. */
+  /* Held in a ref so the effect below can run ONCE per mount. Keyed on
+     `onClose` it re-ran on every parent render, and each re-run
+     captured the already-locked "hidden" as the value to restore — so
+     closing put that back and left the page unscrollable, which reads
+     as the close button doing nothing. */
+  const closeRef = useRef(onClose);
   useEffect(() => {
-    const onKey = (e) => e.key === "Escape" && onClose();
+    closeRef.current = onClose;
+  }, [onClose]);
+
+  /* Esc closes; scroll is locked while open. The body class hides the
+     header's Book ticket button for as long as this is up — it and the
+     Close button would otherwise sit stacked in the same corner, and
+     only Close is meaningful while a photo is open. CSS does it rather
+     than lifting state to App, since nothing else needs to know. */
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && closeRef.current();
     document.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("lightbox-open");
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      document.body.classList.remove("lightbox-open");
     };
-  }, [onClose]);
+  }, []);
 
   useGSAP(
     () => {
@@ -48,7 +65,16 @@ export function Lightbox({ shot, onClose }) {
 
   if (!shot) return null;
 
-  return (
+  /* Rendered into <body>, not in place. Gallery sits inside <main>,
+     which has position:relative + z-index:50 and therefore opens a
+     stacking context — so this dialog's z-index only ever competed
+     INSIDE that context, while the fixed header (a sibling of main, at
+     z-index 70) painted over the whole thing. The header has no
+     background and is as tall as the docked logo, so it was an
+     invisible full-width strip across the top swallowing the clicks
+     meant for Close. A portal puts the dialog above the page entirely,
+     which is where a modal belongs. */
+  return createPortal(
     <div
       className="fixed inset-0 grid place-items-center p-5 sm:p-10"
       style={{ zIndex: "var(--z-loader)", perspective: "1600px" }}
@@ -99,11 +125,12 @@ export function Lightbox({ shot, onClose }) {
       <button
         type="button"
         onClick={onClose}
-        className="label absolute top-6 right-6 rounded-full border border-antique/40 px-4 py-2 text-mukut transition-colors hover:bg-mukut hover:text-obsidian"
-        style={{ zIndex: 1 }}
+        className="label absolute top-6 right-6 cursor-pointer rounded-full border border-antique/40 bg-obsidian/80 px-4 py-2 text-mukut transition-colors hover:bg-mukut hover:text-obsidian"
+        style={{ zIndex: 3 }}
       >
         Close
       </button>
-    </div>
+    </div>,
+    document.body
   );
 }

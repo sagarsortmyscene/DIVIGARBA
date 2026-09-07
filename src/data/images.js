@@ -1,16 +1,11 @@
 /* ============================================================
-   ASSET CATALOG — all local now. Nothing is fetched from a CDN.
-
-   Every path below points at a file that actually exists in
-   public/assets. Three fields (BRAND.logoFlag, BACKGROUNDS.canvas,
-   BACKGROUNDS.bells) have no distinct source yet — they're flagged
-   below and currently reuse the closest existing crop as a stand-in.
+   ASSET CATALOG — all local. Nothing is fetched from a CDN.
+   Every path below points at a file that exists in public/assets.
    ============================================================ */
 
 /** Local assets need no transform — this keeps the <Media> API unchanged. */
 export const unsplash = (file) => file;
 export const unsplashSrcSet = () => undefined;
-export const unsplashBlur = (file) => file;
 
 export const SIZES = {
   full:     "100vw",
@@ -22,33 +17,8 @@ export const SIZES = {
 
 /* ---------- Brand ---------- */
 export const BRAND = {
-  /* the gold logotype on transparent — used in the header and the gate */
-  logo:     "/assets/logo-divi.png",
-  /* TODO: no separate "with flag stroke" variant has been supplied yet —
-     reusing the plain logotype until one is uploaded. */
-  logoFlag: "/assets/logo-divi.png",
-};
-
-/* ---------- Painted backgrounds, one crop per viewport shape ---------- */
-export const BACKGROUNDS = {
-  devi: {
-    wide:     "/assets/divibg-web.jpg",
-    square:   "/assets/divibg-square.jpg",
-    portrait: "/assets/divibg-mobile.jpg",
-    focal:    "28% center",   // keeps the face in frame when cropped
-  },
-  /* TODO: "plain canvas, no face" hasn't been supplied — standing in
-     with the gate's portrait background until a real one lands. */
-  canvas: {
-    portrait: "/assets/gate-mobile-background.jpg",
-    focal:    "center center",
-  },
-  /* TODO: no "bells along the top" crop exists yet — reusing the devi
-     portrait crop as a placeholder. */
-  bells: {
-    portrait: "/assets/divibg-mobile.jpg",
-    focal:    "center top",
-  },
+  /* the gold logotype on transparent — header, gate and legal pages */
+  logo: "/assets/logo-divi.png",
 };
 
 /* ---------- The gate + the canvas behind it ---------- */
@@ -58,7 +28,7 @@ export const IMAGES = {
      below, picked by TempleGate at render time. `fileMobile` is the
      fallback for any mobile width none of those four crops covers. */
   door: {
-    file:       "/assets/gate-background.jpg",
+    file:       "/assets/gate-background.jpg",      // 1600x900, ratio 1.778
     fileMobile: "/assets/gate-mobile-background.jpg",
     alt: "Maa Durga — the gate",
     focal: "center center",
@@ -71,19 +41,22 @@ export const IMAGES = {
     alt: "Maa Durga, painted on aged canvas — the Divi key artwork",
     focal: "center 34%",
   },
-  /* Portrait crop of the same artwork, for tall viewports */
-  deviPortrait: {
-    file: "/assets/gate-mobile-background.jpg",
-    alt: "Maa Durga, painted on aged canvas",
-    focal: "center 30%",
-  },
-  /* The venue at rest — lotus canopy, rangoli, the empty circle */
-  venue: {
-    file: "/assets/gallery/DSC07975.jpg",
-    alt: "The flower-ringed altar under a canopy of fabric petals",
-    focal: "center 45%",
-  },
 };
+
+/* ---------- Gate: desktop ----------
+   One supplied creative, 1600x900 (16:9), shown with object-cover.
+
+   Worth knowing: a real desktop viewport is rarely 16:9, because
+   browser chrome takes ~110px of height — most end up WIDER
+   (1920x1080 -> 1.98, 1366x768 -> 2.08) and some TALLER (1024x768 ->
+   1.56). Cover therefore crops whichever axis is in surplus, and the
+   "Event by panchatva" mark sits only 2.5% in from the left and 4.4%
+   down from the top, so it is the first thing to go on the shapes
+   furthest from 16:9. Supplying extra crops here — the way the mobile
+   ones below are cut per handset — is what would fix that. */
+export const DOOR_DESKTOP_CROPS = [
+  { w: 1600, h: 900, file: "/assets/gate-background.jpg" },
+];
 
 /* ---------- Gate: mobile crops ----------
    Four creatives, each composed for a specific handset rather than one
@@ -117,5 +90,3 @@ export const GALLERY = [
   { n: "09", file: "/assets/gallery/DSC07975.jpg", title: "The centre",    line: "Before anyone arrives. The lamp, the rangoli, the wait.", alt: "The flower-ringed altar under a canopy of fabric petals", focal: "center 45%", span: "full" },
 ];
 
-/** No external photography any more — nothing to attribute. */
-export const CREDITS = [];

@@ -306,10 +306,28 @@
   opacity: 0.4;
 }
 
-/* The emblem docks into the header; this reserves its slot */
+/* While a gallery photo is open, its Close button sits in the same
+   corner as the header's Book ticket button. Only Close means anything
+   at that moment, so the CTA steps aside until the photo is dismissed
+   — on phones and desktop alike. Set by Lightbox on <body>. */
+body.lightbox-open #buy-btn {
+  display: none;
+}
+
+/* The emblem docks into the header; this reserves its slot, and
+   FlyingEmblem measures it to work out where and how small to land —
+   so this width alone controls the docked logo's size.
+   140px on desktop; phones keep the previous fluid 72-100px, since a
+   140px mark would be a third of a 360px-wide screen. The breakpoint
+   matches useIsMobile() so the two never disagree. */
 .emblem-slot {
-  width: clamp(72px, 8vw, 100px);
+  width: 180px;
   aspect-ratio: 1;
+}
+@media (max-width: 768px) {
+  .emblem-slot {
+    width: clamp(100px, 26vw, 120px);
+  }
 }
 
 /* ============================================================

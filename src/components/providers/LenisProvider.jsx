@@ -3,7 +3,6 @@ import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
-import { LenisContext } from "./LenisContext";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -52,5 +51,9 @@ export function LenisProvider({ children }) {
     };
   }, [reduced]);
 
-  return <LenisContext.Provider value={lenisRef}>{children}</LenisContext.Provider>;
+  /* Renders children as-is. It used to publish the Lenis instance on a
+     context, but nothing ever read it — the smooth scroll is wired
+     straight into GSAP's ticker above. Put a context back if something
+     genuinely needs programmatic scrollTo. */
+  return children;
 }

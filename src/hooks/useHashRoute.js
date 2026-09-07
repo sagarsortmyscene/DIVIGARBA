@@ -11,8 +11,18 @@ export function useHashRoute() {
 
   useEffect(() => {
     const onChange = () => {
-      setRoute(read());
-      window.scrollTo({ top: 0 });
+      const next = read();
+      setRoute(next);
+      /* Land on the matching anchor if the newly rendered view has one
+         (the legal pages' "return to the circle" points at #footer), and
+         only fall back to the top when there is nothing to land on.
+         Deferred a frame because that element does not exist until the
+         view this hash switches to has actually rendered. */
+      requestAnimationFrame(() => {
+        const target = document.getElementById(next);
+        if (target) target.scrollIntoView();
+        else window.scrollTo({ top: 0 });
+      });
     };
     window.addEventListener("hashchange", onChange);
     return () => window.removeEventListener("hashchange", onChange);

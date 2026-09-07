@@ -15,7 +15,7 @@ export const EVENT_CONFIG = {
   email: "panchatva@divigarba.com",
   instagram: "https://www.instagram.com/divigarba/",
   instagramHandle: "@divigarba",
-  maps: "https://maps.app.goo.gl/BTfX64dfCBcKsEip9",
+  maps: "https://share.google/TpbhF5qgcvUpwjPHC",
 
   terms: "#terms",
   privacy: "#privacy",

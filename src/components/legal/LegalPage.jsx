@@ -1,4 +1,5 @@
 import { EVENT_CONFIG } from "../../data/event";
+import { BRAND } from "../../data/images";
 import { SiteFooter } from "../layout/SiteFooter";
 
 function Section({ heading, paragraphs = [], bullets = [] }) {
@@ -29,19 +30,25 @@ export function LegalPage({ title, effective, intro, sections = [], footnote, ch
   return (
     <div className="min-h-svh">
       <header
-        className="sticky top-0 flex items-center justify-between border-b border-antique/15 bg-obsidian/90 px-5 py-4 backdrop-blur-md sm:px-10"
+        className="sticky top-0 flex items-center justify-between border-b border-antique/15 bg-obsidian/90 px-5 py-2 backdrop-blur-md sm:px-10"
         style={{ zIndex: "var(--z-nav)" }}
       >
-        <a href="#top" className="label text-ivory/60 transition-colors hover:text-ivory">
-          ← Return to the circle
+        {/* Lands on the footer rather than the top of the landing page —
+            you came from a footer link, so that is where you left off.
+            App.jsx does the scrolling once the main view has mounted. */}
+        <a href="#footer" className="label text-ivory/60 transition-colors hover:text-ivory">
+          ← Back
         </a>
-        <span className="label text-mukut">{EVENT_CONFIG.brandLine}</span>
+        <img
+          src={BRAND.logo}
+          alt={EVENT_CONFIG.brandLine}
+          className="emblem-slot object-contain"
+        />
       </header>
 
       <main className="px-5 pt-12 pb-24 sm:px-10">
         <div className="mx-auto max-w-2xl">
-          <p className="label text-center text-antique">{EVENT_CONFIG.brandLine}</p>
-          <h1 className="display-type mt-3 text-center text-[clamp(2rem,5vw,3.2rem)] text-ivory">{title}</h1>
+          <h1 className="display-type text-center text-[clamp(2rem,5vw,3.2rem)] text-ivory">{title}</h1>
           {effective && <p className="mt-4 text-center text-xs text-ivory/35">Effective {effective}</p>}
 
           <div className="divider-carved mt-8">
