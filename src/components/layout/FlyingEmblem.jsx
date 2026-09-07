@@ -14,19 +14,43 @@ function centreOf(el) {
   };
 }
 
-/** The header slot's position and scale, measured live and expressed as
- *  ABSOLUTE values from the 0,0 origin — never a delta from wherever
- *  the mark currently sits, which would be stale the moment the
- *  viewport height changed. The slot lives in a fixed header pinned to
- *  the top, so its coordinates hold no matter how far the page has
- *  scrolled. Returns null until both elements have been measured. */
+/** An element's position in the viewport from its LAYOUT boxes, walking
+ *  the offsetParent chain. Deliberately not getBoundingClientRect:
+ *  a rect includes every transform on every ancestor, and the header
+ *  carries one — SiteHeader's intro is a `gsap.from(..., { y: -14 })`,
+ *  whose start state is applied the instant the tween is created, in a
+ *  layout effect that runs BEFORE this component's. Measured with a
+ *  rect, the slot therefore reads 14px too high, the header then
+ *  animates back to y:0, and the mark — which never re-measures —
+ *  stays 14px above the Book ticket button forever. Offsets ignore
+ *  transforms, so this reads the resting position whenever it is
+ *  called, mid-animation or not.
+ *
+ *  The header is `fixed top-0 left-0`, so its own offsets are its
+ *  viewport position and the walk terminates there. */
+function layoutPos(el) {
+  let x = 0;
+  let y = 0;
+  for (let n = el; n; n = n.offsetParent) {
+    x += n.offsetLeft;
+    y += n.offsetTop;
+  }
+  return { x, y };
+}
+
+/** The header slot's position and scale, as ABSOLUTE values from the
+ *  0,0 origin — never a delta from wherever the mark currently sits,
+ *  which would be stale the moment the viewport height changed. The
+ *  slot lives in a fixed header pinned to the top, so its coordinates
+ *  hold no matter how far the page has scrolled. Returns null until
+ *  both elements have been measured. */
 function dockOf(wrap, slotEl) {
-  const slot = slotEl?.getBoundingClientRect();
-  if (!slot || !wrap || !wrap.offsetWidth) return null;
+  if (!slotEl || !wrap || !wrap.offsetWidth) return null;
+  const at = layoutPos(slotEl);
   return {
-    x: slot.left + slot.width / 2 - wrap.offsetWidth / 2,
-    y: slot.top + slot.height / 2 - wrap.offsetHeight / 2,
-    scale: slot.width / wrap.offsetWidth,
+    x: at.x + slotEl.offsetWidth / 2 - wrap.offsetWidth / 2,
+    y: at.y + slotEl.offsetHeight / 2 - wrap.offsetHeight / 2,
+    scale: slotEl.offsetWidth / wrap.offsetWidth,
   };
 }
 

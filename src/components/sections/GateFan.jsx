@@ -41,7 +41,15 @@ export function GateFan({ shots }) {
           260 x 377, and 0.66 of 600 is 396 — clear of it. At the old
           520 the height would have been clipped back to 343, so this
           went up with the card size rather than staying put. */}
-      <div className="pointer-events-auto w-full" style={{ height: 600 }}>
+      {/* marginTop pushes the whole hand below the header, so the
+          docked logo and the Book ticket button sit clear above it
+          rather than being overlapped by the top cards. A margin and
+          not a translate: GSAP animates this subtree's `y` on the gate
+          timeline and writes `transform` directly, so a transform here
+          would be clobbered. 96px clears a mobile header, which is the
+          logo slot (clamp 100-120px) plus its py-4 — raise it to drop
+          the hand further, lower it to bring the hand back up. */}
+      <div className="pointer-events-auto w-full" style={{ height: 600, marginTop: 96 }}>
         <Blinds
           items={shots.map((s) => ({ title: s.title, image: s.file }))}
           mode="fan"
