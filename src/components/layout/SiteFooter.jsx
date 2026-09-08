@@ -67,9 +67,15 @@ export function SiteFooter() {
 
         <p className="mt-8 text-center text-sm text-ivory/70">
           {brandLine.split(" ").slice(0, 2).join(" ")} is a Navratri experience by{" "}
-          <a href={organiserUrl} target="_blank" rel="noreferrer noopener" className="text-mukut hover:text-mukut">
-            {organiserName}
-          </a>
+          {organiserUrl ? (
+            <a href={organiserUrl} target="_blank" rel="noreferrer noopener" className="text-mukut hover:text-mukut">
+              {organiserName}
+            </a>
+          ) : (
+            /* No URL configured — the name still reads as the credit,
+               just without a dead link wrapped around it. */
+            <span className="text-mukut">{organiserName}</span>
+          )}
           .
         </p>
 

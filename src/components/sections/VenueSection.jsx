@@ -40,8 +40,11 @@ export function VenueSection() {
           <p className="mt-5 text-lg leading-relaxed text-ivory/70 sm:text-2xl">
             {venueStreet}
           </p>
+          {/* The full statement lives here rather than in the hero's
+              fact row, which is three narrow columns and would wrap it
+              badly. This column has the width for the whole rule. */}
           <p className="mt-2 text-lg leading-relaxed text-ivory/70 sm:text-2xl">
-            Gates open {gateEntry} · Last entry {entryCloses}
+            Music from {gateEntry}. Last entry {entryCloses} — gate entry closes after that.
           </p>
 
           <div className="mt-7 flex flex-wrap gap-3.5">

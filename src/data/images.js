@@ -22,17 +22,6 @@ export const IMAGES = {
     alt: "Divi Garba — Navratri 2026",
   },
 
-  /* The book's second page — the first thing on show once the cover
-     opens. 414x896, so ratio 0.462 against a 0.75 page: it is a
-     phone-shaped crop left over from the temple gate, and it cannot
-     fill this page without either bars or a heavy crop. GalleryFlip
-     covers it and pins it to the top, losing 38% of its height. A
-     900x1200 export of this artwork would drop that compromise. */
-  opening: {
-    file: "/assets/gate-mobile-414x896.jpg",
-    alt: "Divi Garba — the gate",
-  },
-
   /* The temple bells hung at the top of the hero, once each side.
      640x640 and a genuine RGBA cut-out — 85.6% of it is fully
      transparent — so it drops onto the gradient with no mask and no
@@ -43,8 +32,9 @@ export const IMAGES = {
   },
 
   /* The ornament that drifts behind the home hero, twice — low-left
-     and high-right. A genuine 626x626 RGBA PNG, so it needs no mask: the transparency does the work and it
-     sits over the gradient cleanly at low opacity. */
+     and high-right. A genuine 626x626 RGBA PNG, so it needs no mask —
+     the transparency does the work and it sits over the gradient
+     cleanly at low opacity. */
   vector: {
     file: "/assets/vector.png",
     alt: "",

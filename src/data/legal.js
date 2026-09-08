@@ -5,12 +5,12 @@
    ============================================================ */
 import { EVENT_CONFIG } from "./event";
 
-const { brandLine, phone, email, dates, location, gateEntry, entryCloses } =
+const { brandLine, phone, email, dates, location, gateEntry, entryCloses, organiserName } =
   EVENT_CONFIG;
 
 export const TERMS = {
   title: "Terms & Conditions",
-  intro: `${brandLine} is owned and operated by INCEPT EVENTS, a proprietorship registered in India.`,
+  intro: `${brandLine} is owned and operated by ${organiserName}, a proprietorship registered in India.`,
   sections: [
     {
       heading: "Single Pass — Entry Terms",
@@ -38,7 +38,7 @@ export const TERMS = {
 export const PRIVACY = {
   title: "Privacy Policy",
   effective: "19 August 2026",
-  intro: `${brandLine} is owned and operated by INCEPT EVENTS, a proprietorship registered in India. This policy explains how we collect, use, share, protect, retain, and delete personal data when you use the ${brandLine} website, waitlist, ticketing services, event-entry systems, email communications, or WhatsApp communications.`,
+  intro: `${brandLine} is owned and operated by ${organiserName}, a proprietorship registered in India. This policy explains how we collect, use, share, protect, retain, and delete personal data when you use the ${brandLine} website, waitlist, ticketing services, event-entry systems, email communications, or WhatsApp communications.`,
   sections: [
     {
       heading: "Information We Collect",
@@ -50,7 +50,7 @@ export const PRIVACY = {
         "WhatsApp information: opt-in or revocation evidence, hashed or masked recipient identifiers, approved template and message status, provider message identifiers, and STOP or START choices.",
       ],
       paragraphs: [
-        "Payment information is entered into Razorpay's secure checkout. INCEPT EVENTS does not receive or store your complete payment-card or banking credentials.",
+        `Payment information is entered into Razorpay's secure checkout. ${organiserName} does not receive or store your complete payment-card or banking credentials.`,
       ],
     },
     {
@@ -70,7 +70,7 @@ export const PRIVACY = {
       heading: "When Information Is Shared",
       paragraphs: [
         `We share only what is reasonably necessary with service providers that help us operate ${brandLine}, including Razorpay for payments, Meta and WhatsApp for consented messaging and optional analytics, Cloudflare for website delivery and security, our hosting and database providers, and our email-delivery provider.`,
-        "Authorised INCEPT EVENTS staff and Community Partners may access limited information when required to review an application, allocate or support a ticket, or operate the event. We may also disclose information where required by law, to protect people or the event, or to investigate fraud or misuse. We do not sell personal data.",
+        `Authorised ${organiserName} staff and Community Partners may access limited information when required to review an application, allocate or support a ticket, or operate the event. We may also disclose information where required by law, to protect people or the event, or to investigate fraud or misuse. We do not sell personal data.`,
       ],
     },
     {
@@ -128,7 +128,7 @@ export const DATA_DELETION = {
       heading: "Verification and Timing",
       bullets: [
         "We may request additional information to verify the requester's identity.",
-        "After verification, INCEPT EVENTS will complete deletion or anonymisation within 30 days and confirm completion by email.",
+        `After verification, ${organiserName} will complete deletion or anonymisation within 30 days and confirm completion by email.`,
         "If you don't receive an acknowledgement within seven days, please follow up.",
       ],
     },

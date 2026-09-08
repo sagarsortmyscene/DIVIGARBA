@@ -70,8 +70,8 @@ export function GalleryFlip() {
      back in the middle, and the transition means it glides into the
      full spread as the cover opens rather than jumping.
 
-     lg-only: below that the book is in portrait, where a single page
-     already fills the box and there is nothing to correct.
+     xl-only, matching the grid: below that the book is full width and
+     the correction does not apply.
      It goes on the BOOK, not on the wrapper around it. On the wrapper
      it moved the arrows and the counter by the same amount, so the
      page and the controls kept their offset and the row ended up
@@ -80,9 +80,9 @@ export function GalleryFlip() {
      where the controls already are.
      Safe as a transform because page-flip reads pointer positions from
      getBoundingClientRect, which includes it — drag stays accurate. */
-  const LAST = GALLERY.length + 2;
+  const LAST = GALLERY.length + 1;
   const recentre =
-    page === 0 ? "lg:-translate-x-1/4" : page >= LAST ? "lg:translate-x-1/4" : "";
+    page === 0 ? "xl:-translate-x-1/4" : page >= LAST ? "xl:translate-x-1/4" : "";
 
   return (
     /* WIDTH here is a request for a HEIGHT, and it must cover BOTH
@@ -105,10 +105,39 @@ export function GalleryFlip() {
        No explicit height: the parent's auto height is already larger
        than the book wants, and pinning one risks the blockHeight clamp
        on the last line above shrinking the pages instead.
-       Below lg the parent stays w-full, so a phone is untouched — it
-       is under the threshold and shows a single page, as it did. */
+       Below xl the parent is w-full and the layout is stacked, so the
+       book is capped at min(90vh, 700px) and centred. Without that cap
+       it took the FULL content width when stacked — about 1199px at
+       1279 wide — and then shrank to 808 the moment the layout went
+       two-column at 1280. The cap keeps the two sides of that
+       breakpoint within a few percent of each other.
+       A tablet still gets a spread; a phone drops under 560 and gets a
+       single page.
+
+       The split moved from lg to xl deliberately. At lg (1024) the
+       book's column worked out at 552px — four pixels under the 560
+       portrait threshold — so the book collapsed to ONE page at
+       exactly the width the layout went two-column. At xl the column
+       is 706px and clears it. */
     <div
-      className="mx-auto w-full lg:w-[90vh] lg:max-w-full"
+      /* The aspect ratio is what keeps the arrows below the book.
+         page-flip lays its pages out absolutely, so this box does not
+         grow to fit them — it was falling back to the 373px minHeight
+         while a portrait page rendered 427px tall at 360 wide, and the
+         controls row started 54px INSIDE the photograph. The narrower
+         the phone the worse it got, which is why 412 looked fine and
+         390 and 360 did not.
+
+         The two ratios are page-flip's own maths, not a guess:
+           portrait  page = blockWidth,     height = w / 0.75  -> 3/4
+           landscape page = blockWidth / 2, height = w / 1.5   -> 3/2
+         so the box now reserves exactly the height the book draws, and
+         the `height > blockHeight` clamp inside page-flip never fires.
+
+         The switch is at 600px, not at `sm`, because that is the real
+         boundary: below 600 the content width falls under the 560px
+         (2 x minWidth) portrait threshold. */
+      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 xl:w-[90vh] xl:max-w-full"
       onPointerEnter={hover ? () => setPaused(true) : undefined}
       onPointerLeave={hover ? () => setPaused(false) : undefined}
     >
@@ -166,27 +195,6 @@ export function GalleryFlip() {
           />
         </div>
 
-        {/* PAGE 02 — the first thing you see once the book opens.
-            A soft leaf, not a board, so it turns like a page.
-
-            object-cover, as asked. Worth knowing what it costs: the
-            creative is 414x896 (ratio 0.462) against a 0.75 page, so
-            filling the page means losing 38% of the image's HEIGHT.
-            objectPosition pins it to the top, because the mark sits in
-            the upper part of these gate crops — centred, cover would
-            take the bite out of both ends and clip it. The blurred
-            side-fill that stood behind the contained version is gone
-            with it; cover leaves no gap to fill. */}
-        <div key="gate" className="overflow-hidden bg-maroon">
-          <img
-            src={IMAGES.opening.file}
-            alt={IMAGES.opening.alt}
-            decoding="async"
-            className="h-full w-full object-cover"
-            style={{ objectPosition: "center top" }}
-          />
-        </div>
-
         {GALLERY.map((shot) => (
           <div key={shot.file} className="overflow-hidden bg-maroon">
             <div className="relative h-full w-full">
@@ -237,7 +245,12 @@ export function GalleryFlip() {
       {/* Arrows and a count. A drag-to-turn corner is not discoverable
           on its own, and on a touch screen it competes with scrolling —
           these make the book usable without either. */}
-      <div className="mt-5 flex items-center justify-center gap-5">
+      {/* Extra room below on a phone. The controls sit right on the
+          bottom edge of the book there, and the section's own padding
+          is the only thing under them — so they read as crowded against
+          whatever follows. `sm:` returns it to the tighter desktop
+          spacing, where the layout already has air around it. */}
+      <div className="mt-6 mb-10 flex items-center justify-center gap-5 sm:mt-5 sm:mb-0">
         <button
           type="button"
           onClick={() => flip(-1)}
@@ -247,9 +260,9 @@ export function GalleryFlip() {
           <ChevronLeft className="h-4 w-4" strokeWidth={1.8} />
         </button>
 
-        {/* +3: two covers and the opening page. */}
+        {/* +2 for the two covers, which count as pages here. */}
         <span className="label text-ivory/45 tabular-nums">
-          {String(page + 1).padStart(2, "0")} / {String(GALLERY.length + 3).padStart(2, "0")}
+          {String(page + 1).padStart(2, "0")} / {String(GALLERY.length + 2).padStart(2, "0")}
         </span>
 
         <button

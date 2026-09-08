@@ -8,11 +8,21 @@ import { EVENT_CONFIG } from "../../data/event";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
 
 /* The three facts that belong above the fold. Data, not markup, so the
-   row is one map instead of three near-identical blocks. */
+   row is one map instead of three near-identical blocks.
+
+   Times and the venue name are read from EVENT_CONFIG rather than
+   typed again here — they were duplicated, so changing the gate time
+   in one place used to leave this row saying something else. The date
+   stays written out because this is the one spot that wants the short
+   "Oct" form; everywhere else prints the full month. */
 const FACTS = [
   { Icon: Calendar, head: "11 — 20 Oct 2026", sub: "Ten nights" },
-  { Icon: MapPin,   head: "Master Farm",      sub: "Vaishnodevi Circle" },
-  { Icon: Music,    head: "Live garba · dhol", sub: "8:00 PM — 2:00 AM" },
+  { Icon: MapPin,   head: EVENT_CONFIG.venueName, sub: "Vaishnodevi Circle" },
+  {
+    Icon: Music,
+    head: "Live garba · dhol",
+    sub: `From ${EVENT_CONFIG.gateEntry} · Last entry ${EVENT_CONFIG.entryCloses}`,
+  },
 ];
 
 /* The two drifting vectors. Position, size and motion in one place so
@@ -226,41 +236,51 @@ export function HomeHero({ start = true }) {
            height rather than its width. 1.5fr of a 1664px container
            gives about 936px — near enough that the spread lands close
            to the 60vh it wants. */
-        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 lg:grid-cols-[1.5fr_1fr] lg:gap-6"
+        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 xl:grid-cols-[1.5fr_1fr] xl:gap-6"
         style={{ zIndex: "var(--z-content)" }}
       >
         {/* THE COPY. First in the DOM so it leads the reading order on
             a phone; order-1 on desktop puts the book back on the left
             where the design wants it. */}
-        <div data-slide className="order-1 lg:order-2 lg:pl-6">
-          <h1 className="font-display text-[clamp(2.6rem,5.2vw,5rem)] leading-[0.95] tracking-[-0.02em] text-ivory">
-            Ten nights.
-            <br />
+        <div data-slide className="order-1 xl:order-2 xl:pl-6">
+          <h1 className="font-display text-[clamp(2rem,3.6vw,4.6rem)] leading-[1.02] tracking-[-0.02em] text-balance text-ivory xl:leading-[0.98]">
+            {/* The break is XL-ONLY. Below that the layout is stacked and
+                the copy has the full page width, so the line reads as
+                one; from xl it shares the row with the book and 470px
+                of column, where it has to fall in two. Hiding a <br />
+                removes the break; xl:inline puts it back. */}
+            Ten nights.{" "}
+            <br className="hidden xl:inline" />
             One circle.
           </h1>
 
-          <p className="display-type mt-6 text-[clamp(1.15rem,2.2vw,1.7rem)] text-mukut italic">
+          <p className="display-type mt-5 text-[clamp(1.05rem,1.7vw,1.55rem)] text-mukut italic">
             Where heritage meets celebration.
           </p>
 
-          <p className="mt-5 max-w-[46ch] text-[clamp(1rem,1.25vw,1.15rem)] leading-[1.7] font-light text-ivory/60">
+          <p className="mt-4 max-w-[46ch] text-[clamp(0.95rem,1.05vw,1.1rem)] leading-[1.65] font-light text-ivory/60">
             Music, garba, dandiya and devotion, ten nights running — the
             ground fills, the dhol starts, and tradition and celebration
             stop being two separate things.
           </p>
 
-          <div className="mt-9 flex flex-wrap gap-3.5">
+          {/* nowrap from xl. Below that they may wrap, which is right on a
+              phone where two full-width buttons cannot share a row. At
+              xl the column is only ~470px, so the padding and tracking
+              below are cut back to keep both on one line; 2xl has the
+              room to go back to full size. */}
+          <div className="mt-7 flex flex-wrap gap-3 xl:flex-nowrap 2xl:mt-9 2xl:gap-3.5">
             <button
               type="button"
               onClick={openTickets}
               data-cursor="cta"
-              className="cta-label cursor-pointer rounded-full border border-mukut bg-mukut px-7 py-3.5 text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold"
+              className="cursor-pointer rounded-full border border-mukut bg-mukut px-5 py-3 text-[0.62rem] font-bold tracking-[0.16em] whitespace-nowrap uppercase text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold 2xl:px-7 2xl:py-3.5 2xl:text-[0.68rem] 2xl:tracking-[0.28em]"
             >
               Book your passes →
             </button>
             <a
               href="#gallery"
-              className="label rounded-full border border-antique/45 px-7 py-3.5 text-ivory/85 transition-colors duration-500 hover:border-mukut hover:text-mukut"
+              className="rounded-full border border-antique/45 px-5 py-3 text-[0.62rem] tracking-[0.16em] whitespace-nowrap uppercase text-ivory/85 transition-colors duration-500 hover:border-mukut hover:text-mukut 2xl:px-7 2xl:py-3.5 2xl:text-[0.68rem] 2xl:tracking-[0.28em]"
             >
               Explore the lineup →
             </a>
@@ -271,7 +291,7 @@ export function HomeHero({ start = true }) {
               last-child exception. */}
           <dl
            
-            className="mt-12 grid grid-cols-1 gap-y-6 border-t border-antique/20 pt-8 sm:grid-cols-3 sm:gap-y-0 sm:divide-x sm:divide-antique/20"
+            className="mt-8 grid grid-cols-1 gap-y-5 border-t border-antique/20 pt-6 sm:grid-cols-3 sm:gap-y-0 sm:divide-x sm:divide-antique/20 2xl:mt-12 2xl:pt-8"
           >
             {FACTS.map(({ Icon, head, sub }) => (
               /* The doubled type is a DESKTOP size. A phone shows these
@@ -283,11 +303,11 @@ export function HomeHero({ start = true }) {
                  before: at 1.75rem the three columns need every pixel
                  of their ~160px of content width. */
               <div key={head} className="sm:px-3 sm:first:pl-0 sm:last:pr-0">
-                <Icon className="mb-2 h-5 w-5 text-mukut sm:mb-3 sm:h-8 sm:w-8" aria-hidden strokeWidth={1.6} />
+                <Icon className="mb-2 h-5 w-5 text-mukut sm:mb-3 sm:h-6 sm:w-6 2xl:h-8 2xl:w-8" aria-hidden strokeWidth={1.6} />
                 {/* text-balance so a line that has to wrap splits
                     evenly rather than leaving one orphaned word. */}
-                <dt className="text-base leading-tight text-balance text-ivory sm:text-[1.75rem]">{head}</dt>
-                <dd className="mt-1 text-[0.8rem] tracking-[0.12em] uppercase text-ivory/45 sm:mt-2 sm:text-[1.36rem]">
+                <dt className="text-[clamp(0.95rem,1.4vw,1.6rem)] leading-tight text-balance text-ivory">{head}</dt>
+                <dd className="mt-1 text-[clamp(0.75rem,1.05vw,1.25rem)] tracking-[0.12em] uppercase text-ivory/45 sm:mt-2">
                   {sub}
                 </dd>
               </div>
@@ -298,7 +318,7 @@ export function HomeHero({ start = true }) {
         {/* THE BOOK — the gallery photographs, bound and turnable. This
             replaced the couple photo that stood here; that file is
             still in public/assets if it is ever wanted back. */}
-        <div data-slide className="order-2 lg:order-1">
+        <div data-slide className="order-2 xl:order-1">
           <GalleryFlip />
         </div>
       </div>

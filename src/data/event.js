@@ -43,8 +43,16 @@ export const EVENT_CONFIG = {
   privacy: "#privacy",
   dataDeletion: "#data-deletion",
 
-  organiserName: "INCEPT EVENTS",
-  organiserUrl: "https://www.inceptevents.in/",
+  /* Who runs the event. This is the ONLY place the name is written:
+     the footer credit and every mention across the Terms, Privacy and
+     Data Deletion pages read it from here, so the five hardcoded
+     "INCEPT EVENTS" strings that used to sit in legal.js cannot drift
+     out of step with the footer again.
+     `organiserUrl` is null because no site was given — the footer
+     renders plain text when it is empty and a link when it is set, so
+     adding a URL here is all that is needed to make it clickable. */
+  organiserName: "Panchatva Events",
+  organiserUrl: null,
   brandLine: "Divi Garba",
   venue: "Divi Garba — VAYANA",
 };
