@@ -228,6 +228,14 @@ export function HomeHero({ start = true }) {
            aside for it the copy rendered underneath the nav links and
            read as part of the bar. 144px leaves a clear gap.
 
+           The book column is AUTO, not a fraction. It used to be
+           1.5fr, but the book is capped by HEIGHT (90vh) while a
+           fraction is a share of WIDTH — so whenever 90vh came out
+           smaller than 1.5fr the book floated inside a wider column
+           with dead space beside it: 58px at 1280x720, 88px at
+           1600x900. An auto column is exactly as wide as the book,
+           so that gap cannot exist and the copy takes the remainder.
+           The old note, kept for the sizing maths:
            The container is wide and the columns uneven (1.5fr / 1fr)
            to buy the flipbook room. That matters more than it looks:
            the book is a two-page SPREAD, so its column has to hold
@@ -236,7 +244,7 @@ export function HomeHero({ start = true }) {
            height rather than its width. 1.5fr of a 1664px container
            gives about 936px — near enough that the spread lands close
            to the 60vh it wants. */
-        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 xl:grid-cols-[1.5fr_1fr] xl:gap-6"
+        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 xl:grid-cols-[auto_minmax(0,1fr)] xl:gap-6"
         style={{ zIndex: "var(--z-content)" }}
       >
         {/* THE COPY. First in the DOM so it leads the reading order on

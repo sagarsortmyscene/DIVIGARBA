@@ -26,6 +26,45 @@ export function GalleryFlip() {
   /* A real pointer, not a touch screen. Gates the hover-pause below. */
   const hover = useMediaQuery("(hover: hover) and (pointer: fine)");
 
+  /* The two halves of the clip on the first spread (child indices 1
+     and 2). In landscape getCurrentPageIndex reports the FIRST page of
+     the open spread, so 1 means the pair is showing; in portrait the
+     pages are visited one at a time, hence either index counts. */
+  const videoRefs = useRef([]);
+  const onFilmSpread = page === 1 || page === 2;
+
+  /* Two separate elements can drift, and at the gutter a few frames of
+     difference is visible as a torn seam. The left half drives: on each
+     of its time updates the right one is nudged back into line, but
+     only past a threshold — assigning currentTime every tick would
+     stutter the playback it is meant to fix. */
+  const syncHalves = () => {
+    const [l, r] = videoRefs.current;
+    if (!l || !r) return;
+    if (Math.abs(r.currentTime - l.currentTime) > 0.08) r.currentTime = l.currentTime;
+  };
+
+  /* Plays only while that spread is open, and restarts each time it
+     opens. The clip runs 18s against a 3.8s page turn, so without the
+     rewind you would join it partway through on every pass and never
+     see the opening. preload="none" on the elements means the 16MB is
+     not fetched at all until this fires. */
+  useEffect(() => {
+    const vids = videoRefs.current.filter(Boolean);
+    if (!vids.length) return;
+    for (const v of vids) {
+      if (onFilmSpread) {
+        v.currentTime = 0;
+        /* Autoplay can still be refused; muted + playsInline is what
+           makes it allowed, and the catch keeps a refusal from
+           throwing into the effect. */
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+      }
+    }
+  }, [onFilmSpread]);
+
   /* pageFlip() is the imperative handle the library exposes. It does
      not exist until the book has mounted and measured, so every call
      goes through the optional chain rather than assuming it is there. */
@@ -80,7 +119,7 @@ export function GalleryFlip() {
      where the controls already are.
      Safe as a transform because page-flip reads pointer positions from
      getBoundingClientRect, which includes it — drag stays accurate. */
-  const LAST = GALLERY.length + 1;
+  const LAST = GALLERY.length + 4;
   const recentre =
     page === 0 ? "xl:-translate-x-1/4" : page >= LAST ? "xl:translate-x-1/4" : "";
 
@@ -99,9 +138,11 @@ export function GalleryFlip() {
        280 minWidth), so the book collapsed to one page and the left
        page disappeared.
 
-       max-w-full because 90vh can exceed the grid column on a tall
-       screen; the book then fills the column instead and comes out a
-       little under 60vh, which is the right way to lose that argument.
+       The xl cap is 52vw, not max-w-full: its column is now "auto",
+       so a percentage max-width would be measured against a column
+       that is itself sized by this element. 52vw is absolute, keeps
+       the book inside its half of the page, and lets 90vh win
+       wherever there is room for it.
        No explicit height: the parent's auto height is already larger
        than the book wants, and pinning one risks the blockHeight clamp
        on the last line above shrinking the pages instead.
@@ -137,7 +178,7 @@ export function GalleryFlip() {
          The switch is at 600px, not at `sm`, because that is the real
          boundary: below 600 the content width falls under the 560px
          (2 x minWidth) portrait threshold. */
-      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 xl:w-[90vh] xl:max-w-full"
+      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 xl:w-[90vh] xl:max-w-[52vw]"
       onPointerEnter={hover ? () => setPaused(true) : undefined}
       onPointerLeave={hover ? () => setPaused(false) : undefined}
     >
@@ -192,6 +233,81 @@ export function GalleryFlip() {
             fetchPriority="high"
             decoding="async"
             className="h-full w-full object-contain"
+          />
+        </div>
+
+        {/* THE FILM, ACROSS ONE SPREAD.
+
+            Two pages, each holding the same clip at 200% of a page
+            width: the left one aligned left so its window shows the
+            first half, the right one pushed back a full page width so
+            its window shows the second. Together they compose one
+            continuous frame across the gutter — the same geometry the
+            old temple gate used for its two door panels.
+
+            They sit at child indices 1 and 2, which is what makes them
+            a PAIR: with showCover on, page-flip groups the cover alone
+            and then pairs everything after it, so [1,2] is the first
+            spread the book opens onto.
+
+            Below 600px the book is a single page at a time, where half
+            a frame would be meaningless — so there the clip drops to
+            one page wide and object-contain, showing the whole shot.
+
+            Two <video> elements is the cost of spanning two separately
+            transformed pages; syncHalves keeps them from drifting
+            apart at the seam. */}
+        <div key="video-l" className="relative overflow-hidden bg-obsidian">
+          <video
+            ref={(el) => { videoRefs.current[0] = el; }}
+            src={IMAGES.video.file}
+            aria-label={IMAGES.video.alt}
+            muted
+            loop
+            playsInline
+            preload="none"
+            onTimeUpdate={syncHalves}
+            className="absolute top-0 left-0 h-full w-full max-w-none object-contain              min-[600px]:w-[200%] min-[600px]:object-cover"
+          />
+        </div>
+        <div key="video-r" className="relative overflow-hidden bg-obsidian">
+          <video
+            ref={(el) => { videoRefs.current[1] = el; }}
+            src={IMAGES.video.file}
+            aria-label={IMAGES.video.alt}
+            muted
+            loop
+            playsInline
+            preload="none"
+            
+            className="absolute top-0 left-0 h-full w-full max-w-none object-contain              min-[600px]:w-[200%] min-[600px]:object-cover min-[600px]:-left-full"
+          />
+        </div>
+        {/* PAGE 02 — the whole image, nothing cropped.
+
+            This creative is 414x896 (ratio 0.462) against a 0.75 page,
+            so the two shapes disagree and something has to give:
+              object-cover  fills the page but cuts 38% of its HEIGHT
+              object-contain shows all of it, leaving ~37% of the page
+                             width empty down the sides
+            Contain is the one that keeps the image complete, and the
+            empty sides are filled by a cover-scaled, blurred copy of
+            the same file sitting behind it — so the edges read as the
+            artwork continuing rather than as bars. The blurred layer
+            is aria-hidden; only the sharp one carries the alt text. */}
+        <div key="gate" className="relative overflow-hidden bg-maroon">
+          <img
+            src={IMAGES.opening.file}
+            alt=""
+            aria-hidden
+            decoding="async"
+            className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl"
+          />
+          <img
+            src={IMAGES.opening.file}
+            alt={IMAGES.opening.alt}
+            decoding="async"
+            className="relative h-full w-full object-contain"
           />
         </div>
 
@@ -260,9 +376,9 @@ export function GalleryFlip() {
           <ChevronLeft className="h-4 w-4" strokeWidth={1.8} />
         </button>
 
-        {/* +2 for the two covers, which count as pages here. */}
+        {/* +5: two covers, the opening page and the two film halves. */}
         <span className="label text-ivory/45 tabular-nums">
-          {String(page + 1).padStart(2, "0")} / {String(GALLERY.length + 2).padStart(2, "0")}
+          {String(page + 1).padStart(2, "0")} / {String(GALLERY.length + 5).padStart(2, "0")}
         </span>
 
         <button

@@ -34,9 +34,14 @@ export function CinematicHero() {
       /* Each scene owns a slice of the hero: its photo crossfades in a
          touch ahead of its caption and holds a touch after, so the
          image is never left waiting on bare grade before the text. */
-      SCENES.forEach((scene) => {
+      SCENES.forEach((scene, i) => {
         const text = q(`[data-scene="${scene.id}"]`);
         const photo = q(`[data-photo="${scene.id}"]`);
+        /* The first photo is up before a pixel is scrolled. Its slice
+           starts at 0, so any fade-in at all means the film opens on
+           bare obsidian and the image arrives late. */
+        const first = i === 0;
+        if (first) gsap.set(photo, { opacity: 1 });
 
         if (reduced) {
           gsap.set(text, { opacity: 1, y: 0 });
@@ -66,9 +71,23 @@ export function CinematicHero() {
               scrub: 1,
             },
           })
-          .fromTo(photo, { opacity: 0, scale: 1.06 }, { opacity: 1, duration: 1, ease: "power2.out" })
+          /* Every tween carries an explicit position. Without one the
+             fade-out was APPENDED after the fade-in — so it finished a
+             third of the way through the slice and the photo then sat
+             at opacity 0 for the rest of it, which is where the black
+             between scenes came from. The scale tween runs 3.4, so the
+             timeline is 3.4 long; putting the fade-out at 2.9 keeps
+             the image up until the very end of its slice.
+             The slices already overlap by 0.05 either side, so the
+             next photo is fully in before this one is fully out. */
+          .fromTo(
+            photo,
+            { opacity: first ? 1 : 0, scale: 1.06 },
+            { opacity: 1, duration: 0.5, ease: "power2.out" },
+            0
+          )
           .to(photo, { scale: 1, duration: 3.4, ease: "none" }, 0) // slow drift, whole slice
-          .to(photo, { opacity: 0, duration: 1, ease: "power2.in" });
+          .to(photo, { opacity: 0, duration: 0.5, ease: "power2.in" }, 2.9);
       });
 
       if (reduced) return;

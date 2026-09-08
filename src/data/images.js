@@ -22,6 +22,30 @@ export const IMAGES = {
     alt: "Divi Garba — Navratri 2026",
   },
 
+  /* The book's second page. 414x896, so ratio 0.462 against a 0.75
+     page — it is a phone-shaped crop and the two shapes do not agree.
+     Shown with object-CONTAIN so the whole image is visible: cover
+     would fill the page but cut 38% of its height off. Contain leaves
+     about 37% of the page width empty, which GalleryFlip fills with a
+     blurred copy of the same file rather than flat bars.
+     A 900x1200 export of this artwork would remove the compromise. */
+  opening: {
+    file: "/assets/gate-mobile-414x896.jpg",
+    alt: "Divi Garba — the gate",
+  },
+
+  /* The clip that plays across the book's first spread. 1280x720
+     (1.78) — hopeless on a single 0.75 page, but a SPREAD is two pages
+     side by side and therefore 1.5, so cover trims about 16% of the
+     width instead of 58%. That is the whole reason it runs across both
+     halves rather than sitting on one page.
+     16MB, so GalleryFlip loads it with preload="none" and only starts
+     it when that spread is actually open. */
+  video: {
+    file: "/assets/graba.mp4",
+    alt: "Garba on the ground at night",
+  },
+
   /* The temple bells hung at the top of the hero, once each side.
      640x640 and a genuine RGBA cut-out — 85.6% of it is fully
      transparent — so it drops onto the gradient with no mask and no
