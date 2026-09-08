@@ -39,8 +39,11 @@ export const IMAGES = {
      side by side and therefore 1.5, so cover trims about 16% of the
      width instead of 58%. That is the whole reason it runs across both
      halves rather than sitting on one page.
-     16MB, so GalleryFlip loads it with preload="none" and only starts
-     it when that spread is actually open. */
+     Re-encoded from 16.1MB to 6.7MB: H.264 CRF 23 -> 26 at preset
+     slow, +faststart, and the audio track dropped outright since the
+     player is muted. Measured SSIM against the original is 0.976, so
+     the loss is not visible at this size. Still loaded with
+     preload="none" and only started when that spread is open. */
   video: {
     file: "/assets/graba.mp4",
     alt: "Garba on the ground at night",

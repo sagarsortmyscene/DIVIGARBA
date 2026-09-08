@@ -40,8 +40,6 @@ export const EVENT_CONFIG = {
   mapEmbed: "https://www.google.com/maps?q=23.1427868,72.5244871&z=16&output=embed",
 
   terms: "#terms",
-  privacy: "#privacy",
-  dataDeletion: "#data-deletion",
 
   /* Who runs the event. This is the ONLY place the name is written:
      the footer credit and every mention across the Terms, Privacy and

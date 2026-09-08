@@ -13,14 +13,10 @@ import { Gallery } from "./components/sections/Gallery";
 import { DetailsSection } from "./components/sections/DetailsSection";
 import { VenueSection } from "./components/sections/VenueSection";
 import { TermsPage } from "./components/legal/TermsPage";
-import { PrivacyPage } from "./components/legal/PrivacyPage";
-import { DataDeletionPage } from "./components/legal/DataDeletionPage";
 import { PrivacyChoicesPage } from "./components/legal/PrivacyChoicesPage";
 
 const ROUTES = {
   terms: TermsPage,
-  privacy: PrivacyPage,
-  "data-deletion": DataDeletionPage,
   "privacy-choices": PrivacyChoicesPage,
 };
 
