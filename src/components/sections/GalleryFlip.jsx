@@ -26,12 +26,21 @@ export function GalleryFlip() {
   /* A real pointer, not a touch screen. Gates the hover-pause below. */
   const hover = useMediaQuery("(hover: hover) and (pointer: fine)");
 
-  /* The two halves of the clip on the first spread (child indices 1
-     and 2). In landscape getCurrentPageIndex reports the FIRST page of
-     the open spread, so 1 means the pair is showing; in portrait the
-     pages are visited one at a time, hence either index counts. */
+  /* 600px is page-flip's own portrait/landscape line here: below it the
+     content width falls under 2 x minWidth and the book shows a single
+     page. The film is two half-pages on a spread and ONE full page
+     below that, so the page count changes with it — every index in
+     this component is derived from `videoPages` rather than written
+     out, so the two modes cannot fall out of step. */
+  const spread = useMediaQuery("(min-width: 600px)");
+  const videoPages = spread ? 2 : 1;
+
+  /* The film sits directly after the cover, so it occupies indices 1
+     to `videoPages`. In landscape getCurrentPageIndex reports the
+     FIRST page of the open spread, so 1 covers the pair; in portrait
+     there is only index 1 to match. */
   const videoRefs = useRef([]);
-  const onFilmSpread = page === 1 || page === 2;
+  const onFilmSpread = page >= 1 && page <= videoPages;
 
   /* Two separate elements can drift, and at the gutter a few frames of
      difference is visible as a torn seam. The left half drives: on each
@@ -44,25 +53,47 @@ export function GalleryFlip() {
     if (Math.abs(r.currentTime - l.currentTime) > 0.08) r.currentTime = l.currentTime;
   };
 
+  /* Whether the clip is genuinely running. The hold on the page-turn
+     timer is DERIVED from it rather than being its own state — being
+     on the spread is already known, so storing both would mean keeping
+     two things in step, and clearing one of them on the way out is the
+     synchronous setState-in-effect that lint rightly objects to. */
+  const [filmPlaying, setFilmPlaying] = useState(false);
+  const filmHolding = onFilmSpread && filmPlaying;
+
   /* Plays only while that spread is open, and restarts each time it
-     opens. The clip runs 18s against a 3.8s page turn, so without the
-     rewind you would join it partway through on every pass and never
-     see the opening. preload="none" on the elements means the 16MB is
-     not fetched at all until this fires. */
+     opens. preload="none" on the elements means the 16MB is not
+     fetched at all until this fires.
+
+     The hold is set from the play() PROMISE, not optimistically. If a
+     browser refuses autoplay the clip never runs and never ends, so a
+     hold taken on faith would stop the book on this spread for good.
+     Resolving means it really is playing; rejecting leaves the hold
+     off and the ordinary timer carries on turning pages. */
   useEffect(() => {
     const vids = videoRefs.current.filter(Boolean);
     if (!vids.length) return;
-    for (const v of vids) {
-      if (onFilmSpread) {
-        v.currentTime = 0;
-        /* Autoplay can still be refused; muted + playsInline is what
-           makes it allowed, and the catch keeps a refusal from
-           throwing into the effect. */
-        v.play().catch(() => {});
-      } else {
-        v.pause();
-      }
+
+    /* No setState on the way out: filmHolding is gated on
+       onFilmSpread, so leaving the spread releases the hold by
+       itself. */
+    if (!onFilmSpread) {
+      for (const v of vids) v.pause();
+      return;
     }
+
+    let alive = true;
+    for (const v of vids) v.currentTime = 0;
+    const [lead, ...rest] = vids;
+    lead
+      .play()
+      .then(() => alive && setFilmPlaying(true))
+      .catch(() => alive && setFilmPlaying(false));
+    for (const v of rest) v.play().catch(() => {});
+
+    return () => {
+      alive = false;
+    };
   }, [onFilmSpread]);
 
   /* pageFlip() is the imperative handle the library exposes. It does
@@ -75,6 +106,17 @@ export function GalleryFlip() {
     else api.flipNext();
   };
 
+  /* The clip finished, so let the book go on. It flips straight away
+     rather than releasing the hold and waiting out another 3.8s, which
+     would read as the book stalling on a frozen last frame.
+     Nothing happens here if the reader is hovering or has asked for
+     less motion — releasing the hold is enough, and the timer picks it
+     up on its own terms. */
+  const handleFilmEnd = () => {
+    setFilmPlaying(false);
+    if (!reduced && !paused) flip(1);
+  };
+
   /* Turns itself. Three things worth noting:
      - at the back cover it uses turnToPage(0) rather than flip(0),
        because flipping back animates every page in reverse; this cuts
@@ -85,9 +127,13 @@ export function GalleryFlip() {
      - on TOUCH it never pauses, and that is the point: a tap fires
        pointerenter with no pointerleave to follow it, so the pause
        latched on and the book simply stopped turning after the first
-       touch. `hover` gates the handlers off entirely there. */
+       touch. `hover` gates the handlers off entirely there.
+     - it also stands down while filmHolding is set, so the video
+       spread is never cut off mid-clip. The ARROWS are untouched by
+       any of this: they call flip() directly and always turn the page
+       immediately, film or no film. */
   useEffect(() => {
-    if (reduced || paused) return;
+    if (reduced || paused || filmHolding) return;
     const id = setInterval(() => {
       const api = bookRef.current?.pageFlip?.();
       if (!api) return;
@@ -95,7 +141,7 @@ export function GalleryFlip() {
       else api.flipNext();
     }, AUTO_MS);
     return () => clearInterval(id);
-  }, [reduced, paused]);
+  }, [reduced, paused, filmHolding]);
 
   /* A CLOSED book only fills half its own box, and page-flip puts that
      half on a different side at each end. From its showSpread():
@@ -119,7 +165,9 @@ export function GalleryFlip() {
      where the controls already are.
      Safe as a transform because page-flip reads pointer positions from
      getBoundingClientRect, which includes it — drag stays accurate. */
-  const LAST = GALLERY.length + 4;
+  /* cover + film pages + gate + photographs + back cover. */
+  const TOTAL = GALLERY.length + 3 + videoPages;
+  const LAST = TOTAL - 1;
   const recentre =
     page === 0 ? "xl:-translate-x-1/4" : page >= LAST ? "xl:translate-x-1/4" : "";
 
@@ -236,53 +284,50 @@ export function GalleryFlip() {
           />
         </div>
 
-        {/* THE FILM, ACROSS ONE SPREAD.
+        {/* THE FILM.
 
-            Two pages, each holding the same clip at 200% of a page
-            width: the left one aligned left so its window shows the
-            first half, the right one pushed back a full page width so
-            its window shows the second. Together they compose one
-            continuous frame across the gutter — the same geometry the
-            old temple gate used for its two door panels.
+            On a SPREAD it runs across two pages: each holds the same
+            clip at 200% of a page width, the left aligned left so its
+            window shows the first half, the right pushed back a full
+            page width so its window shows the second. Together they
+            compose one continuous frame across the gutter — the same
+            geometry the old temple gate used for its door panels.
 
-            They sit at child indices 1 and 2, which is what makes them
-            a PAIR: with showCover on, page-flip groups the cover alone
-            and then pairs everything after it, so [1,2] is the first
-            spread the book opens onto.
+            On a PHONE there is only ever one page on screen, so the
+            second half is not rendered at all: half a frame beside
+            nothing is meaningless, and an unused page would still take
+            a turn of the book to get past. One page, object-cover, so
+            the clip fills the full height.
 
-            Below 600px the book is a single page at a time, where half
-            a frame would be meaningless — so there the clip drops to
-            one page wide and object-contain, showing the whole shot.
+            The count is deliberate. With showCover on, page-flip pairs
+            everything after the cover, so two halves land as [1,2] —
+            the first spread the book opens onto. One half lands at [1]
+            alone. Everything downstream reads `videoPages` rather than
+            a literal, so the page count and the last-page index follow
+            automatically.
 
-            Two <video> elements is the cost of spanning two separately
-            transformed pages; syncHalves keeps them from drifting
-            apart at the seam. */}
-        <div key="video-l" className="relative overflow-hidden bg-obsidian">
-          <video
-            ref={(el) => { videoRefs.current[0] = el; }}
-            src={IMAGES.video.file}
-            aria-label={IMAGES.video.alt}
-            muted
-            loop
-            playsInline
-            preload="none"
-            onTimeUpdate={syncHalves}
-            className="absolute top-0 left-0 h-full w-full max-w-none object-contain              min-[600px]:w-[200%] min-[600px]:object-cover"
-          />
-        </div>
-        <div key="video-r" className="relative overflow-hidden bg-obsidian">
-          <video
-            ref={(el) => { videoRefs.current[1] = el; }}
-            src={IMAGES.video.file}
-            aria-label={IMAGES.video.alt}
-            muted
-            loop
-            playsInline
-            preload="none"
-            
-            className="absolute top-0 left-0 h-full w-full max-w-none object-contain              min-[600px]:w-[200%] min-[600px]:object-cover min-[600px]:-left-full"
-          />
-        </div>
+            Only the lead half carries onTimeUpdate and onEnded — one
+            driver for the sync and for handing the book on. */}
+        {(spread ? [0, 1] : [0]).map((half) => (
+          <div key={`video-${half}`} className="relative overflow-hidden bg-obsidian">
+            <video
+              ref={(el) => {
+                videoRefs.current[half] = el;
+              }}
+              src={IMAGES.video.file}
+              aria-label={IMAGES.video.alt}
+              muted
+              playsInline
+              preload="none"
+              onTimeUpdate={half === 0 ? syncHalves : undefined}
+              onEnded={half === 0 ? handleFilmEnd : undefined}
+              className={`absolute top-0 left-0 h-full w-full max-w-none object-cover min-[600px]:w-[200%] ${
+                half === 1 ? "min-[600px]:-left-full" : ""
+              }`}
+            />
+          </div>
+        ))}
+
         {/* PAGE 02 — the whole image, nothing cropped.
 
             This creative is 414x896 (ratio 0.462) against a 0.75 page,
@@ -376,9 +421,10 @@ export function GalleryFlip() {
           <ChevronLeft className="h-4 w-4" strokeWidth={1.8} />
         </button>
 
-        {/* +5: two covers, the opening page and the two film halves. */}
+        {/* TOTAL follows videoPages, so this reads 14 on a spread and
+            13 on a phone without a second literal to keep in step. */}
         <span className="label text-ivory/45 tabular-nums">
-          {String(page + 1).padStart(2, "0")} / {String(GALLERY.length + 5).padStart(2, "0")}
+          {String(page + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
         </span>
 
         <button
