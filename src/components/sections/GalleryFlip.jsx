@@ -96,6 +96,41 @@ export function GalleryFlip() {
     };
   }, [onFilmSpread]);
 
+  /* page-flip measures its container once at mount and then ONLY
+     re-measures on a window `resize` — it never watches the container
+     itself. Anything that changes this box without changing the window
+     leaves the book sized for a box that no longer exists, and since
+     its pages are absolutely positioned they then spill past the
+     bottom and sit over the arrows.
+
+     The splash screen is exactly that case: it holds
+     `document.body.style.overflow = "hidden"` for about two seconds,
+     which removes the scrollbar and makes the page ~15px wider. The
+     book mounts and measures inside that window; when the splash lifts
+     the scrollbar comes back and the container narrows, with no resize
+     event to notice it. Hence "wrong until you refresh".
+
+     A ResizeObserver on the box closes that, and covers the rest of
+     the same family for free: late fonts, the xl/spread switch,
+     orientation changes, and the hero's slide-in. rAF-deferred because
+     calling update() straight from the callback can retrigger the
+     observer in the same frame. */
+  const boxRef = useRef(null);
+  useEffect(() => {
+    const box = boxRef.current;
+    if (!box || typeof ResizeObserver === "undefined") return;
+    let frame = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => bookRef.current?.pageFlip?.()?.update?.());
+    });
+    ro.observe(box);
+    return () => {
+      cancelAnimationFrame(frame);
+      ro.disconnect();
+    };
+  }, []);
+
   /* pageFlip() is the imperative handle the library exposes. It does
      not exist until the book has mounted and measured, so every call
      goes through the optional chain rather than assuming it is there. */
@@ -209,6 +244,7 @@ export function GalleryFlip() {
        exactly the width the layout went two-column. At xl the column
        is 706px and clears it. */
     <div
+      ref={boxRef}
       /* The aspect ratio is what keeps the arrows below the book.
          page-flip lays its pages out absolutely, so this box does not
          grow to fit them — it was falling back to the 373px minHeight
