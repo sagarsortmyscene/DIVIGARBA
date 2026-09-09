@@ -7,6 +7,15 @@
 export const BRAND = {
   /* the gold logotype on transparent — legal pages and the footer */
   logo: "/assets/logo-divi.png",
+
+  /* The organiser's mark, set beside the Divi logo in the header.
+     4140x1564, so ratio 2.65 — a wide logotype, which is why it is
+     sized by HEIGHT with an auto width wherever it is used.
+     Arrived as "Panchatva logo-02.png" and was renamed: a space in a
+     filename has to be percent-encoded in a URL, and mixed case broke
+     this project's images on Vercel once already, since Windows does
+     not distinguish it locally but Linux does. */
+  panchatva: "/assets/panchatva-logo.png",
 };
 
 /* ---------- Images, by the job each one does ---------- */

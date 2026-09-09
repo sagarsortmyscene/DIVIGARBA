@@ -5,7 +5,7 @@ import { Calendar, MapPin, Music } from "lucide-react";
 import { IMAGES } from "../../data/images";
 import { GalleryFlip } from "./GalleryFlip";
 import { EVENT_CONFIG } from "../../data/event";
-import { useReducedMotion } from "../../hooks/useMediaQuery";
+import { useMediaQuery, useReducedMotion } from "../../hooks/useMediaQuery";
 
 /* The three facts that belong above the fold. Data, not markup, so the
    row is one map instead of three near-identical blocks.
@@ -40,16 +40,13 @@ const VECTORS = [
    rather than the same picture twice. `sway` is the swing in degrees:
    opposite signs and different periods, because two bells moving in
    lockstep look like one animation applied twice. */
+/* One bell now, on the right. The left one is gone — the header's
+   top-left corner carries the Divi and Panchatva marks, and a bell
+   hanging behind them was competing with the thing it framed.
+   Kept as an array rather than collapsed to a single object so the
+   GSAP loop, the mirroring and the render below all stay unchanged,
+   and a second bell is one entry away. */
 const BELLS = [
-  /* The left one hangs smaller — the two are no longer a symmetrical
-     pair, so `size` is per-bell rather than a shared class. */
-  {
-    at: "left-[6%] sm:left-[12%]",
-    size: "w-[min(20vw,116px)] lg:w-[min(12vw,160px)]",
-    flip: false,
-    sway: 2.4,
-    period: 4.2,
-  },
   {
     at: "right-[6%] sm:right-[12%]",
     size: "w-[min(26vw,150px)] lg:w-[min(16vw,210px)]",
@@ -71,6 +68,14 @@ const BELLS = [
 export function HomeHero({ start = true }) {
   const ref = useRef(null);
   const reduced = useReducedMotion();
+
+  /* Wide enough for the two-column layout, but short. This is the same
+     condition GalleryFlip uses to drop the book to 70%, so there is one
+     idea of "short desktop" rather than two thresholds that could drift
+     apart. Read in JS rather than as a stacked Tailwind variant because
+     it changes the MARKUP below — icon beside the text instead of above
+     it — not just a class. */
+  const shortDesktop = useMediaQuery("(min-width: 1280px) and (max-height: 849px)");
 
   useGSAP(
     () => {
@@ -211,12 +216,12 @@ export function HomeHero({ start = true }) {
           /* Held back to 55%: at full strength the bells competed with
              the nav sitting right between them. They are decoration
              and should sit behind the reading, not beside it. */
-          /* Hidden below sm. On a phone the header already fills that
-             strip with the logo and the Book ticket button, and a pair
-             of bells behind them reads as clutter rather than as
-             decoration. `hidden` also keeps the image request off the
-             mobile critical path entirely. */
-          className={`pointer-events-none absolute top-0 hidden origin-top opacity-55 sm:block ${size} ${at}`}
+          /* Hidden below 1300px. The header now carries two marks
+             plus the nav and the CTA, and under that width the bells
+             sit behind them rather than beside them. `hidden` rather
+             than an opacity fade so the browser never requests the
+             image on those screens at all. */
+          className={`pointer-events-none absolute top-0 hidden origin-top opacity-55 min-[1300px]:block ${size} ${at}`}
           style={{ zIndex: "var(--z-geometry)" }}
         />
       ))}
@@ -228,38 +233,45 @@ export function HomeHero({ start = true }) {
            aside for it the copy rendered underneath the nav links and
            read as part of the bar. 144px leaves a clear gap.
 
-           The book column is AUTO, not a fraction. It used to be
-           1.5fr, but the book is capped by HEIGHT (90vh) while a
-           fraction is a share of WIDTH — so whenever 90vh came out
-           smaller than 1.5fr the book floated inside a wider column
-           with dead space beside it: 58px at 1280x720, 88px at
-           1600x900. An auto column is exactly as wide as the book,
-           so that gap cannot exist and the copy takes the remainder.
-           The old note, kept for the sizing maths:
-           The container is wide and the columns uneven (1.5fr / 1fr)
-           to buy the flipbook room. That matters more than it looks:
-           the book is a two-page SPREAD, so its column has to hold
-           twice a page's width, and it asks for 90vh. On a 1080-tall
-           screen that is 972px, so anything narrower crops the book's
-           height rather than its width. 1.5fr of a 1664px container
-           gives about 936px — near enough that the spread lands close
-           to the 60vh it wants. */
-        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 xl:grid-cols-[auto_minmax(0,1fr)] xl:gap-6"
+           60 / 40 — the book's column against the copy's, written as
+           3fr/2fr so the gap is taken out of the free space. A literal
+           60%/40% pair plus a gap would total more than 100%.
+
+           The column is a share of WIDTH while the book is capped by
+           HEIGHT, so on a short screen the book cannot always fill its
+           60% and a gap opens between the columns. That is the right
+           way round. The alternative was sizing the container from the
+           book instead, which removes the gap but at 1600x800 pinned
+           the whole layout to 944px of a 1600px screen — a third of
+           the width empty down each side. A gap inside a full-width
+           layout reads as a gap; a narrow layout reads as broken. */
+        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 xl:grid-cols-[3fr_2fr] xl:gap-6"
         style={{ zIndex: "var(--z-content)" }}
       >
         {/* THE COPY. First in the DOM so it leads the reading order on
             a phone; order-1 on desktop puts the book back on the left
             where the design wants it. */}
         <div data-slide className="order-1 xl:order-2 xl:pl-6">
-          <h1 className="font-display text-[clamp(2rem,3.6vw,4.6rem)] leading-[1.02] tracking-[-0.02em] text-balance text-ivory xl:leading-[0.98]">
-            {/* The break is XL-ONLY. Below that the layout is stacked and
-                the copy has the full page width, so the line reads as
-                one; from xl it shares the row with the book and 470px
-                of column, where it has to fall in two. Hiding a <br />
-                removes the break; xl:inline puts it back. */}
-            Ten nights.{" "}
-            <br className="hidden xl:inline" />
-            One circle.
+          {/* Gujarati, so this is set in Anek and NOT in the display
+              face: Sregs Serif has no Gujarati glyphs at all, and its
+              unicode-range does not claim the block, so `font-display`
+              would silently fall through per character.
+
+              Two settings differ from the Latin heading that was here:
+              line-height is 1.35 rather than 0.98, because Gujarati
+              carries matras above and below the baseline and a tight
+              display leading clips them; and the -0.02em tracking is
+              gone, since negative letter-spacing pulls conjuncts into
+              each other. `lang` so screen readers and the browser's
+              own shaping treat it as Gujarati.
+
+              The xl-only <br /> went with the old copy — this is one
+              short phrase and needs no break. */}
+          <h1
+            lang="gu"
+            className="font-ui text-[clamp(2.2rem,4vw,5rem)] leading-[1.35] text-ivory"
+          >
+            સાંજથી પરોઢ
           </h1>
 
           <p className="display-type mt-5 text-[clamp(1.05rem,1.7vw,1.55rem)] text-mukut italic">
@@ -282,13 +294,13 @@ export function HomeHero({ start = true }) {
               type="button"
               onClick={openTickets}
               data-cursor="cta"
-              className="cursor-pointer rounded-full border border-mukut bg-mukut px-5 py-3 text-[0.62rem] font-bold tracking-[0.16em] whitespace-nowrap uppercase text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold 2xl:px-7 2xl:py-3.5 2xl:text-[0.68rem] 2xl:tracking-[0.28em]"
+              className="cursor-pointer rounded-full border border-mukut bg-mukut px-5 py-3 text-[0.62rem] font-bold tracking-[0.16em] whitespace-nowrap uppercase text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold 2xl:px-7 2xl:py-3.5 2xl:text-label 2xl:tracking-[0.28em]"
             >
               Book your passes →
             </button>
             <a
               href="#gallery"
-              className="rounded-full border border-antique/45 px-5 py-3 text-[0.62rem] tracking-[0.16em] whitespace-nowrap uppercase text-ivory/85 transition-colors duration-500 hover:border-mukut hover:text-mukut 2xl:px-7 2xl:py-3.5 2xl:text-[0.68rem] 2xl:tracking-[0.28em]"
+              className="rounded-full border border-antique/45 px-5 py-3 text-[0.62rem] tracking-[0.16em] whitespace-nowrap uppercase text-ivory/85 transition-colors duration-500 hover:border-mukut hover:text-mukut 2xl:px-7 2xl:py-3.5 2xl:text-label 2xl:tracking-[0.28em]"
             >
               Explore the lineup →
             </a>
@@ -297,9 +309,23 @@ export function HomeHero({ start = true }) {
           {/* The facts. A hairline between columns rather than boxes —
               divide-x only paints BETWEEN children, so it needs no
               last-child exception. */}
+          {/* Three across normally; a stacked list on a wide-but-SHORT
+              screen. On those the book shrinks to 70%, which leaves the
+              copy column very wide, and three facts spread across it
+              read as drifting off to the side rather than as a row.
+
+              Stacked, each fact turns into a single compact line —
+              icon beside the text instead of above it. That matters:
+              keeping the icon-on-top block and merely stacking them
+              would make this group about 265px tall, taller than the
+              row it replaced, which is the wrong direction on a screen
+              that is short to begin with. Inline it is ~150px. */}
           <dl
-           
-            className="mt-8 grid grid-cols-1 gap-y-5 border-t border-antique/20 pt-6 sm:grid-cols-3 sm:gap-y-0 sm:divide-x sm:divide-antique/20 2xl:mt-12 2xl:pt-8"
+            className={`mt-8 grid border-t border-antique/20 pt-6 2xl:mt-12 2xl:pt-8 ${
+              shortDesktop
+                ? "grid-cols-1 gap-y-4"
+                : "grid-cols-1 gap-y-5 sm:grid-cols-3 sm:gap-y-0 sm:divide-x sm:divide-antique/20"
+            }`}
           >
             {FACTS.map(({ Icon, head, sub }) => (
               /* The doubled type is a DESKTOP size. A phone shows these
@@ -310,14 +336,33 @@ export function HomeHero({ start = true }) {
                  Padding is trimmed from px-5 for the same reason it was
                  before: at 1.75rem the three columns need every pixel
                  of their ~160px of content width. */
-              <div key={head} className="sm:px-3 sm:first:pl-0 sm:last:pr-0">
-                <Icon className="mb-2 h-5 w-5 text-mukut sm:mb-3 sm:h-6 sm:w-6 2xl:h-8 2xl:w-8" aria-hidden strokeWidth={1.6} />
-                {/* text-balance so a line that has to wrap splits
-                    evenly rather than leaving one orphaned word. */}
-                <dt className="text-[clamp(0.95rem,1.4vw,1.6rem)] leading-tight text-balance text-ivory">{head}</dt>
-                <dd className="mt-1 text-[clamp(0.75rem,1.05vw,1.25rem)] tracking-[0.12em] uppercase text-ivory/45 sm:mt-2">
-                  {sub}
-                </dd>
+              <div
+                key={head}
+                className={shortDesktop ? "flex items-center gap-3" : "sm:px-3 sm:first:pl-0 sm:last:pr-0"}
+              >
+                <Icon
+                  className={`text-mukut ${
+                    shortDesktop
+                      ? "h-5 w-5 shrink-0"
+                      : "mb-2 h-5 w-5 sm:mb-3 sm:h-6 sm:w-6 2xl:h-8 2xl:w-8"
+                  }`}
+                  aria-hidden
+                  strokeWidth={1.6}
+                />
+                <div>
+                  {/* text-balance so a line that has to wrap splits
+                      evenly rather than leaving one orphaned word. */}
+                  <dt className="text-[clamp(0.95rem,1.4vw,1.6rem)] leading-tight text-balance text-ivory">
+                    {head}
+                  </dt>
+                  <dd
+                    className={`text-[clamp(0.75rem,1.05vw,1.25rem)] tracking-[0.12em] uppercase text-ivory/45 ${
+                      shortDesktop ? "" : "mt-1 sm:mt-2"
+                    }`}
+                  >
+                    {sub}
+                  </dd>
+                </div>
               </div>
             ))}
           </dl>

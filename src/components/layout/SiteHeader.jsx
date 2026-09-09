@@ -64,22 +64,45 @@ export function SiteHeader() {
           window cropped from the centre shows the mark complete —
           104x80 of real logo — and throws away only empty space.
           Swap the logo file and this window wants re-checking. */}
-      <a
-        href="#home"
-        className="pointer-events-auto block shrink-0"
-        aria-label={`${EVENT_CONFIG.brandLine}, home`}
-      >
-        <img
-          src={BRAND.logo}
-          alt={EVENT_CONFIG.brandLine}
-          /* Shrinks once the bar is solid. A 112px opaque strip across
-             every page is a lot of chrome; over the hero, where it is
-             transparent, the full size costs nothing. The window stays
-             proportional (140x88 -> 100x63) so the crop still frames
-             the mark the same way. */
-          className={`object-cover transition-all duration-300 ${stuck ? "h-16 w-25" : "h-22 w-35"}`}
+      {/* The two marks as one lockup: Divi, a hairline, then the
+          organiser's. Only the Divi half is the home link — the
+          Panchatva mark is a credit, and wrapping it in the same anchor
+          would make it a second, confusing route to the same page.
+
+          The "Garba by Panchatva" line that sat under the Divi mark is
+          gone: the logo beside it now says exactly that, and running
+          both read as a duplicate. */}
+      <div className="pointer-events-auto flex shrink-0 items-center gap-3 sm:gap-4">
+        <a href="#home" aria-label={`${EVENT_CONFIG.brandLine}, home`}>
+          <img
+            src={BRAND.logo}
+            alt={EVENT_CONFIG.brandLine}
+            /* Shrinks once the bar is solid. A 112px opaque strip across
+               every page is a lot of chrome; over the hero, where it is
+               transparent, the full size costs nothing. The window stays
+               proportional (140x88 -> 100x63) so the crop still frames
+               the mark the same way. */
+            className={`object-cover transition-all duration-300 ${stuck ? "h-16 w-25" : "h-22 w-35"}`}
+          />
+        </a>
+
+        <span
+          aria-hidden
+          className={`w-px bg-antique/30 transition-all duration-300 ${stuck ? "h-7" : "h-10"}`}
         />
-      </a>
+
+        {/* Sized by HEIGHT with `w-auto`: this logotype is 4140x1564,
+            ratio 2.65, so pinning a width would make it tower over the
+            Divi mark. h-14 puts it at about 148px across — set against
+            the Divi mark's ~80px of visible artwork, the two now read
+            as a matched pair rather than a brand with a footnote.
+            It steps down with the bar like everything else here. */}
+        <img
+          src={BRAND.panchatva}
+          alt={EVENT_CONFIG.organiserName}
+          className={`w-auto object-contain transition-all duration-300 ${stuck ? "h-10" : "h-14"}`}
+        />
+      </div>
 
       {/* Hidden below md: three links plus a CTA do not fit beside a
           140px mark on a 360px screen, and the same sections are all

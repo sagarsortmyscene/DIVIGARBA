@@ -262,7 +262,21 @@ export function GalleryFlip() {
          The switch is at 600px, not at `sm`, because that is the real
          boundary: below 600 the content width falls under the 560px
          (2 x minWidth) portrait threshold. */
-      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 xl:w-[90vh] xl:max-w-[52vw]"
+      /* At xl the book FILLS its 60% column, capped so it can never
+         run past the fold. That cap is derived rather than guessed:
+
+           usable height = 100vh - 296px   (pt-36 + controls + pb-24)
+           a 3:2 spread   = 1.5 x its height
+           so max width   = calc(150vh - 444px)
+
+         Which means the hero lands at exactly the viewport height when
+         the cap binds, and under it when the column binds. It replaces
+         both the old 90vh/52vw pair and the separate 63vh short-screen
+         override — one expression that already knows about short
+         screens, because a short screen is just a smaller 100vh.
+
+         Below xl the stacked sizing is untouched. */
+      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 xl:w-full xl:max-w-[calc(150vh-444px)]"
       onPointerEnter={hover ? () => setPaused(true) : undefined}
       onPointerLeave={hover ? () => setPaused(false) : undefined}
     >
