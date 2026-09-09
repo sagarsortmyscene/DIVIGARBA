@@ -245,13 +245,15 @@ export function HomeHero({ start = true }) {
            the whole layout to 944px of a 1600px screen — a third of
            the width empty down each side. A gap inside a full-width
            layout reads as a gap; a narrow layout reads as broken. */
-        className="relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 sm:pt-36 sm:pb-24 xl:grid-cols-[3fr_2fr] xl:gap-6"
+        className={`relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 xl:grid-cols-[3fr_2fr] xl:gap-6 ${
+          shortDesktop ? "sm:pt-32 sm:pb-16" : "sm:pt-36 sm:pb-24"
+        }`}
         style={{ zIndex: "var(--z-content)" }}
       >
         {/* THE COPY. First in the DOM so it leads the reading order on
             a phone; order-1 on desktop puts the book back on the left
             where the design wants it. */}
-        <div data-slide className="order-1 xl:order-2 xl:pl-6">
+        <div data-slide className="order-1 min-w-0 xl:order-2 xl:pl-6">
           {/* Gujarati, so this is set in Anek and NOT in the display
               face: Sregs Serif has no Gujarati glyphs at all, and its
               unicode-range does not claim the block, so `font-display`
@@ -321,7 +323,7 @@ export function HomeHero({ start = true }) {
               row it replaced, which is the wrong direction on a screen
               that is short to begin with. Inline it is ~150px. */}
           <dl
-            className={`mt-8 grid border-t border-antique/20 pt-6 2xl:mt-12 2xl:pt-8 ${
+            className={`grid border-t border-antique/20 2xl:mt-12 2xl:pt-8 ${shortDesktop ? "mt-6 pt-5" : "mt-8 pt-6"} ${
               shortDesktop
                 ? "grid-cols-1 gap-y-4"
                 : "grid-cols-1 gap-y-5 sm:grid-cols-3 sm:gap-y-0 sm:divide-x sm:divide-antique/20"
@@ -371,7 +373,7 @@ export function HomeHero({ start = true }) {
         {/* THE BOOK — the gallery photographs, bound and turnable. This
             replaced the couple photo that stood here; that file is
             still in public/assets if it is ever wanted back. */}
-        <div data-slide className="order-2 xl:order-1">
+        <div data-slide className="order-2 min-w-0 xl:order-1">
           <GalleryFlip />
         </div>
       </div>
