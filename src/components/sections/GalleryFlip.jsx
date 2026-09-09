@@ -190,7 +190,7 @@ export function GalleryFlip() {
      back in the middle, and the transition means it glides into the
      full spread as the cover opens rather than jumping.
 
-     xl-only, matching the grid: below that the book is full width and
+     lg-only, matching the grid: below that the book is full width and
      the correction does not apply.
      It goes on the BOOK, not on the wrapper around it. On the wrapper
      it moved the arrows and the counter by the same amount, so the
@@ -204,7 +204,7 @@ export function GalleryFlip() {
   const TOTAL = GALLERY.length + 3 + videoPages;
   const LAST = TOTAL - 1;
   const recentre =
-    page === 0 ? "xl:-translate-x-1/4" : page >= LAST ? "xl:translate-x-1/4" : "";
+    page === 0 ? "lg:-translate-x-1/4" : page >= LAST ? "lg:translate-x-1/4" : "";
 
   return (
     /* WIDTH here is a request for a HEIGHT, and it must cover BOTH
@@ -275,8 +275,11 @@ export function GalleryFlip() {
          override — one expression that already knows about short
          screens, because a short screen is just a smaller 100vh.
 
-         Below xl the stacked sizing is untouched. */
-      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 xl:w-full xl:max-w-[calc(150vh-444px)]"
+         Below lg the stacked sizing is untouched. The two-column
+         layout starts at lg now, not xl: stacked, a book plus the full
+         copy ran the hero to ~1180px, which scrolled 380px past an
+         800-tall screen. Side by side it lands under 740px. */
+      className="mx-auto aspect-3/4 w-full max-w-[min(90vh,700px)] min-[600px]:aspect-3/2 lg:w-full lg:max-w-[calc(150vh-444px)]"
       onPointerEnter={hover ? () => setPaused(true) : undefined}
       onPointerLeave={hover ? () => setPaused(false) : undefined}
     >
@@ -461,7 +464,7 @@ export function GalleryFlip() {
           is the only thing under them — so they read as crowded against
           whatever follows. `sm:` returns it to the tighter desktop
           spacing, where the layout already has air around it. */}
-      <div className="mt-6 mb-10 flex items-center justify-center gap-5 sm:mt-5 sm:mb-0">
+      <div className="mt-20 mb-10 flex items-center justify-center gap-5 sm:mt-5 sm:mb-0">
         <button
           type="button"
           onClick={() => flip(-1)}
@@ -477,7 +480,7 @@ export function GalleryFlip() {
           {String(page + 1).padStart(2, "0")} / {String(TOTAL).padStart(2, "0")}
         </span>
 
-        <button
+        <button 
           type="button"
           onClick={() => flip(1)}
           aria-label="Next page"

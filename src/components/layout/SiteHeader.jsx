@@ -72,7 +72,7 @@ export function SiteHeader() {
           The "Garba by Panchatva" line that sat under the Divi mark is
           gone: the logo beside it now says exactly that, and running
           both read as a duplicate. */}
-      <div className="pointer-events-auto flex shrink-0 items-center gap-3 sm:gap-4">
+      <div className="pointer-events-auto flex shrink-0 items-center gap-1.5 sm:gap-4">
         <a href="#home" aria-label={`${EVENT_CONFIG.brandLine}, home`}>
           <img
             src={BRAND.logo}
@@ -82,25 +82,32 @@ export function SiteHeader() {
                transparent, the full size costs nothing. The window stays
                proportional (140x88 -> 100x63) so the crop still frames
                the mark the same way. */
-            className={`object-cover transition-all duration-300 ${stuck ? "h-16 w-25" : "h-22 w-35"}`}
+            className={`object-cover transition-all duration-300 ${
+              stuck ? "h-12 w-19 sm:h-16 sm:w-25" : "h-15 w-24 sm:h-22 sm:w-35"
+            }`}
           />
         </a>
 
         <span
           aria-hidden
-          className={`w-px bg-antique/30 transition-all duration-300 ${stuck ? "h-7" : "h-10"}`}
+          className={`w-px bg-antique/30 transition-all duration-300 ${
+            stuck ? "h-4 sm:h-7" : "h-5 sm:h-10"
+          }`}
         />
 
         {/* Sized by HEIGHT with `w-auto`: this logotype is 4140x1564,
-            ratio 2.65, so pinning a width would make it tower over the
-            Divi mark. h-14 puts it at about 148px across — set against
-            the Divi mark's ~80px of visible artwork, the two now read
-            as a matched pair rather than a brand with a footnote.
+            ratio 2.65, so a height of h-14 comes out about 148px ACROSS
+            — which is why it has to shrink hardest on a phone. At the
+            desktop sizes the lockup and the Book ticket button wanted
+            458px of a 360px screen, overflowing by 138px; at h-6 the
+            pair fits with room to spare.
             It steps down with the bar like everything else here. */}
         <img
           src={BRAND.panchatva}
           alt={EVENT_CONFIG.organiserName}
-          className={`w-auto object-contain transition-all duration-300 ${stuck ? "h-10" : "h-14"}`}
+          className={`w-auto object-contain transition-all duration-300 ${
+            stuck ? "h-5 sm:h-10" : "h-6 sm:h-14"
+          }`}
         />
       </div>
 

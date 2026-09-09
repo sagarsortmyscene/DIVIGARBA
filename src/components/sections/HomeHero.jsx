@@ -75,7 +75,15 @@ export function HomeHero({ start = true }) {
      apart. Read in JS rather than as a stacked Tailwind variant because
      it changes the MARKUP below — icon beside the text instead of above
      it — not just a class. */
-  const shortDesktop = useMediaQuery("(min-width: 1280px) and (max-height: 849px)");
+  const shortDesktop = useMediaQuery("(min-width: 1024px) and (max-height: 849px)");
+
+  /* The copy column is narrow whenever it is beside the book and the
+     screen is not large: 360px at 1024, 470px at 1280, 534px at 1440.
+     Three facts across any of those is cramped, so they take the same
+     compact one-per-line form the short screens use. Only from 2xl,
+     where the column reaches ~573px, does the row fit again. */
+  const compactFacts =
+    useMediaQuery("(min-width: 1024px) and (max-width: 1535px)") || shortDesktop;
 
   useGSAP(
     () => {
@@ -245,7 +253,7 @@ export function HomeHero({ start = true }) {
            the whole layout to 944px of a 1600px screen — a third of
            the width empty down each side. A gap inside a full-width
            layout reads as a gap; a narrow layout reads as broken. */
-        className={`relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 xl:grid-cols-[3fr_2fr] xl:gap-6 ${
+        className={`relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 lg:grid-cols-[minmax(560px,3fr)_2fr] lg:gap-6 ${
           shortDesktop ? "sm:pt-32 sm:pb-16" : "sm:pt-36 sm:pb-24"
         }`}
         style={{ zIndex: "var(--z-content)" }}
@@ -253,7 +261,17 @@ export function HomeHero({ start = true }) {
         {/* THE COPY. First in the DOM so it leads the reading order on
             a phone; order-1 on desktop puts the book back on the left
             where the design wants it. */}
-        <div data-slide className="order-1 min-w-0 xl:order-2 xl:pl-6">
+        {/* Order flips at lg, because the two layouts want opposite
+            things.
+            SIDE BY SIDE (lg and up) the book takes the left column, so
+            it is order-1 and the copy order-2.
+            STACKED (below lg) the copy leads. On a phone the book is a
+            portrait page around 470px tall, and putting it first would
+            push the heading and the Book your passes button below the
+            fold before anything has been read.
+            Stacked also matches DOM order, so on a phone what a screen
+            reader hears and what you see are the same. */}
+        <div data-slide className="order-1 min-w-0 lg:order-2 lg:pl-6">
           {/* Gujarati, so this is set in Anek and NOT in the display
               face: Sregs Serif has no Gujarati glyphs at all, and its
               unicode-range does not claim the block, so `font-display`
@@ -324,7 +342,7 @@ export function HomeHero({ start = true }) {
               that is short to begin with. Inline it is ~150px. */}
           <dl
             className={`grid border-t border-antique/20 2xl:mt-12 2xl:pt-8 ${shortDesktop ? "mt-6 pt-5" : "mt-8 pt-6"} ${
-              shortDesktop
+              compactFacts
                 ? "grid-cols-1 gap-y-4"
                 : "grid-cols-1 gap-y-5 sm:grid-cols-3 sm:gap-y-0 sm:divide-x sm:divide-antique/20"
             }`}
@@ -340,11 +358,11 @@ export function HomeHero({ start = true }) {
                  of their ~160px of content width. */
               <div
                 key={head}
-                className={shortDesktop ? "flex items-center gap-3" : "sm:px-3 sm:first:pl-0 sm:last:pr-0"}
+                className={compactFacts ? "flex items-center gap-3" : "sm:px-3 sm:first:pl-0 sm:last:pr-0"}
               >
                 <Icon
                   className={`text-mukut ${
-                    shortDesktop
+                    compactFacts
                       ? "h-5 w-5 shrink-0"
                       : "mb-2 h-5 w-5 sm:mb-3 sm:h-6 sm:w-6 2xl:h-8 2xl:w-8"
                   }`}
@@ -359,7 +377,7 @@ export function HomeHero({ start = true }) {
                   </dt>
                   <dd
                     className={`text-[clamp(0.75rem,1.05vw,1.25rem)] tracking-[0.12em] uppercase text-ivory/45 ${
-                      shortDesktop ? "" : "mt-1 sm:mt-2"
+                      compactFacts ? "" : "mt-1 sm:mt-2"
                     }`}
                   >
                     {sub}
@@ -373,7 +391,7 @@ export function HomeHero({ start = true }) {
         {/* THE BOOK — the gallery photographs, bound and turnable. This
             replaced the couple photo that stood here; that file is
             still in public/assets if it is ever wanted back. */}
-        <div data-slide className="order-2 min-w-0 xl:order-1">
+        <div data-slide className="order-2 min-w-0 lg:order-1">
           <GalleryFlip />
         </div>
       </div>
