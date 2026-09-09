@@ -58,13 +58,19 @@ export const SCENES = [
     heading: "One step. One circle. One energy.",
     body: "",
     image: {
-      /* The centre installation, per the reference given with this
-         line. It comes from the gallery set rather than img-1..4, so
-         there is no tighter phone crop for it — the desktop file is
-         used at both sizes, the same fallback the old third scene
-         used. */
-      file: "/assets/gallery/DSC07975.jpg",
-      fileMobile: "/assets/gallery/DSC07975.jpg",
+      /* The petal canopy over the flower-ringed altar — the second of
+         the two circle photographs, and the one the gallery does NOT
+         carry. It used to be read straight out of the gallery folder
+         as DSC07975.jpg, which broke the moment that set was renamed
+         to its nine titled files; the photograph itself was dropped
+         from the gallery in the process. It now lives beside the other
+         scene photographs as its own asset, so nothing here depends on
+         what the gallery happens to hold.
+         1400x933, already at the optimised size. No tighter phone crop
+         exists, so the desktop file is used at both — the same
+         fallback the last scene uses. */
+      file: "/assets/scene-circle.jpg",
+      fileMobile: "/assets/scene-circle.jpg",
       alt: "The flower-ringed altar at the centre of the ground, under a canopy of fabric petals",
       focal: "center 45%",
     },
