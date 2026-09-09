@@ -94,7 +94,7 @@ export function Gallery() {
               <button
                 key={`${shot.file}-${i}`}
                 type="button"
-                aria-label={`${shot.title} — ${shot.line}`}
+                aria-label={`View ${shot.title}`}
                 tabIndex={i < ROW.shots.length ? undefined : -1}
                 onClick={() => setOpen(shot)}
                 className="frame-ancient frame-pips group relative h-[46svh] w-[70vw] shrink-0 overflow-hidden bg-maroon text-left sm:h-[58svh] sm:w-[30vw] md:w-[24vw]"
@@ -117,11 +117,8 @@ export function Gallery() {
                   {shot.n}
                 </span>
 
-                {/* Title only. The sub-line under it came off by
-                    request — `shot.line` is still in the data and still
-                    shows in the Lightbox when a plate is opened, so
-                    nothing was lost, it just does not crowd the plate
-                    as it drifts past. */}
+                {/* Title only. The set is titled from its filenames
+                    and carries no sub-caption. */}
                 <div className="absolute inset-x-4 bottom-4">
                   <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
                 </div>

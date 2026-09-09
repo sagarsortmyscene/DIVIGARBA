@@ -144,17 +144,19 @@ export function CinematicHero() {
             key={scene.id}
             data-scene={scene.id}
             className={cx(
-              "absolute flex max-w-[min(78vw,30rem)] flex-col opacity-0",
+              "absolute flex max-w-[min(86vw,38rem)] flex-col opacity-0",
               SIDE[scene.side],
               ALIGN[scene.align]
             )}
             style={{ zIndex: "var(--z-content)" }}
           >
-            <span className="text-[clamp(0.68rem,1vw,0.8rem)] tracking-[0.4em] uppercase text-antique">{scene.eyebrow}</span>
-            <h2 className="display-type mt-5 text-[clamp(1.8rem,4.4vw,3.4rem)] leading-[1.05] text-ivory">
+            <span className="text-[clamp(0.8rem,1.25vw,1.05rem)] tracking-[0.34em] uppercase text-antique">
+              {scene.eyebrow}
+            </span>
+            <h2 className="display-type mt-5 text-[clamp(2.3rem,5.6vw,4.6rem)] leading-[1.03] text-ivory">
               {scene.heading}
             </h2>
-            <p className="mt-4 max-w-[38ch] text-sm leading-relaxed text-ivory/55 sm:text-base">
+            <p className="mt-4 max-w-[40ch] text-base leading-relaxed text-ivory/70 sm:text-lg">
               {scene.body}
             </p>
           </div>

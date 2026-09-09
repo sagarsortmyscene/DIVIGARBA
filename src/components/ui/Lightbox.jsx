@@ -116,8 +116,12 @@ export function Lightbox({ shot, onClose }) {
         </div>
 
         <figcaption className="shrink-0 px-6 pt-4 pb-5">
+          {/* `line` is optional now. The gallery set is titled from its
+              filenames and carries no sub-caption, so this renders only
+              when one exists rather than leaving an empty paragraph
+              holding space under the title. */}
           <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
-          <p className="mt-1 text-sm text-ivory/60">{shot.line}</p>
+          {shot.line && <p className="mt-1 text-sm text-ivory/60">{shot.line}</p>}
         </figcaption>
       </figure>
 

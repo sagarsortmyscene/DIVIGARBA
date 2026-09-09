@@ -1,6 +1,5 @@
 import { EVENT_CONFIG } from "../../data/event";
 import { BRAND } from "../../data/images";
-import { SiteFooter } from "../layout/SiteFooter";
 
 function Section({ heading, paragraphs = [], bullets = [] }) {
   return (
@@ -25,7 +24,10 @@ function Section({ heading, paragraphs = [], bullets = [] }) {
   );
 }
 
-/** Shared shell for every legal page — a slim header/footer of its own. */
+/** Shared shell for every legal page — a slim header of its own and
+ *  nothing after the copy. The site footer used to close these pages,
+ *  which is where their phone, Instagram and map row came from; it is
+ *  gone entirely now rather than merely having its contacts hidden. */
 export function LegalPage({ title, effective, intro, sections = [], footnote, children }) {
   return (
     <div className="min-h-svh">
@@ -33,12 +35,26 @@ export function LegalPage({ title, effective, intro, sections = [], footnote, ch
         className="sticky top-0 flex items-center justify-between border-b border-antique/15 bg-obsidian/90 px-5 py-2 backdrop-blur-md sm:px-10"
         style={{ zIndex: "var(--z-nav)" }}
       >
-        {/* Lands on the footer rather than the top of the landing page —
-            you came from a footer link, so that is where you left off.
-            App.jsx does the scrolling once the main view has mounted. */}
-        <a href="#footer" className="label text-ivory/60 transition-colors hover:text-ivory">
+        {/* Genuine history back, not a link to #footer. The hash link
+            navigated FORWARD to a new route, which remounted the whole
+            landing page — splash screen and all — and dropped you at
+            the footer rather than where you actually were. Going back
+            through history returns the previous view with its scroll
+            position intact and replays nothing.
+
+            The fallback covers arriving here directly, from a shared
+            link or a bookmark, where there is no previous page to
+            return to: clearing the hash lands on the landing page. */}
+        <button
+          type="button"
+          onClick={() => {
+            if (window.history.length > 1) window.history.back();
+            else window.location.hash = "";
+          }}
+          className="label cursor-pointer text-ivory/60 transition-colors hover:text-ivory"
+        >
           ← Back
-        </a>
+        </button>
         <img
           src={BRAND.logo}
           alt={EVENT_CONFIG.brandLine}
@@ -66,8 +82,6 @@ export function LegalPage({ title, effective, intro, sections = [], footnote, ch
           {footnote && <p className="mt-12 border-t border-antique/15 pt-6 text-xs leading-relaxed text-ivory/35">{footnote}</p>}
         </div>
       </main>
-
-      <SiteFooter contacts={false} />
     </div>
   );
 }
