@@ -1,5 +1,6 @@
 import { Phone, Mail, MapPin } from "lucide-react";
 import { EVENT_CONFIG } from "../../data/event";
+import { SectionPlate } from "./SectionPlate";
 
 /**
  * The Instagram glyph, drawn here rather than imported: lucide-react 1.x
@@ -29,7 +30,13 @@ function InstagramIcon({ size = 24, strokeWidth = 2, ...rest }) {
   );
 }
 
-export function SiteFooter() {
+/**
+ * `contacts` is off on the legal pages. The phone, email, Instagram and
+ * map row belongs on the landing page; on Terms it reads as an invite
+ * to get in touch in the middle of a legal document, and it was showing
+ * there only because those pages render this same footer.
+ */
+export function SiteFooter({ contacts: showContacts = true }) {
   const {
     brandLine, phone, email, instagram, instagramHandle, maps,
     terms,
@@ -52,32 +59,52 @@ export function SiteFooter() {
   return (
     <footer
       id="footer"
-      className="relative px-5 pb-10 sm:px-10"
+      className="relative overflow-hidden px-5 pt-10 pb-10 sm:px-10"
       style={{ zIndex: "var(--z-content)" }}
     >
-      <div className="divider-carved mb-10"><span className="h-1.5 w-1.5 rotate-45 bg-mukut/70" /></div>
+      <SectionPlate />
 
-      <div className="mx-auto max-w-5xl">
-        <ul className="grid gap-px border border-antique/15 bg-antique/15 sm:grid-cols-2 lg:grid-cols-4">
-          {contacts.map(({ Icon, label, href }) => (
-            <li key={label} className="bg-obsidian/90">
-              <a
-                href={href}
-                target={href.startsWith("http") ? "_blank" : undefined}
-                rel={href.startsWith("http") ? "noreferrer noopener" : undefined}
-                className="flex flex-col items-center gap-2 px-4 py-5 text-ivory/60 transition-colors hover:text-ivory"
-              >
-                <Icon size={16} strokeWidth={1.2} className="text-antique" aria-hidden />
-                <span className="text-sm">{label}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
+      {/* Both of these needed `relative` and a layer. The footer's
+          children were static, and a static element paints UNDER a
+          positioned sibling however high its z-index — so without this
+          the plate above would cover the whole footer. */}
+      <div className="divider-carved relative mb-10" style={{ zIndex: "var(--z-content)" }}>
+        <span className="h-1.5 w-1.5 rotate-45 bg-mukut/70" />
+      </div>
+
+      <div className="relative mx-auto max-w-5xl" style={{ zIndex: "var(--z-content)" }}>
+        {/* Four framed tiles, dressed exactly like the About block —
+            `frame-ancient` plus `bg-maroon/25` — instead of the opaque
+            obsidian panels with hairline gaps that were here.
+
+            The old grid drew its dividers with `gap-px` over a
+            `bg-antique/15` backing, which only works while the tiles
+            are OPAQUE: at maroon/25 that backing would show straight
+            through every tile and tint the lot. Giving each tile its
+            own frame and using real gaps removes the problem rather
+            than fighting it, and matches About besides. */}
+        {showContacts && (
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {contacts.map(({ Icon, label, href }) => (
+              <li key={label} className="frame-ancient bg-maroon/25">
+                <a
+                  href={href}
+                  target={href.startsWith("http") ? "_blank" : undefined}
+                  rel={href.startsWith("http") ? "noreferrer noopener" : undefined}
+                  className="flex flex-col items-center gap-2 px-4 py-5 text-ivory/60 transition-colors hover:text-ivory"
+                >
+                  <Icon size={16} strokeWidth={1.2} className="text-antique" aria-hidden />
+                  <span className="text-sm">{label}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
 
         {/* The date-and-address line that sat here is gone: the Find us
             section above already carries the venue, and the "Find your
             way" link in the row above this one still opens the map. */}
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div className={`flex flex-wrap items-center justify-center gap-3 ${showContacts ? "mt-8" : "mt-0"}`}>
           {legal.map(([label, href]) => (
             <a
               key={label}
@@ -92,7 +119,7 @@ export function SiteFooter() {
         </div>
 
         <p className="mt-8 text-center text-sm text-ivory/70">
-          {brandLine.split(" ").slice(0, 2).join(" ")} is a Navratri experience by{" "}
+          {brandLine.split(" ").slice(0, 2).join(" ")} organised by{" "}
           {organiserUrl ? (
             <a href={organiserUrl} target="_blank" rel="noreferrer noopener" className="text-mukut hover:text-mukut">
               {organiserName}

@@ -8,7 +8,7 @@ import { EVENT_CONFIG } from "./event";
 
 /* Exactly what TERMS interpolates — `email` came out with the Privacy
    and Data Deletion copy, which was the only thing using it. */
-const { brandLine, organiserName, gateEntry, entryCloses, dates, location, phone } =
+const { brandLine, organiserName, gateEntry, entryCloses, dates, location } =
   EVENT_CONFIG;
 
 export const TERMS = {
@@ -35,5 +35,5 @@ export const TERMS = {
       ],
     },
   ],
-  footnote: `Event dates: ${dates}. Venue: ${location}. Contact: ${phone}.`,
+  footnote: `Event dates: ${dates}. Venue: ${location}.`,
 };

@@ -20,7 +20,7 @@ const FACTS = [
   { Icon: MapPin,   head: EVENT_CONFIG.venueName, sub: "Vaishnodevi Circle" },
   {
     Icon: Music,
-    head: "Live garba · dhol",
+    head: "Shehnai · dhol",
     sub: `From ${EVENT_CONFIG.gateEntry} · Last entry ${EVENT_CONFIG.entryCloses}`,
   },
 ];
@@ -157,12 +157,6 @@ export function HomeHero({ start = true }) {
     { scope: ref, dependencies: [reduced, start] }
   );
 
-  /* The SortMyScene widget binds itself to #buy-btn in the header, and
-     an id can only be on one element — so rather than a second trigger
-     the widget knows nothing about, this forwards the click to the one
-     it already owns. */
-  const openTickets = () => document.getElementById("buy-btn")?.click();
-
   return (
     <section
       ref={ref}
@@ -170,18 +164,47 @@ export function HomeHero({ start = true }) {
       className="relative flex min-h-svh w-full items-center overflow-hidden"
       aria-label={`${EVENT_CONFIG.name} — Navratri 2026`}
     >
-      {/* The ground. Built from palette tokens rather than raw hexes so
-          it follows the theme if that is ever retuned. */}
+      {/* THE GROUND — the master plate, in place of the gradient.
+
+          A <picture> rather than two <img> tags behind a `hidden`
+          class: display:none does NOT stop a browser downloading an
+          image, so the class approach would have every phone fetching
+          both files. A <source media> is resolved before the request,
+          so exactly one 700KB file is ever pulled.
+
+          The mobile source is the same plate rotated 90 degrees. See
+          IMAGES.heroBg — a phone is about 0.46 and the plate is 2.00,
+          so unrotated cover would keep a narrow vertical slice and
+          discard most of the picture.
+
+          fetchPriority high because this is now the largest thing
+          painted on first load, and it replaced a gradient that cost
+          nothing to render. */}
+      <picture aria-hidden className="absolute inset-0" style={{ zIndex: "var(--z-background)" }}>
+        <source media="(min-width: 640px)" srcSet={IMAGES.heroBg.file} />
+        <img
+          src={IMAGES.heroBg.fileMobile}
+          alt=""
+          fetchPriority="high"
+          decoding="async"
+          className="h-full w-full object-cover"
+        />
+      </picture>
+
+      {/* A scrim over the plate. The copy used to sit on a gradient
+          built to stay dark behind the text; a photograph has bright
+          areas, and ivory type on those is unreadable. This keeps the
+          picture legible underneath while giving the words a floor —
+          weighted to the right, which is where the copy sits from lg
+          up. Remove it and the plate reads brighter, but check the
+          heading against the lightest part before you do. */}
       <div
         aria-hidden
         className="absolute inset-0"
         style={{
-          zIndex: "var(--z-background)",
-          background: `
-            radial-gradient(80% 62% at 20% 84%, color-mix(in srgb, var(--color-ember) 32%, transparent), transparent 68%),
-            radial-gradient(72% 58% at 78% 18%, color-mix(in srgb, var(--color-sindoor) 38%, transparent), transparent 72%),
-            linear-gradient(168deg, var(--color-temple) 0%, var(--color-maroon) 48%, var(--color-obsidian) 100%)
-          `,
+          zIndex: "var(--z-atmosphere)",
+          background:
+            "linear-gradient(90deg, rgba(7,5,4,0.35) 0%, rgba(7,5,4,0.55) 55%, rgba(7,5,4,0.72) 100%)",
         }}
       />
 
@@ -295,36 +318,23 @@ export function HomeHero({ start = true }) {
           </h1>
 
           <p className="display-type mt-5 text-[clamp(1.05rem,1.7vw,1.55rem)] text-mukut italic">
-            Where heritage meets celebration.
+            Ten nights. One circle.
+          </p>
+
+          <p className="mt-2 text-[clamp(0.95rem,1.15vw,1.2rem)] text-ivory/80">
+            Where tradition comes alive.
           </p>
 
           <p className="mt-4 max-w-[46ch] text-[clamp(0.95rem,1.05vw,1.1rem)] leading-[1.65] font-light text-ivory/60">
-            Music, garba, dandiya and devotion, ten nights running — the
-            ground fills, the dhol starts, and tradition and celebration
-            stop being two separate things.
+            Garba, dhol, devotion and togetherness — ten nights of music,
+            movement and celebration, all coming together in one timeless
+            circle.
           </p>
 
-          {/* nowrap from xl. Below that they may wrap, which is right on a
-              phone where two full-width buttons cannot share a row. At
-              xl the column is only ~470px, so the padding and tracking
-              below are cut back to keep both on one line; 2xl has the
-              room to go back to full size. */}
-          <div className="mt-7 flex flex-wrap gap-3 xl:flex-nowrap 2xl:mt-9 2xl:gap-3.5">
-            <button
-              type="button"
-              onClick={openTickets}
-              data-cursor="cta"
-              className="cursor-pointer rounded-full border border-mukut bg-mukut px-5 py-3 text-[0.62rem] font-bold tracking-[0.16em] whitespace-nowrap uppercase text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold 2xl:px-7 2xl:py-3.5 2xl:text-label 2xl:tracking-[0.28em]"
-            >
-              Book your passes →
-            </button>
-            <a
-              href="#gallery"
-              className="rounded-full border border-antique/45 px-5 py-3 text-[0.62rem] tracking-[0.16em] whitespace-nowrap uppercase text-ivory/85 transition-colors duration-500 hover:border-mukut hover:text-mukut 2xl:px-7 2xl:py-3.5 2xl:text-label 2xl:tracking-[0.28em]"
-            >
-              Explore the lineup →
-            </a>
-          </div>
+          {/* The "Book your passes" and "Explore the lineup" buttons
+              were here and are gone by request. Booking still has a
+              route: the header's Book ticket, which is the element the
+              SortMyScene widget actually binds to. */}
 
           {/* The facts. A hairline between columns rather than boxes —
               divide-x only paints BETWEEN children, so it needs no

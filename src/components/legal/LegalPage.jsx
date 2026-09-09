@@ -67,7 +67,7 @@ export function LegalPage({ title, effective, intro, sections = [], footnote, ch
         </div>
       </main>
 
-      <SiteFooter />
+      <SiteFooter contacts={false} />
     </div>
   );
 }

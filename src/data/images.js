@@ -58,6 +58,26 @@ export const IMAGES = {
     alt: "Garba on the ground at night",
   },
 
+  /* The hero's ground, in place of the gradient that was there.
+     Two files from one plate, both re-encoded from the 1.89MB original
+     at quality 78 (mozjpeg) to about 700KB each:
+
+       file        2667x1334, ratio 2.00 — as shot, landscape
+       fileMobile  1334x2667, ratio 0.50 — the same plate ROTATED 90
+
+     The rotation matters. A phone is around 0.46 (390x844), so
+     object-cover on the landscape plate would keep a narrow vertical
+     slice and throw away roughly three quarters of the width. Rotated,
+     0.50 against 0.46 means it trims a little height and nothing else.
+     Arrived as "master bg_divi.jpeg" and renamed: a space needs
+     percent-encoding in a URL, and mixed case has broken this project
+     on Vercel before — Windows ignores it locally, Linux does not. */
+  heroBg: {
+    file: "/assets/master-bg-divi.jpg",
+    fileMobile: "/assets/master-bg-divi-mobile.jpg",
+    alt: "",
+  },
+
   /* The temple bells hung at the top of the hero, once each side.
      640x640 and a genuine RGBA cut-out — 85.6% of it is fully
      transparent — so it drops onto the gradient with no mask and no

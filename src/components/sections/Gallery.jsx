@@ -117,11 +117,13 @@ export function Gallery() {
                   {shot.n}
                 </span>
 
+                {/* Title only. The sub-line under it came off by
+                    request — `shot.line` is still in the data and still
+                    shows in the Lightbox when a plate is opened, so
+                    nothing was lost, it just does not crowd the plate
+                    as it drifts past. */}
                 <div className="absolute inset-x-4 bottom-4">
                   <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
-                  <p className="mt-1.5 max-w-[34ch] text-xs leading-snug text-ivory/60">
-                    {shot.line}
-                  </p>
                 </div>
               </button>
             ))}

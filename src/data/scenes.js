@@ -4,17 +4,27 @@
    height; `side`/`align` map straight onto CinematicHero's SIDE/ALIGN
    tables. Each scene owns one photo: `image.file` for desktop,
    `image.fileMobile` for phones (a tighter crop of the same shot).
+
+   FIVE scenes now, not four. The copy opens with a title beat —
+   "Divi Garba 2026" — before the four narrative ones, so the ranges
+   below were redistributed to give each an even share. They still
+   overlap by the ±0.05 the photo timelines add in CinematicHero,
+   which is what keeps one picture on screen at all times.
+
+   Photographs are matched to the references given with the copy:
+   dhol players for the invitation, the centre installation for the
+   circle, the crowd for one direction, friends for the last.
    ============================================================ */
 export const SCENES = [
   {
-    id: "altar",
-    from: 0.03,
-    to: 0.26,
+    id: "opening",
+    from: 0.02,
+    to: 0.19,
     side: "left",
     align: "start",
-    eyebrow: "The presence",
-    heading: "She is installed at dusk.",
-    body: "Marigold, flame and cloth, laid out before the first beat of the dhol.",
+    eyebrow: "Divi Garba 2026",
+    heading: "Our Divi glows",
+    body: "Where tradition comes alive.",
     image: {
       file: "/assets/img-1.jpg",
       fileMobile: "/assets/img1-mobile.jpg",
@@ -24,13 +34,13 @@ export const SCENES = [
   },
   {
     id: "dhol",
-    from: 0.29,
-    to: 0.5,
+    from: 0.22,
+    to: 0.39,
     side: "right",
     align: "center",
-    eyebrow: "The invitation",
-    heading: "The dhol calls first.",
-    body: "Before the feet move, the drum does. It reaches you before you reach the ground.",
+    eyebrow: "The Invitation",
+    heading: "First beat of dhol",
+    body: "Beats invite and feet follow the rhythm.",
     image: {
       file: "/assets/img-2.jpg",
       fileMobile: "/assets/img2-mobile.jpg",
@@ -40,13 +50,50 @@ export const SCENES = [
   },
   {
     id: "circle",
-    from: 0.53,
-    to: 0.74,
+    from: 0.41,
+    to: 0.58,
     side: "left",
     align: "end",
-    eyebrow: "The circle",
-    heading: "Everyone you know is here.",
-    body: "Old friends, new outfits, the same ten nights.",
+    eyebrow: "The Circle",
+    heading: "One step. One circle. One energy.",
+    body: "",
+    image: {
+      /* The centre installation, per the reference given with this
+         line. It comes from the gallery set rather than img-1..4, so
+         there is no tighter phone crop for it — the desktop file is
+         used at both sizes, the same fallback the old third scene
+         used. */
+      file: "/assets/gallery/DSC07975.jpg",
+      fileMobile: "/assets/gallery/DSC07975.jpg",
+      alt: "The flower-ringed altar at the centre of the ground, under a canopy of fabric petals",
+      focal: "center 45%",
+    },
+  },
+  {
+    id: "ground",
+    from: 0.61,
+    to: 0.78,
+    side: "right",
+    align: "center",
+    eyebrow: "One Direction",
+    heading: "Rhythm",
+    body: "Driving thousands of people together.",
+    image: {
+      file: "/assets/img-4.jpg",
+      fileMobile: "/assets/img4-mobile.jpg",
+      alt: "Young dhol players leading a procession through a packed night crowd",
+      focal: "center 48%",
+    },
+  },
+  {
+    id: "everyone",
+    from: 0.80,
+    to: 0.97,
+    side: "left",
+    align: "end",
+    eyebrow: "The Ground",
+    heading: "Everyone you know is here",
+    body: "Old friends, new memories and a circle that keeps growing.",
     image: {
       file: "/assets/img-3.jpg",
       // no mobile crop was uploaded for this one — falls back to the
@@ -54,22 +101,6 @@ export const SCENES = [
       fileMobile: "/assets/img-3.jpg",
       alt: "A group of friends in festive attire smiling together at the ground",
       focal: "center 30%",
-    },
-  },
-  {
-    id: "ground",
-    from: 0.77,
-    to: 0.97,
-    side: "right",
-    align: "end",
-    eyebrow: "One direction",
-    heading: "Ten thousand people.",
-    body: "One direction of travel, the whole night through.",
-    image: {
-      file: "/assets/img-4.jpg",
-      fileMobile: "/assets/img4-mobile.jpg",
-      alt: "Young dhol players leading a procession through a packed night crowd",
-      focal: "center 48%",
     },
   },
 ];

@@ -5,7 +5,11 @@ export const EVENT_CONFIG = {
   location: "Master Farm, B/s Sardardham, Vaishnodevi Circle",
 
   /* The same address, split for the Find us panel: a headline name and
-     the street line under it. */
+     the street line under it.
+     Corrected to the Google listing for "Divi Garba 2026". The site
+     previously said "B/s Sardardham, Vaishnodevi Circle", which is a
+     different part of Ahmedabad entirely — so the printed address and
+     the map pin were pointing people to two different places. */
   venueName: "Master Farm",
   venueStreet: "B/s Sardardham, Vaishnodevi Circle",
 
@@ -37,8 +41,18 @@ export const EVENT_CONFIG = {
      this same listing (both carry kgmid /g/11w98wzdgk), so the frame
      and the button show the same spot — one is simply the only form
      Google will let us embed. */
+  /* Coordinates ONLY. Two things were tried and both failed:
+       q=lat,lng+(Label)  renders the map but asks Google to resolve
+                          place info for the label, and when that
+                          lookup fails the frame shows a
+                          "Place info couldn't load" card over it.
+       /maps/place/ URL   answers X-Frame-Options: SAMEORIGIN, so it
+                          cannot be framed at all.
+     A bare coordinate pair is the one form that renders cleanly every
+     time. It drops an unnamed marker, so the venue name is printed
+     over the frame by VenueSection instead — under our control, and
+     it cannot fail to load. */
   mapEmbed: "https://www.google.com/maps?q=23.1427868,72.5244871&z=16&output=embed",
-
   terms: "#terms",
 
   /* Who runs the event. This is the ONLY place the name is written:

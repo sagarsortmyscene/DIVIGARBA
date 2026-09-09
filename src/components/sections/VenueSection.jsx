@@ -1,73 +1,56 @@
 import { EVENT_CONFIG } from "../../data/event";
 import { ScrollReveal } from "../motion/ScrollReveal";
+import { SectionPlate } from "../layout/SectionPlate";
 
 /**
- * FIND US — the venue named large at the left, the map at the right.
+ * LOCATION — the heading and address at the left, the map at the right.
  *
  * Set in Anek Gujarati throughout (it is the site's --font-ui now), so
  * the address reads the same whether it is written in Latin or
  * Gujarati — that is the whole reason for the face.
  */
 export function VenueSection() {
-  /* Two URLs for the same place on purpose — see the note in event.js:
-     `maps` is the share link the button opens, `mapEmbed` is the only
-     form Google serves without X-Frame-Options, so it is what the
-     frame can actually show. */
-  const { venueName, venueStreet, gateEntry, entryCloses, maps, mapEmbed } = EVENT_CONFIG;
-
-  /* The widget owns #buy-btn in the header and an id can only sit on
-     one element, so this forwards to the trigger it already knows. */
-  const openTickets = () => document.getElementById("buy-btn")?.click();
+  /* Both URLs, for two different jobs: mapEmbed is the only form
+     Google will render inside a frame, and maps is the real place
+     link the frame now opens when you click it. */
+  const { venueName, venueStreet, maps, mapEmbed } = EVENT_CONFIG;
 
   return (
-    <section id="venue" className="relative px-5 py-16 sm:px-10 sm:py-16 lg:py-14" aria-label="Find us">
+    <section id="venue" className="relative overflow-hidden px-5 py-16 sm:px-10 sm:py-16 lg:py-14" aria-label="Location">
+      <SectionPlate />
+
       <div
-        className="mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-10"
+        /* `relative` is required, not decorative: the z-index below
+           does nothing without a position, and the plate above is
+           absolute — so unpositioned content would sit UNDER it. */
+        className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-10"
         style={{ zIndex: "var(--z-content)" }}
       >
         <ScrollReveal className="mt-0">
-          {/* Not the `label` utility here: that is fixed at 0.68rem,
-              and it would be a second font-size rule fighting any size
-              class added beside it. Written out so the size is the
-              only thing that changed — tracking is eased off from
-              label's 0.36em, which reads gappy once the type grows. */}
-          <p className="text-[1.1rem] tracking-[0.2em] uppercase text-antique">Find us</p>
-
-          <h2 className="mt-4 text-[clamp(2.6rem,6vw,4.4rem)] leading-[1.05] font-semibold text-ivory">
-            {venueName}
+          {/* "Location" is the heading now and carries the large size;
+              the venue name steps down to sit with the address it
+              belongs to. The two swapped rather than both growing —
+              one thing per block should be the loudest. */}
+          <h2 className="text-[clamp(2.6rem,6vw,4.4rem)] leading-[1.05] font-semibold text-ivory">
+            Location
           </h2>
 
-          <p className="mt-5 text-lg leading-relaxed text-ivory/70 sm:text-2xl">
-            {venueStreet}
-          </p>
-          {/* The full statement lives here rather than in the hero's
-              fact row, which is three narrow columns and would wrap it
-              badly. This column has the width for the whole rule. */}
-          <p className="mt-2 text-lg leading-relaxed text-ivory/70 sm:text-2xl">
-            Music from {gateEntry}. Last entry {entryCloses} — gate entry closes after that.
+          <p className="mt-5 text-xl tracking-[0.06em] text-mukut sm:text-2xl">
+            {venueName}
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3.5">
-            <button
-              type="button"
-              onClick={openTickets}
-              data-cursor="cta"
-              className="cta-label cursor-pointer rounded-full border border-mukut bg-mukut px-7 py-3.5 text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold"
-            >
-              Tickets →
-            </button>
-            {/* The share link the config already holds. It opens the
-                real place card, which the embed on the right cannot —
-                and it is the one the organiser verified. */}
-            <a
-              href={maps}
-              target="_blank"
-              rel="noreferrer noopener"
-              className="label rounded-full border border-antique/45 px-7 py-3.5 text-ivory/85 transition-colors duration-500 hover:border-mukut hover:text-mukut"
-            >
-              Open in maps →
-            </a>
-          </div>
+          <p className="mt-2 text-lg leading-relaxed text-ivory/70 sm:text-xl">
+            {venueStreet}
+          </p>
+          {/* The timing line came off by request. The hero's fact row
+              still carries "From 8:00 PM · Last entry 2:00 AM", and
+              the Terms page states the full rule including no
+              re-entry — so this block is now purely the address. */}
+
+          {/* The "Tickets" and "Open in maps" buttons were here and
+              are gone by request. Booking is one tap away in the
+              header, and the map beside this opens Google Maps when
+              clicked, so neither route was lost with them. */}
         </ScrollReveal>
 
         {/* The map. `loading="lazy"` keeps Google's payload off the
@@ -75,16 +58,49 @@ export function VenueSection() {
             aspect ratio holds its box before the frame arrives, so
             nothing below it jumps when it loads. */}
         <ScrollReveal className="mt-0">
-          <div className="frame-ancient relative aspect-4/3 w-full overflow-hidden sm:aspect-16/10">
+          {/* The whole map is a link now. The iframe is
+              pointer-events-none so every click lands on the anchor
+              wrapping it rather than panning the embed — one tap opens
+              the real place in Google Maps.
+
+              Two things this fixes beyond the click: an embedded map
+              otherwise traps touch scrolling, so dragging up the page
+              over it zooms the map instead of scrolling; and it gives
+              the map a keyboard-reachable, labelled target, which a
+              bare iframe is not. */}
+          <a
+            href={maps}
+            target="_blank"
+            rel="noreferrer noopener"
+            aria-label={`Open ${venueName} in Google Maps`}
+            className="frame-ancient group relative block aspect-4/3 w-full cursor-pointer overflow-hidden sm:aspect-16/10"
+          >
+            {/* The pin's name, printed by us rather than asked of
+                Google. The embed's own label syntax
+                (`q=lat,lng (Name)`) renders the map but then fails its
+                place lookup and covers it with a "Place info couldn't
+                load" card — so the marker stays unnamed and this says
+                what it is. */}
+            <span className="pointer-events-none absolute top-3 left-3 z-10 rounded-sm bg-obsidian/85 px-3 py-1.5 text-xs tracking-[0.14em] uppercase text-mukut">
+              {EVENT_CONFIG.name} 2026
+            </span>
+
             <iframe
               src={mapEmbed}
               title={`Map to ${venueName}`}
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-              className="absolute inset-0 h-full w-full border-0"
+              tabIndex={-1}
+              className="pointer-events-none absolute inset-0 h-full w-full border-0"
             />
-          </div>
+
+            {/* A wash that lifts on hover, so it reads as something you
+                can open rather than a picture of a map. */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-obsidian/0 transition-colors duration-300 group-hover:bg-obsidian/20"
+            />
+          </a>
         </ScrollReveal>
       </div>
     </section>
