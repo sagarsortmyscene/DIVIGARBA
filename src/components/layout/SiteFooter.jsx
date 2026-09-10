@@ -2,13 +2,7 @@ import { Phone, Mail, MapPin } from "lucide-react";
 import { EVENT_CONFIG } from "../../data/event";
 import { SectionPlate } from "./SectionPlate";
 
-/**
- * The Instagram glyph, drawn here rather than imported: lucide-react 1.x
- * dropped its brand icons, so there is no `Instagram` export any more.
- * Same 24x24 viewBox, same currentColor stroke and the same `size` /
- * `strokeWidth` props as the lucide icons beside it, so it lines up
- * with them and inherits the identical antique-gold colour.
- */
+
 function InstagramIcon({ size = 24, strokeWidth = 2, ...rest }) {
   return (
     <svg
@@ -30,12 +24,7 @@ function InstagramIcon({ size = 24, strokeWidth = 2, ...rest }) {
   );
 }
 
-/**
- * `contacts` is off on the legal pages. The phone, email, Instagram and
- * map row belongs on the landing page; on Terms it reads as an invite
- * to get in touch in the middle of a legal document, and it was showing
- * there only because those pages render this same footer.
- */
+
 export function SiteFooter({ contacts: showContacts = true }) {
   const {
     brandLine, phone, email, instagram, instagramHandle, maps,
@@ -50,10 +39,7 @@ export function SiteFooter({ contacts: showContacts = true }) {
     { Icon: MapPin, label: "Find your way", href: maps },
   ];
 
-  /* Terms only. Privacy, Data Deletion and Privacy choices came out of
-     this row by request. The PAGES are untouched and still reachable
-     at #privacy, #data-deletion and #privacy-choices — they simply are
-     not linked from the footer any more. */
+  
   const legal = [["T&Cs", terms]];
 
   return (
@@ -64,25 +50,13 @@ export function SiteFooter({ contacts: showContacts = true }) {
     >
       <SectionPlate />
 
-      {/* Both of these needed `relative` and a layer. The footer's
-          children were static, and a static element paints UNDER a
-          positioned sibling however high its z-index — so without this
-          the plate above would cover the whole footer. */}
+      
       <div className="divider-carved relative mb-10" style={{ zIndex: "var(--z-content)" }}>
         <span className="h-1.5 w-1.5 rotate-45 bg-mukut/70" />
       </div>
 
       <div className="relative mx-auto max-w-5xl" style={{ zIndex: "var(--z-content)" }}>
-        {/* Four framed tiles, dressed exactly like the About block —
-            `frame-ancient` plus `bg-maroon/25` — instead of the opaque
-            obsidian panels with hairline gaps that were here.
-
-            The old grid drew its dividers with `gap-px` over a
-            `bg-antique/15` backing, which only works while the tiles
-            are OPAQUE: at maroon/25 that backing would show straight
-            through every tile and tint the lot. Giving each tile its
-            own frame and using real gaps removes the problem rather
-            than fighting it, and matches About besides. */}
+        
         {showContacts && (
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {contacts.map(({ Icon, label, href }) => (
@@ -101,9 +75,7 @@ export function SiteFooter({ contacts: showContacts = true }) {
           </ul>
         )}
 
-        {/* The date-and-address line that sat here is gone: the Find us
-            section above already carries the venue, and the "Find your
-            way" link in the row above this one still opens the map. */}
+        
         <div className={`flex flex-wrap items-center justify-center gap-3 ${showContacts ? "mt-8" : "mt-0"}`}>
           {legal.map(([label, href]) => (
             <a
@@ -125,17 +97,14 @@ export function SiteFooter({ contacts: showContacts = true }) {
               {organiserName}
             </a>
           ) : (
-            /* No URL configured — the name still reads as the credit,
-               just without a dead link wrapped around it. */
+            
             <span className="text-mukut">{organiserName}</span>
           )}
           .
         </p>
 
         <p className="mt-3 text-center text-sm text-ivory/70">
-          {/* No year: it was hardcoded to 2026, so it would have gone
-              stale on its own. One claim now covers both the images
-              and the words. */}
+          
           All photographs and content owned by {brandLine}.
         </p>
       </div>

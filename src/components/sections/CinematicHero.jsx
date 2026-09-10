@@ -5,7 +5,6 @@ import { SCENES } from "../../data/scenes";
 import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
 import { cx } from "../../lib/utils";
 
-/** How tall the scroll film runs. Longer = slower, more cinematic. */
 const HERO_VH = 520;
 
 const SIDE = {
@@ -14,14 +13,6 @@ const SIDE = {
 };
 const ALIGN = { start: "top-[22%]", center: "top-1/2 -translate-y-1/2", end: "bottom-[22%]" };
 
-/**
- * THE FILM — a pinned scroll-scrubbed sequence of real event photos,
- * one per scene, crossfading as captions slide through them.
- *
- * It follows HomeHero, which is the actual opening screen. This used
- * to carry the home background itself; that moved into HomeHero when
- * the hero became its own section.
- */
 export function CinematicHero() {
   const sectionRef = useRef(null);
   const reduced = useReducedMotion();
@@ -31,15 +22,10 @@ export function CinematicHero() {
     () => {
       const q = gsap.utils.selector(sectionRef);
 
-      /* Each scene owns a slice of the hero: its photo crossfades in a
-         touch ahead of its caption and holds a touch after, so the
-         image is never left waiting on bare grade before the text. */
       SCENES.forEach((scene, i) => {
         const text = q(`[data-scene="${scene.id}"]`);
         const photo = q(`[data-photo="${scene.id}"]`);
-        /* The first photo is up before a pixel is scrolled. Its slice
-           starts at 0, so any fade-in at all means the film opens on
-           bare obsidian and the image arrives late. */
+
         const first = i === 0;
         if (first) gsap.set(photo, { opacity: 1 });
 
@@ -59,7 +45,7 @@ export function CinematicHero() {
             },
           })
           .fromTo(text, { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 1, ease: "power2.out" })
-          .to(text, { duration: 1.4 }) // hold
+          .to(text, { duration: 1.4 })
           .to(text, { opacity: 0, y: -34, duration: 1, ease: "power2.in" });
 
         gsap
@@ -71,28 +57,19 @@ export function CinematicHero() {
               scrub: 1,
             },
           })
-          /* Every tween carries an explicit position. Without one the
-             fade-out was APPENDED after the fade-in — so it finished a
-             third of the way through the slice and the photo then sat
-             at opacity 0 for the rest of it, which is where the black
-             between scenes came from. The scale tween runs 3.4, so the
-             timeline is 3.4 long; putting the fade-out at 2.9 keeps
-             the image up until the very end of its slice.
-             The slices already overlap by 0.05 either side, so the
-             next photo is fully in before this one is fully out. */
+
           .fromTo(
             photo,
             { opacity: first ? 1 : 0, scale: 1.06 },
             { opacity: 1, duration: 0.5, ease: "power2.out" },
             0
           )
-          .to(photo, { scale: 1, duration: 3.4, ease: "none" }, 0) // slow drift, whole slice
+          .to(photo, { scale: 1, duration: 3.4, ease: "none" }, 0)
           .to(photo, { opacity: 0, duration: 0.5, ease: "power2.in" }, 2.9);
       });
 
       if (reduced) return;
 
-      /* Ending: darken to obsidian so the next section arrives without a cut */
       gsap.fromTo(
         q("[data-outro]"),
         { opacity: 0 },
@@ -114,7 +91,7 @@ export function CinematicHero() {
       style={{ height: `${reduced ? 160 : HERO_VH}vh` }}
       aria-label="Divi Garba — the ritual"
     >
-      {/* the frame stays put while the scroll drives what is inside it */}
+
       <div className="sticky top-0 h-svh w-full overflow-hidden bg-obsidian">
         {SCENES.map((scene) => (
           <img
@@ -127,7 +104,6 @@ export function CinematicHero() {
           />
         ))}
 
-        {/* grade: pulls the photos into the site's palette */}
         <div
           aria-hidden
           className="absolute inset-0"
@@ -138,7 +114,6 @@ export function CinematicHero() {
           }}
         />
 
-        {/* scenes — never over the centre, where the action is */}
         {SCENES.map((scene) => (
           <div
             key={scene.id}
@@ -162,7 +137,6 @@ export function CinematicHero() {
           </div>
         ))}
 
-        {/* outro veil */}
         <div
           data-outro
           aria-hidden

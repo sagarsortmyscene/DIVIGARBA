@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+# Camera originals kept beside the project for re-exporting. They are
+# 17-24MB each and nothing loads them: public/assets holds the resized
+# copies the site actually serves.
+assets-source
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

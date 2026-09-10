@@ -1,13 +1,5 @@
-/* ============================================================
-   LEGAL COPY — the Terms page.
-   Content lives here so the page component stays pure layout.
-   The PRIVACY and DATA_DELETION blocks were removed with their
-   pages; only Terms is still reachable from the site.
-   ============================================================ */
 import { EVENT_CONFIG } from "./event";
 
-/* Exactly what TERMS interpolates — `email` came out with the Privacy
-   and Data Deletion copy, which was the only thing using it. */
 const { brandLine, organiserName, gateEntry, entryCloses, dates, location } =
   EVENT_CONFIG;
 

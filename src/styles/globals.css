@@ -1,15 +1,5 @@
 @import "tailwindcss";
 
-/* The site's one custom typeface — a single Heavy-weight face, so the
-   range covers every weight the site asks for rather than letting the
-   browser synthesize (fake-bold) a mismatch.
-
-   This is the "Free" trial build of the font: its digit glyphs (0–9)
-   are replaced with the word "Sregs" as a watermark forcing a
-   licence purchase for real numerals. `unicode-range` tells the
-   browser this face doesn't cover the digit codepoints at all, so it
-   skips straight to the next font in the stack for any number —
-   everything else still renders in Sregs Serif. */
 @font-face {
   font-family: "Sregs Serif";
   src: url("/fonts/SregsSerif-Heavy.otf") format("opentype");
@@ -19,23 +9,6 @@
   unicode-range: U+0020-002F, U+003A-007E, U+00A0-00FF, U+2010-2027;
 }
 
-/* ANEK GUJARATI — the site's writing face. Two files, Regular and Bold.
-   Bold is here because it is the only way a `font-bold` can actually
-   look bold: with Regular alone declared across the whole 100-900
-   range, the browser has a face for every weight asked of it and
-   renders them all at Regular. The alternative — dropping the range so
-   it synthesizes — smears the Regular into a fake bold, which on a
-   text face looks worse than no bold at all.
-
-   The two ranges do NOT overlap (100-600 and 700-900) on purpose. If
-   both faces claimed 700, which one won would be down to the browser's
-   matching order rather than anything stated here.
-
-   The unicode-range does the same job as it does on Sregs, for a
-   different reason: it lists everything Anek should render and leaves
-   the DIGITS (U+0030-0039) out, so numerals fall past this face to
-   Poppins — the one thing Poppins is loaded for. Both faces need it;
-   a digit must miss BOTH to reach Poppins. */
 @font-face {
   font-family: "Anek Gujarati";
   src: url("/fonts/AnekGujarati-Regular.ttf") format("truetype");
@@ -53,13 +26,7 @@
   unicode-range: U+0020-002F, U+003A-007E, U+00A0-00FF, U+0A80-0AFF, U+2010-2027, U+20B9;
 }
 
-/* ============================================================
-   TAILWIND V4 — CSS-FIRST CONFIG
-   Everything below becomes a utility: bg-obsidian, text-gold,
-   font-display, text-hero, z-nav …
-   ============================================================ */
 @theme {
-  /* --- COLOR. Ratio discipline: 80% dark / 12% red / 6% ivory / 2% gold --- */
   --color-obsidian: #070504;
   --color-void: #0b0706;
   --color-maroon: #180807;
@@ -67,21 +34,12 @@
   --color-sindoor: #8f1712;
   --color-crimson: #b32618;
   --color-ember: #d8641e;
-  --color-mukut: #f0c14b;   /* mukut gold — the crown yellow */
+  --color-mukut: #f0c14b;
   --color-brass: #a8792c;
   --color-antique: #c9a24a;
   --color-gold: #edc766;
   --color-ivory: #f4e8d0;
 
-  /* --- TYPE --- Two faces on this site, and Poppins for numerals only.
-     Fallback is per CHARACTER, not per element, which is what makes
-     this work: both local faces declare a unicode-range with the
-     digits left out, so a digit finds no cover in them and drops to
-     the next entry. Poppins therefore sets every number on the site
-     and nothing else.
-     Order matters. Poppins sits ahead of Anek in the display stack so
-     digits reach it first; Gujarati has no cover in Sregs or Poppins,
-     so it falls all the way through to Anek. */
   --font-display: "Sregs Serif", "Poppins", "Anek Gujarati", sans-serif;
   --font-ui: "Anek Gujarati", "Poppins", sans-serif;
 
@@ -92,15 +50,12 @@
   --text-body: clamp(1rem, 1.15vw, 1.2rem);
   --text-label: 0.68rem;
 
-  /* Devanagari carries matras above and below the baseline, so it needs
-     its own steps rather than borrowing the Latin display sizes. */
   --text-deva-hero: clamp(3rem, 9vw, 7rem);
   --text-deva-chapter: clamp(2.2rem, 5.2vw, 4.2rem);
   --text-deva-verse: clamp(1rem, 2.2vw, 1.5rem);
   --text-deva-caption: clamp(1.1rem, 2.6vw, 1.9rem);
   --text-deva-blessing: clamp(1.4rem, 4vw, 2.6rem);
 
-  /* --- LAYERS. One scale — components read these, never raw values. --- */
   --z-background: 0;
   --z-atmosphere: 10;
   --z-geometry: 20;
@@ -112,14 +67,10 @@
   --z-cursor: 90;
   --z-loader: 100;
 
-  /* --- MOTION --- */
   --ease-sacred: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-veil: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-/* ============================================================
-   BASE
-   ============================================================ */
 @layer base {
   *,
   *::before,
@@ -142,7 +93,6 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Lenis owns scrolling. Native smooth would fight it. */
   html.lenis,
   html.lenis body {
     height: auto;
@@ -178,13 +128,6 @@
   }
 }
 
-/* ============================================================
-   REUSABLE UTILITIES
-   Composed here rather than repeated as long class strings.
-   ============================================================ */
-
-/* The gallery's marquee row — renders its shots twice back to back
-   and slides exactly one set-width, so the loop point is invisible. */
 @keyframes marquee-left {
   to {
     transform: translateX(-50%);
@@ -199,13 +142,6 @@
   text-transform: uppercase;
 }
 
-/* The filled gold call-to-action: Book ticket, Book your passes,
-   Tickets. Same as `label` but heavier, and its own utility for the
-   same reason nav-link is — `label` sets font-weight: 400, so pairing
-   it with a `font-bold` class leaves two rules of equal specificity
-   fighting, and the winner would depend on the order Tailwind emits
-   them. 700 resolves to the real Bold file declared above, not a
-   synthesized one. */
 @utility cta-label {
   font-family: var(--font-ui);
   font-size: var(--text-label);
@@ -221,9 +157,6 @@
   letter-spacing: -0.02em;
 }
 
-/* ============================================================
-   REDUCED MOTION — the story still reads, it just doesn't move
-   ============================================================ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -234,22 +167,14 @@
   }
 }
 
-/* While a gallery photo is open, its Close button sits in the same
-   corner as the header's Book ticket button. Only Close means anything
-   at that moment, so the CTA steps aside until the photo is dismissed
-   — on phones and desktop alike. Set by Lightbox on <body>. */
 body.lightbox-open #buy-btn {
   display: none;
 }
 
-/* ============================================================
-   ANCIENT FRAME — a double brass rule with cut corners, the way
-   a temple panel or an old invitation card is bordered.
-   ============================================================ */
 .frame-ancient {
   position: relative;
   border: 1px solid rgba(201, 162, 74, 0.42);
-  /* clipped corners read as beaten metal, not a CSS box */
+
   clip-path: polygon(
     14px 0, calc(100% - 14px) 0, 100% 14px,
     100% calc(100% - 14px), calc(100% - 14px) 100%,
@@ -266,7 +191,6 @@ body.lightbox-open #buy-btn {
   clip-path: inherit;
 }
 
-/* Corner pips — the small brass studs at each corner of a panel */
 .frame-pips::after {
   content: "";
   position: absolute;
@@ -284,7 +208,6 @@ body.lightbox-open #buy-btn {
   opacity: 0.65;
 }
 
-/* A carved divider: hairline, lozenge, hairline */
 .divider-carved {
   display: flex;
   align-items: center;

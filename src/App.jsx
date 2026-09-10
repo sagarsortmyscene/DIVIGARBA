@@ -22,20 +22,16 @@ const ROUTES = {
 
 export default function App() {
   const route = useHashRoute();
-  /* Gates the hero's entrance. Without it the book and the copy would
-     slide in behind the splash and be finished before it lifts. */
+  
   const [ready, setReady] = useState(false);
 
-  /* The legal pages are each their own view: no atmosphere, no header,
-     and no Lenis smoothing fighting a form. */
+  
   const RouteView = ROUTES[route];
   if (RouteView) return <RouteView />;
 
   return (
     <LenisProvider>
-      {/* The load screen. It removes itself once its own timeline has
-          finished; `onReady` fires a beat earlier, as it starts to
-          lift, so the hero is already moving underneath. */}
+      
       <SplashScreen onDone={() => setReady(true)} />
 
       <Atmosphere />
@@ -44,10 +40,7 @@ export default function App() {
 
       <SiteHeader />
 
-      {/* HomeHero is the opening screen; CinematicHero is the scrolled
-          photo film that follows it. There was a pinned "temple gate"
-          ahead of both — split doors, a mark that grew out of the light
-          and flew into the header — removed by request. */}
+      
       <main id="top" className="relative" style={{ zIndex: "var(--z-content)" }}>
         <HomeHero start={ready} />
         <CinematicHero />

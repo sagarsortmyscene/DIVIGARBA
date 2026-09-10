@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { useIsTouch, useReducedMotion } from "../../hooks/useMediaQuery";
 
-/** Desktop only. Reads data-cursor on whatever is under the pointer. */
+
 const STATES = {
   default: { scale: 1, opacity: 0.9, borderWidth: 1 },
   link: { scale: 1.9, opacity: 0.8, borderWidth: 1 },
@@ -20,10 +20,7 @@ export function CustomCursor() {
     if (touch || reduced) return;
     const el = ref.current;
     const set = { x: gsap.quickTo(el, "x", { duration: 0.35, ease: "power3" }), y: gsap.quickTo(el, "y", { duration: 0.35, ease: "power3" }) };
-    // only the position needs to update every single move — the size/
-    // opacity tween is expensive to recreate, so it only reruns when the
-    // hovered element's cursor state actually changes (was firing on
-    // every pointermove regardless, which is most of them on a 120Hz mouse)
+
     let lastKey = null;
 
     const onMove = (e) => {

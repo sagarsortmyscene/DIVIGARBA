@@ -5,28 +5,12 @@ import { BRAND } from "../../data/images";
 import { EVENT_CONFIG } from "../../data/event";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
 
-/**
- * The load screen: white, the mark growing from nothing, then away.
- *
- * The whole thing runs about two seconds and it is deliberately NOT a
- * constant rate. `power4.in` starts almost still and accelerates hard
- * — for the first second the mark barely moves, then it arrives all at
- * once, which is what makes it read as fast rather than merely short.
- * A linear or `out` ease over the same two seconds feels sluggish.
- *
- * `onDone` fires as the veil STARTS to lift, not after it has gone, so
- * the page underneath begins moving while this is still fading. The
- * two overlap by a beat instead of the site sitting still and then
- * starting.
- */
 export function SplashScreen({ onDone }) {
   const ref = useRef(null);
   const markRef = useRef(null);
   const [gone, setGone] = useState(false);
   const reduced = useReducedMotion();
 
-  /* Nothing should scroll behind the veil. Restores whatever was on
-     body rather than assuming it was empty. */
   useEffect(() => {
     if (gone) return;
     const prev = document.body.style.overflow;
@@ -38,8 +22,6 @@ export function SplashScreen({ onDone }) {
 
   useGSAP(
     () => {
-      /* No performance for anyone who asked for less motion — the veil
-         is skipped outright rather than played quickly. */
       if (reduced) {
         onDone?.();
         setGone(true);
@@ -53,8 +35,7 @@ export function SplashScreen({ onDone }) {
           { scale: 0, opacity: 1 },
           { scale: 1, duration: 1.5, ease: "power4.in" }
         )
-        /* A last push past full size, so it feels thrown rather than
-           parked on its mark. */
+
         .to(markRef.current, { scale: 1.3, duration: 0.3, ease: "power2.out" })
         .to(
           ref.current,
@@ -81,9 +62,7 @@ export function SplashScreen({ onDone }) {
         alt={EVENT_CONFIG.brandLine}
         fetchPriority="high"
         decoding="async"
-        /* scale-0 from first paint: GSAP attaches in a layout effect,
-           but without this the full-size mark can paint for one frame
-           before it does. */
+
         className="w-[min(58vw,420px)] scale-0 object-contain"
       />
     </div>

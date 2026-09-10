@@ -4,13 +4,12 @@ import { EVENT_CONFIG } from "../../data/event";
 
 const KEY = "privacy-choices:optional-tracking";
 
-/** Read once, at first render. In an effect this rendered the page with
- *  the wrong answer and then immediately re-rendered with the right one. */
+
 function storedChoice() {
   try {
     return localStorage.getItem(KEY) === "true";
   } catch {
-    /* private browsing, storage blocked — default stays off */
+    
     return false;
   }
 }
@@ -25,7 +24,7 @@ export function PrivacyChoicesPage() {
     try {
       localStorage.setItem(KEY, String(next));
     } catch {
-      /* nothing to persist to; the in-memory choice still applies this session */
+      
     }
   }
 

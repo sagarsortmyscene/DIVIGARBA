@@ -24,10 +24,7 @@ function Section({ heading, paragraphs = [], bullets = [] }) {
   );
 }
 
-/** Shared shell for every legal page — a slim header of its own and
- *  nothing after the copy. The site footer used to close these pages,
- *  which is where their phone, Instagram and map row came from; it is
- *  gone entirely now rather than merely having its contacts hidden. */
+
 export function LegalPage({ title, effective, intro, sections = [], footnote, children }) {
   return (
     <div className="min-h-svh">
@@ -35,16 +32,7 @@ export function LegalPage({ title, effective, intro, sections = [], footnote, ch
         className="sticky top-0 flex items-center justify-between border-b border-antique/15 bg-obsidian/90 px-5 py-2 backdrop-blur-md sm:px-10"
         style={{ zIndex: "var(--z-nav)" }}
       >
-        {/* Genuine history back, not a link to #footer. The hash link
-            navigated FORWARD to a new route, which remounted the whole
-            landing page — splash screen and all — and dropped you at
-            the footer rather than where you actually were. Going back
-            through history returns the previous view with its scroll
-            position intact and replays nothing.
-
-            The fallback covers arriving here directly, from a shared
-            link or a bookmark, where there is no previous page to
-            return to: clearing the hash lands on the landing page. */}
+        
         <button
           type="button"
           onClick={() => {

@@ -3,11 +3,7 @@ import { RevealText } from "../ui/RevealText";
 import { ScrollReveal } from "../motion/ScrollReveal";
 import { SectionPlate } from "../layout/SectionPlate";
 
-/**
- * Dense on purpose. The copy is short, so wide gaps read as an empty
- * page rather than as restraint — everything sits close, the way an
- * old printed invitation is set.
- */
+
 export function DetailsSection() {
   const { dates, location, gateEntry } = EVENT_CONFIG;
 
@@ -24,15 +20,7 @@ export function DetailsSection() {
         style={{ zIndex: "var(--z-content)" }}
       >
         <ScrollReveal className="mt-0">
-          {/* The gilt band behind these dates is gone; the size and the
-              gradient stay, so the line still carries the section.
-
-              The gradient runs DARK to light. It was the other way
-              round, which put the palest tone on "11 — 20" and the
-              deep antique on "2026" — the year carrying the weight
-              instead of the dates. Reversed, the deep gold starts on
-              the 11, holds across the range, and lifts to ivory by the
-              time it reaches the year. */}
+          
           <p className="display-type bg-[linear-gradient(100deg,var(--color-antique)_0%,var(--color-gold)_55%,var(--color-ivory)_100%)] bg-clip-text text-[clamp(2.2rem,6vw,4.4rem)] leading-none font-semibold text-transparent">
             {dates}
           </p>
@@ -49,10 +37,7 @@ export function DetailsSection() {
           className="display-type text-[clamp(1.7rem,4vw,2.8rem)] text-ivory"
         />
 
-        {/* One line now. The three that were here — the event-night
-            note, the music time and the last-entry rule — came out by
-            request; the Find us section still carries the full timing
-            statement for anyone who needs it. */}
+        
         <ScrollReveal className="mt-6 text-sm text-ivory/55 sm:text-base">
           <p>Onward {gateEntry}</p>
         </ScrollReveal>

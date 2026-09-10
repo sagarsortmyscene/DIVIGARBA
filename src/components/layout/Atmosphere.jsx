@@ -3,13 +3,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useReducedMotion, useIsMobile } from "../../hooks/useMediaQuery";
 
-/**
- * ONE persistent background for the whole site — the lesson from the
- * reference: sections pass over a single continuous environment rather
- * than each carrying its own background. Prevents hard section cuts.
- *
- * Layers: base burn → scattered light off the artwork → drifting embers.
- */
+
 export function Atmosphere() {
   const ref = useRef(null);
   const reduced = useReducedMotion();
@@ -19,17 +13,14 @@ export function Atmosphere() {
     () => {
       if (reduced) return;
 
-      // The environment warms and cools across the whole scroll,
-      // so the page reads as one continuous take.
+
       gsap.to(ref.current.querySelector("[data-burn]"), {
         backgroundPosition: "50% 100%",
         ease: "none",
         scrollTrigger: { trigger: document.documentElement, start: "top top", end: "bottom bottom", scrub: true },
       });
 
-      // On mobile these are a permanent, always-running cost (~20 infinite
-      // tweens ticking forever on every page) for an effect that's barely
-      // visible at that size — leave them as static specks there instead.
+
       if (mobile) return;
 
       gsap.utils.toArray(ref.current.querySelectorAll("[data-ember]")).forEach((e, i) => {

@@ -4,18 +4,12 @@ import gsap from "gsap";
 import { BRAND } from "../../data/images";
 import { EVENT_CONFIG } from "../../data/event";
 
-/* Hash targets, all of them real section ids on the landing page.
-   useHashRoute scrolls to a matching element and falls back to the top,
-   so these need no click handlers of their own. */
 const NAV = [
   { label: "Home",    href: "#home" },
   { label: "Gallery", href: "#gallery" },
   { label: "About",   href: "#details" },
 ];
 
-/**
- * The bar: mark at the left, nav in the middle, Book ticket at the right.
- */
 export function SiteHeader() {
   const ref = useRef(null);
   const [stuck, setStuck] = useState(false);
@@ -27,28 +21,14 @@ export function SiteHeader() {
     { scope: ref }
   );
 
-  /* The bar has always been position:fixed, so it already stayed put —
-     what it lacked was a ground. Over the hero it is transparent by
-     design; past that, content scrolls underneath and the nav becomes
-     unreadable against whatever photograph happens to be behind it,
-     so it takes on a solid background instead.
-     A plain scroll listener rather than a ScrollTrigger: Lenis drives
-     the native scroll position, so this fires normally, and `passive`
-     keeps it off the critical path. The state only ever flips at the
-     threshold, so React re-renders twice per crossing, not per frame. */
   useEffect(() => {
     const onScroll = () => setStuck(window.scrollY > 40);
-    onScroll();                       // a reload can restore mid-page
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
-    /* pointer-events-none on the bar, auto on each thing you can
-       actually click. The header is a full-width strip with no
-       background, so as a click target it would otherwise be an
-       invisible sheet across the top of every page, eating clicks
-       meant for whatever sits underneath it. */
     <header
       ref={ref}
       className={`pointer-events-none fixed top-0 left-0 flex w-full items-center justify-between gap-6 px-5 py-3 transition-colors duration-300 sm:px-9 ${
@@ -56,32 +36,13 @@ export function SiteHeader() {
       }`}
       style={{ zIndex: "var(--z-nav)" }}
     >
-      {/* 140px wide, as asked. The height and object-cover are what
-          make that work: logo-divi.png is a 750x1000 PORTRAIT canvas,
-          so at 140px wide it would stand 187px tall and drag the whole
-          header down with it. Only the middle 42.8% of that canvas is
-          artwork (measured: opaque rows 286-714 of 1000), so an 88px
-          window cropped from the centre shows the mark complete —
-          104x80 of real logo — and throws away only empty space.
-          Swap the logo file and this window wants re-checking. */}
-      {/* The two marks as one lockup: Divi, a hairline, then the
-          organiser's. Only the Divi half is the home link — the
-          Panchatva mark is a credit, and wrapping it in the same anchor
-          would make it a second, confusing route to the same page.
 
-          The "Garba by Panchatva" line that sat under the Divi mark is
-          gone: the logo beside it now says exactly that, and running
-          both read as a duplicate. */}
       <div className="pointer-events-auto flex shrink-0 items-center gap-1.5 sm:gap-4">
         <a href="#home" aria-label={`${EVENT_CONFIG.brandLine}, home`}>
           <img
             src={BRAND.logo}
             alt={EVENT_CONFIG.brandLine}
-            /* Shrinks once the bar is solid. A 112px opaque strip across
-               every page is a lot of chrome; over the hero, where it is
-               transparent, the full size costs nothing. The window stays
-               proportional (140x88 -> 100x63) so the crop still frames
-               the mark the same way. */
+
             className={`object-cover transition-all duration-300 ${
               stuck ? "h-12 w-19 sm:h-16 sm:w-25" : "h-15 w-24 sm:h-22 sm:w-35"
             }`}
@@ -95,13 +56,6 @@ export function SiteHeader() {
           }`}
         />
 
-        {/* Sized by HEIGHT with `w-auto`: this logotype is 4140x1564,
-            ratio 2.65, so a height of h-14 comes out about 148px ACROSS
-            — which is why it has to shrink hardest on a phone. At the
-            desktop sizes the lockup and the Book ticket button wanted
-            458px of a 360px screen, overflowing by 138px; at h-6 the
-            pair fits with room to spare.
-            It steps down with the bar like everything else here. */}
         <img
           src={BRAND.panchatva}
           alt={EVENT_CONFIG.organiserName}
@@ -111,9 +65,6 @@ export function SiteHeader() {
         />
       </div>
 
-      {/* Hidden below md: three links plus a CTA do not fit beside a
-          140px mark on a 360px screen, and the same sections are all
-          reachable from the footer. */}
       <nav className="pointer-events-auto hidden items-center gap-9 md:flex">
         {NAV.map(({ label, href }) => (
           <a
@@ -126,12 +77,6 @@ export function SiteHeader() {
         ))}
       </nav>
 
-      {/* A real <button>, and #buy-btn is the selector the SortMyScene
-          embed in index.html binds to (data-trigger="#buy-btn"). It
-          attaches its own click handler, so this deliberately has none
-          of ours — adding one would open the widget twice. HomeHero's
-          "Book your passes" forwards its click here rather than
-          claiming a second id the widget knows nothing about. */}
       <button
         type="button"
         id="buy-btn"

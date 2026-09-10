@@ -7,14 +7,6 @@ import { GalleryFlip } from "./GalleryFlip";
 import { EVENT_CONFIG } from "../../data/event";
 import { useMediaQuery, useReducedMotion } from "../../hooks/useMediaQuery";
 
-/* The three facts that belong above the fold. Data, not markup, so the
-   row is one map instead of three near-identical blocks.
-
-   Times and the venue name are read from EVENT_CONFIG rather than
-   typed again here — they were duplicated, so changing the gate time
-   in one place used to leave this row saying something else. The date
-   stays written out because this is the one spot that wants the short
-   "Oct" form; everywhere else prints the full month. */
 const FACTS = [
   { Icon: Calendar, head: "11 — 20 Oct 2026", sub: "Ten nights" },
   { Icon: MapPin,   head: EVENT_CONFIG.venueName, sub: "Vaishnodevi Circle" },
@@ -25,27 +17,11 @@ const FACTS = [
   },
 ];
 
-/* The two drifting vectors. Position, size and motion in one place so
-   adding a third is a line rather than a copy-paste. `spin` is seconds
-   for a full turn — deliberately long: these should be noticed only if
-   you watch for them. Opposite directions so they never look geared
-   together. */
 const VECTORS = [
   { at: "bottom-[-14%] left-[-16%] w-[min(78vw,560px)]", spin: 150, drift: 18 },
   { at: "top-[-12%] right-[-14%] w-[min(64vw,440px)]",   spin: -190, drift: -22 },
 ];
 
-/* The two bells, hung from the top edge either side of the nav.
-   `flip` mirrors the right one so the pair reads as a matched set
-   rather than the same picture twice. `sway` is the swing in degrees:
-   opposite signs and different periods, because two bells moving in
-   lockstep look like one animation applied twice. */
-/* One bell now, on the right. The left one is gone — the header's
-   top-left corner carries the Divi and Panchatva marks, and a bell
-   hanging behind them was competing with the thing it framed.
-   Kept as an array rather than collapsed to a single object so the
-   GSAP loop, the mirroring and the render below all stay unchanged,
-   and a second bell is one entry away. */
 const BELLS = [
   {
     at: "right-[6%] sm:right-[12%]",
@@ -56,32 +32,12 @@ const BELLS = [
   },
 ];
 
-/**
- * HOME — the opening screen. A gradient ground, two slowly turning
- * vectors behind everything, the gallery bound as a turnable book at
- * the left, and the event's pitch and hard facts at the right.
- *
- * This sits ahead of CinematicHero, which still runs its own
- * scroll-scrubbed photo film underneath — this section replaced
- * nothing, it just arrives first.
- */
 export function HomeHero({ start = true }) {
   const ref = useRef(null);
   const reduced = useReducedMotion();
 
-  /* Wide enough for the two-column layout, but short. This is the same
-     condition GalleryFlip uses to drop the book to 70%, so there is one
-     idea of "short desktop" rather than two thresholds that could drift
-     apart. Read in JS rather than as a stacked Tailwind variant because
-     it changes the MARKUP below — icon beside the text instead of above
-     it — not just a class. */
   const shortDesktop = useMediaQuery("(min-width: 1024px) and (max-height: 849px)");
 
-  /* The copy column is narrow whenever it is beside the book and the
-     screen is not large: 360px at 1024, 470px at 1280, 534px at 1440.
-     Three facts across any of those is cramped, so they take the same
-     compact one-per-line form the short screens use. Only from 2xl,
-     where the column reaches ~573px, does the row fit again. */
   const compactFacts =
     useMediaQuery("(min-width: 1024px) and (max-width: 1535px)") || shortDesktop;
 
@@ -89,24 +45,11 @@ export function HomeHero({ start = true }) {
     () => {
       const q = gsap.utils.selector(ref);
 
-      /* Reduced motion gets the composition, not the movement. The
-         vectors are decoration — a permanent slow rotation is exactly
-         the kind of thing the setting exists to switch off. */
       if (reduced) {
         gsap.set(q("[data-slide]"), { x: 0, opacity: 1 });
         return;
       }
 
-      /* Both columns start fully outside the left edge and travel right
-         into place. -115vw rather than a percentage of the element:
-         the two are different widths, and only a viewport unit puts
-         BOTH genuinely off screen rather than merely displaced. The
-         section is overflow-hidden, so nothing here can widen the page
-         while it is out there.
-
-         Held at that offset until `start` — the splash screen owns the
-         first two seconds, and without the gate this would play out
-         behind the veil and be over before anyone saw it. */
       gsap.set(q("[data-slide]"), { x: "-115vw", opacity: 0 });
       if (start) {
         gsap.to(q("[data-slide]"), {
@@ -118,16 +61,6 @@ export function HomeHero({ start = true }) {
         });
       }
 
-      /* The bells swing from where they are hung, not their middle —
-         origin-top in the markup.
-
-         The mirror is set HERE, not with a `-scale-x-100` class. GSAP
-         owns this element's `transform` the moment it tweens rotation,
-         and it builds that string from its own cache — so a class-set
-         scaleX(-1) is either dropped or, worse, decomposed as a 180
-         degree rotation with a negative scaleY, which is what left the
-         right bell upside down instead of mirrored. Handing GSAP both
-         values means it composes them itself and they cannot fight. */
       q("[data-bell]").forEach((el, i) => {
         const { sway, period, flip } = BELLS[i];
         gsap.set(el, { scaleX: flip ? -1 : 1 });
@@ -140,9 +73,7 @@ export function HomeHero({ start = true }) {
 
       q("[data-vector]").forEach((el, i) => {
         const { spin, drift } = VECTORS[i];
-        /* Two independent tweens on the same element: GSAP composes
-           rotation and y itself, so they can run at different speeds
-           without one resetting the other. */
+
         gsap.to(el, { rotation: spin > 0 ? 360 : -360, duration: Math.abs(spin), repeat: -1, ease: "none" });
         gsap.to(el, {
           y: drift,
@@ -152,7 +83,6 @@ export function HomeHero({ start = true }) {
           ease: "sine.inOut",
         });
       });
-
     },
     { scope: ref, dependencies: [reduced, start] }
   );
@@ -164,22 +94,7 @@ export function HomeHero({ start = true }) {
       className="relative flex min-h-svh w-full items-center overflow-hidden"
       aria-label={`${EVENT_CONFIG.name} — Navratri 2026`}
     >
-      {/* THE GROUND — the master plate, in place of the gradient.
 
-          A <picture> rather than two <img> tags behind a `hidden`
-          class: display:none does NOT stop a browser downloading an
-          image, so the class approach would have every phone fetching
-          both files. A <source media> is resolved before the request,
-          so exactly one 700KB file is ever pulled.
-
-          The mobile source is the same plate rotated 90 degrees. See
-          IMAGES.heroBg — a phone is about 0.46 and the plate is 2.00,
-          so unrotated cover would keep a narrow vertical slice and
-          discard most of the picture.
-
-          fetchPriority high because this is now the largest thing
-          painted on first load, and it replaced a gradient that cost
-          nothing to render. */}
       <picture aria-hidden className="absolute inset-0" style={{ zIndex: "var(--z-background)" }}>
         <source media="(min-width: 640px)" srcSet={IMAGES.heroBg.file} />
         <img
@@ -191,13 +106,6 @@ export function HomeHero({ start = true }) {
         />
       </picture>
 
-      {/* A scrim over the plate. The copy used to sit on a gradient
-          built to stay dark behind the text; a photograph has bright
-          areas, and ivory type on those is unreadable. This keeps the
-          picture legible underneath while giving the words a floor —
-          weighted to the right, which is where the copy sits from lg
-          up. Remove it and the plate reads brighter, but check the
-          heading against the lightest part before you do. */}
       <div
         aria-hidden
         className="absolute inset-0"
@@ -208,108 +116,49 @@ export function HomeHero({ start = true }) {
         }}
       />
 
-      {/* The vectors — one low-left, one high-right, both bled past the
-          edge so no corner of the square PNG is ever visible. They are
-          decoration only: aria-hidden, and pointer-events-none so they
-          cannot intercept a click meant for the copy. */}
       {VECTORS.map(({ at }) => (
+        <picture key={at} className="contents">
+        <source srcSet={IMAGES.vector.webp} type="image/webp" />
         <img
-          key={at}
           data-vector
           src={IMAGES.vector.file}
           alt=""
           aria-hidden
           loading="lazy"
           decoding="async"
-          /* Was opacity-[0.14] with mix-blend-screen. Screen LIGHTENS
-             what is under it, which on this dark ground washed the
-             ornament out to almost nothing — so the blend mode is gone
-             and the artwork renders in its own colour, at nearly three
-             times the opacity. */
+
           className={`pointer-events-none absolute opacity-40 ${at}`}
           style={{ zIndex: "var(--z-geometry)" }}
         />
+        </picture>
       ))}
 
-      {/* The bells, hung either side of the nav. Decoration only:
-          aria-hidden and pointer-events-none, so they can never take a
-          click meant for the header above them. They sit on
-          --z-geometry, under the header's --z-nav, so the logo, links
-          and CTA all stay above and clickable. */}
       {BELLS.map(({ at, size }) => (
+        <picture key={at} className="contents">
+        <source srcSet={IMAGES.bell.webp} type="image/webp" />
         <img
-          key={at}
           data-bell
           src={IMAGES.bell.file}
           alt=""
           aria-hidden
           decoding="async"
-          /* Held back to 55%: at full strength the bells competed with
-             the nav sitting right between them. They are decoration
-             and should sit behind the reading, not beside it. */
-          /* Hidden below 1300px. The header now carries two marks
-             plus the nav and the CTA, and under that width the bells
-             sit behind them rather than beside them. `hidden` rather
-             than an opacity fade so the browser never requests the
-             image on those screens at all. */
+
           className={`pointer-events-none absolute top-0 hidden origin-top opacity-55 min-[1300px]:block ${size} ${at}`}
           style={{ zIndex: "var(--z-geometry)" }}
         />
+        </picture>
       ))}
 
       <div
-        /* The top padding clears the fixed header, which is not in the
-           flow and so reserves no space of its own. It stands 112px
-           tall (an 88px logo window plus py-3), and without room set
-           aside for it the copy rendered underneath the nav links and
-           read as part of the bar. 144px leaves a clear gap.
 
-           60 / 40 — the book's column against the copy's, written as
-           3fr/2fr so the gap is taken out of the free space. A literal
-           60%/40% pair plus a gap would total more than 100%.
-
-           The column is a share of WIDTH while the book is capped by
-           HEIGHT, so on a short screen the book cannot always fill its
-           60% and a gap opens between the columns. That is the right
-           way round. The alternative was sizing the container from the
-           book instead, which removes the gap but at 1600x800 pinned
-           the whole layout to 944px of a 1600px screen — a third of
-           the width empty down each side. A gap inside a full-width
-           layout reads as a gap; a narrow layout reads as broken. */
         className={`relative mx-auto grid w-full max-w-416 items-center gap-10 px-5 pt-32 pb-20 sm:px-10 lg:grid-cols-[minmax(560px,3fr)_2fr] lg:gap-6 ${
           shortDesktop ? "sm:pt-32 sm:pb-16" : "sm:pt-36 sm:pb-24"
         }`}
         style={{ zIndex: "var(--z-content)" }}
       >
-        {/* THE COPY. First in the DOM so it leads the reading order on
-            a phone; order-1 on desktop puts the book back on the left
-            where the design wants it. */}
-        {/* Order flips at lg, because the two layouts want opposite
-            things.
-            SIDE BY SIDE (lg and up) the book takes the left column, so
-            it is order-1 and the copy order-2.
-            STACKED (below lg) the copy leads. On a phone the book is a
-            portrait page around 470px tall, and putting it first would
-            push the heading and the Book your passes button below the
-            fold before anything has been read.
-            Stacked also matches DOM order, so on a phone what a screen
-            reader hears and what you see are the same. */}
+
         <div data-slide className="order-1 min-w-0 lg:order-2 lg:pl-6">
-          {/* Gujarati, so this is set in Anek and NOT in the display
-              face: Sregs Serif has no Gujarati glyphs at all, and its
-              unicode-range does not claim the block, so `font-display`
-              would silently fall through per character.
 
-              Two settings differ from the Latin heading that was here:
-              line-height is 1.35 rather than 0.98, because Gujarati
-              carries matras above and below the baseline and a tight
-              display leading clips them; and the -0.02em tracking is
-              gone, since negative letter-spacing pulls conjuncts into
-              each other. `lang` so screen readers and the browser's
-              own shaping treat it as Gujarati.
-
-              The xl-only <br /> went with the old copy — this is one
-              short phrase and needs no break. */}
           <h1
             lang="gu"
             className="font-ui text-[clamp(2.2rem,4vw,5rem)] leading-[1.35] text-ivory"
@@ -331,25 +180,6 @@ export function HomeHero({ start = true }) {
             circle.
           </p>
 
-          {/* The "Book your passes" and "Explore the lineup" buttons
-              were here and are gone by request. Booking still has a
-              route: the header's Book ticket, which is the element the
-              SortMyScene widget actually binds to. */}
-
-          {/* The facts. A hairline between columns rather than boxes —
-              divide-x only paints BETWEEN children, so it needs no
-              last-child exception. */}
-          {/* Three across normally; a stacked list on a wide-but-SHORT
-              screen. On those the book shrinks to 70%, which leaves the
-              copy column very wide, and three facts spread across it
-              read as drifting off to the side rather than as a row.
-
-              Stacked, each fact turns into a single compact line —
-              icon beside the text instead of above it. That matters:
-              keeping the icon-on-top block and merely stacking them
-              would make this group about 265px tall, taller than the
-              row it replaced, which is the wrong direction on a screen
-              that is short to begin with. Inline it is ~150px. */}
           <dl
             className={`grid border-t border-antique/20 2xl:mt-12 2xl:pt-8 ${shortDesktop ? "mt-6 pt-5" : "mt-8 pt-6"} ${
               compactFacts
@@ -358,14 +188,6 @@ export function HomeHero({ start = true }) {
             }`}
           >
             {FACTS.map(({ Icon, head, sub }) => (
-              /* The doubled type is a DESKTOP size. A phone shows these
-                 stacked one per row at full width, where 1.75rem reads
-                 as a heading rather than a detail and the three of them
-                 push the CTAs off the screen — so the sm: step is where
-                 the size lives, and the base stays close to what it was.
-                 Padding is trimmed from px-5 for the same reason it was
-                 before: at 1.75rem the three columns need every pixel
-                 of their ~160px of content width. */
               <div
                 key={head}
                 className={compactFacts ? "flex items-center gap-3" : "sm:px-3 sm:first:pl-0 sm:last:pr-0"}
@@ -380,8 +202,7 @@ export function HomeHero({ start = true }) {
                   strokeWidth={1.6}
                 />
                 <div>
-                  {/* text-balance so a line that has to wrap splits
-                      evenly rather than leaving one orphaned word. */}
+
                   <dt className="text-[clamp(0.95rem,1.4vw,1.6rem)] leading-tight text-balance text-ivory">
                     {head}
                   </dt>
@@ -398,9 +219,6 @@ export function HomeHero({ start = true }) {
           </dl>
         </div>
 
-        {/* THE BOOK — the gallery photographs, bound and turnable. This
-            replaced the couple photo that stood here; that file is
-            still in public/assets if it is ever wanted back. */}
         <div data-slide className="order-2 min-w-0 lg:order-1">
           <GalleryFlip />
         </div>

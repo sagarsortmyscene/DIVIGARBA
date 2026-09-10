@@ -11,10 +11,6 @@
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Poppins is here for NUMERALS ONLY. Both local faces exclude the
-         digit codepoints via unicode-range (see globals.css), so digits
-         fall through the stack and land here. One weight is enough for
-         that job — it used to pull five. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap"
       rel="stylesheet"
@@ -25,19 +21,6 @@
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
 
-    <!-- SortMyScene booking widget. It binds itself to `data-trigger`, so
-         the header's #buy-btn opens the checkout — nothing to wire up in
-         React, and no click handler of our own on that button (adding one
-         would open it twice).
-
-         Deliberately at the end of <body>, not in <head>. The embed
-         watches for late-mounted triggers with a MutationObserver — which
-         is what makes a React-rendered button work at all — but that
-         observer starts with `if (!MutationObserver || !document.body)
-         return;`. An async script in <head> can execute before <body>
-         exists (easily so on a warm CDN cache), and then the observer
-         never starts, nothing ever binds, and the button is silently
-         dead. Down here the body is guaranteed to exist. -->
     <script
       src="https://cdn.sortmyscene.com/embed.js"
       data-event-id="6a981a7a2a894a5381e4911b"

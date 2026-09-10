@@ -6,13 +6,6 @@ import { Lightbox } from "../ui/Lightbox";
 import { GALLERY, IMAGES } from "../../data/images";
 import { useReducedMotion } from "../../hooks/useMediaQuery";
 
-/**
- * One row of plates, drifting left on a continuous loop — no hover,
- * no click-to-open-a-row, it just runs. The row renders its shots
- * twice back to back and the CSS animation slides it exactly one
- * set-width, so the seam where it repeats is never visible. Click a
- * plate to view it full screen.
- */
 const ROW = { shots: GALLERY, direction: "marquee-left", duration: 91 };
 
 export function Gallery() {
@@ -55,11 +48,7 @@ export function Gallery() {
       className="relative overflow-hidden px-5 py-16 sm:px-10 sm:py-20"
       aria-label="The nights"
     >
-      {/* Maa Durga, aged into the wall behind the panels */}
-      {/* The grade and the mask stay inline: a sepia filter chain and a
-          radial mask have no Tailwind equivalents worth the arbitrary
-          syntax, and this is the only element on the site that wants
-          them. Everything expressible as a class is one. */}
+
       <div
         data-ground
         aria-hidden
@@ -117,8 +106,6 @@ export function Gallery() {
                   {shot.n}
                 </span>
 
-                {/* Title only. The set is titled from its filenames
-                    and carries no sub-caption. */}
                 <div className="absolute inset-x-4 bottom-4">
                   <h3 className="display-type text-2xl text-ivory">{shot.title}</h3>
                 </div>
