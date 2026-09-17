@@ -14,8 +14,9 @@ export function Atmosphere() {
       if (reduced) return;
 
 
+      // Transform instead of background-position: Safari repaints a full-screen gradient every frame otherwise.
       gsap.to(ref.current.querySelector("[data-burn]"), {
-        backgroundPosition: "50% 100%",
+        yPercent: -(120 / 220) * 100,
         ease: "none",
         scrollTrigger: { trigger: document.documentElement, start: "top top", end: "bottom bottom", scrub: true },
       });
@@ -45,15 +46,13 @@ export function Atmosphere() {
     <div
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed inset-0"
+      className="pointer-events-none fixed inset-0 h-lvh overflow-hidden"
       style={{ zIndex: "var(--z-background)" }}
     >
       <div
         data-burn
-        className="absolute inset-0"
+        className="absolute inset-x-0 top-0 h-[220%] will-change-transform"
         style={{
-          backgroundSize: "100% 220%",
-          backgroundPosition: "50% 0%",
           backgroundImage: `
             radial-gradient(120% 60% at 50% 0%, rgba(240,193,75,0.20), transparent 60%),
             radial-gradient(80% 50% at 12% 28%, rgba(168,121,44,0.18), transparent 64%),

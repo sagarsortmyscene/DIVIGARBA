@@ -49,7 +49,37 @@ export function GalleryFlip() {
     return map;
   }, [pages]);
 
-  const activeVideo = videoAt.has(page) ? page : null;
+  // Only turn pages and play sound while the visitor can actually see the book:
+  // tab in the foreground and the book on screen.
+  const rootRef = useRef(null);
+  const [tabVisible, setTabVisible] = useState(() => document.visibilityState === "visible");
+  const [inView, setInView] = useState(false);
+  const live = tabVisible && inView;
+
+  useEffect(() => {
+    const onChange = () => setTabVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", onChange);
+    return () => document.removeEventListener("visibilitychange", onChange);
+  }, []);
+
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  const activeVideo = live && videoAt.has(page) ? page : null;
+
+  // Remember which video page was started so coming back to the tab resumes it instead of restarting.
+  const startedRef = useRef(null);
+  useEffect(() => {
+    if (!videoAt.has(page)) startedRef.current = null;
+  }, [page, videoAt]);
 
   const syncHalves = () => {
     const [l, r] = videoRefs.current;
@@ -64,11 +94,16 @@ export function GalleryFlip() {
 
   useEffect(() => {
     if (!muted) return;
-    const unmute = () => setMuted(false);
-    document.addEventListener("pointerdown", unmute, { once: true });
+    // iOS Safari only lets touchend/click unmute, and the change must happen inside the handler —
+    // unmuting on pointerdown or after a re-render pauses the video instead.
+    const unmute = () => {
+      for (const v of videoRefs.current) if (v?.hasAttribute("data-reel")) v.muted = false;
+      setMuted(false);
+    };
+    document.addEventListener("pointerup", unmute, { once: true });
     document.addEventListener("keydown", unmute, { once: true });
     return () => {
-      document.removeEventListener("pointerdown", unmute);
+      document.removeEventListener("pointerup", unmute);
       document.removeEventListener("keydown", unmute);
     };
   }, [muted]);
@@ -85,7 +120,10 @@ export function GalleryFlip() {
 
     let alive = true;
     const playing = vids.filter((v) => v.dataset.index === String(activeVideo));
-    for (const v of playing) v.currentTime = 0;
+    if (startedRef.current !== activeVideo) {
+      for (const v of playing) v.currentTime = 0;
+      startedRef.current = activeVideo;
+    }
     const [lead, ...rest] = playing;
 
     const start = () =>
@@ -140,13 +178,19 @@ export function GalleryFlip() {
     flip(e.clientX - rect.left < rect.width / 2 ? -1 : 1);
   };
 
+  // Safari can pause playback on its own (Low Power Mode, audio policy); release the hold so autoplay continues.
+  const handlePause = (e) => {
+    const v = e.currentTarget;
+    if (!v.ended && v.dataset.index === String(activeVideo)) setFilmPlaying(false);
+  };
+
   const handleFilmEnd = () => {
     setFilmPlaying(false);
     if (!reduced && !paused) flip(1);
   };
 
   useEffect(() => {
-    if (reduced || paused || filmHolding) return;
+    if (reduced || paused || filmHolding || !live) return;
     const id = setInterval(() => {
       const api = bookRef.current?.pageFlip?.();
       if (!api) return;
@@ -154,7 +198,7 @@ export function GalleryFlip() {
       else api.flipNext();
     }, AUTO_MS);
     return () => clearInterval(id);
-  }, [reduced, paused, filmHolding]);
+  }, [reduced, paused, filmHolding, live]);
 
   const LAST = pages.length - 1;
   const recentre =
@@ -162,6 +206,7 @@ export function GalleryFlip() {
 
   return (
     <div
+      ref={rootRef}
       className="mx-auto flex w-full max-w-[min(90vh,700px)] flex-col pb-8 sm:pb-3 lg:max-w-[calc(150vh-444px)]"
       onPointerEnter={hover ? () => setPaused(true) : undefined}
       onPointerLeave={hover ? () => setPaused(false) : undefined}
@@ -241,6 +286,7 @@ export function GalleryFlip() {
                     playsInline
                     preload="none"
                     onTimeUpdate={!isRight ? syncHalves : undefined}
+                    onPause={!isRight ? handlePause : undefined}
                     onEnded={!isRight ? handleFilmEnd : undefined}
                     className={`absolute top-0 left-0 h-full w-full max-w-none object-cover ${
                       p.whole ? "" : "min-[600px]:w-[200%]"
@@ -261,9 +307,11 @@ export function GalleryFlip() {
                     src={p.src.file}
                     aria-label={p.src.alt}
 
+                    data-reel
                     muted={muted}
                     playsInline
                     preload="none"
+                    onPause={handlePause}
                     onEnded={handleFilmEnd}
                     className="absolute inset-0 h-full w-full object-cover"
                     style={{ objectPosition: "center top" }}

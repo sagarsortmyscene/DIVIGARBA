@@ -31,7 +31,7 @@ export function SiteHeader() {
   return (
     <header
       ref={ref}
-      className={`pointer-events-none fixed top-0 left-0 flex w-full items-center justify-between gap-6 px-5 py-3 transition-colors duration-300 sm:px-9 ${
+      className={`pointer-events-none fixed top-0 left-0 flex w-full items-center justify-between gap-3 px-4 py-3 transition-colors duration-300 sm:gap-6 sm:px-9 ${
         stuck ? "border-b border-antique/15 bg-obsidian/95" : "border-b border-transparent"
       }`}
       style={{ zIndex: "var(--z-nav)" }}
@@ -81,7 +81,7 @@ export function SiteHeader() {
         type="button"
         id="buy-btn"
         data-cursor="cta"
-        className="cta-label pointer-events-auto shrink-0 cursor-pointer rounded-full border border-mukut bg-mukut px-5 py-2.5 text-obsidian transition-colors duration-500 hover:border-gold hover:bg-gold"
+        className="cta-label pointer-events-auto shrink-0 cursor-pointer rounded-full border border-mukut bg-mukut px-4 py-2.5 whitespace-nowrap text-obsidian sm:px-5 transition-colors duration-500 hover:border-gold hover:bg-gold"
       >
         Book ticket
       </button>

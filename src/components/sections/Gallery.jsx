@@ -58,6 +58,7 @@ export function Gallery() {
           zIndex: "var(--z-background)",
           filter: "sepia(0.55) saturate(0.75) contrast(1.05) brightness(0.62)",
           maskImage: "radial-gradient(72% 62% at 50% 42%, #000 18%, transparent 78%)",
+          WebkitMaskImage: "radial-gradient(72% 62% at 50% 42%, #000 18%, transparent 78%)",
         }}
       />
 
@@ -74,7 +75,7 @@ export function Gallery() {
 
         <div data-row className="overflow-hidden">
           <div
-            className="flex w-max gap-4 sm:gap-6"
+            className="flex w-max gap-4 will-change-transform sm:gap-6"
             style={
               reduced ? undefined : { animation: `${ROW.direction} ${ROW.duration}s linear infinite` }
             }

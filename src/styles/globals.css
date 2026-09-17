@@ -80,6 +80,8 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* iOS Safari ignores overflow-x on body alone; clip (unlike hidden) keeps position: sticky working. */
+    overflow-x: clip;
   }
 
   body {
@@ -164,6 +166,18 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+.noise-overlay {
+  opacity: 0.26;
+  mix-blend-mode: overlay;
+}
+/* Safari only: a fixed full-screen blend layer forces the whole page to re-composite on every scroll frame. */
+@supports (font: -apple-system-body) and (-webkit-appearance: none) {
+  .noise-overlay {
+    opacity: 0.06;
+    mix-blend-mode: normal;
   }
 }
 
